@@ -14,7 +14,8 @@
       "Bash(npm run typecheck:*)",
       "Bash(npx tsc:*)",
       "Bash(npm run sam:validate:*)",
-      "Bash(npm install:*)"
+      "Bash(npm install:*)",
+      "Read(//Users/q284340/.claude/projects/**)"
     ],
     "additionalDirectories": []
   },
