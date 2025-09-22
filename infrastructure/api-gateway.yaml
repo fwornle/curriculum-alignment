@@ -1,0 +1,845 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'API Gateway Configuration for Curriculum Alignment System'
+
+Parameters:
+  Environment:
+    Type: String
+    Default: dev
+    AllowedValues: [dev, staging, prod]
+    Description: Deployment environment
+  
+  UserPoolArn:
+    Type: String
+    Description: Cognito User Pool ARN for authentication
+  
+  LambdaFunctionArnPrefix:
+    Type: String
+    Description: Prefix for Lambda function ARNs
+    Default: ''
+  
+  CustomDomainName:
+    Type: String
+    Default: ''
+    Description: Custom domain name for API Gateway (optional)
+  
+  CertificateArn:
+    Type: String
+    Default: ''
+    Description: ACM Certificate ARN for custom domain (optional)
+  
+  ThrottleRateLimit:
+    Type: Number
+    Default: 1000
+    Description: API throttling rate limit per second
+  
+  ThrottleBurstLimit:
+    Type: Number
+    Default: 2000
+    Description: API throttling burst limit
+
+Conditions:
+  HasCustomDomain: !Not [!Equals [!Ref CustomDomainName, '']]
+  HasCertificate: !Not [!Equals [!Ref CertificateArn, '']]
+  IsProd: !Equals [!Ref Environment, 'prod']
+
+Resources:
+  # REST API Gateway
+  CurriculumAlignmentAPI:
+    Type: AWS::ApiGateway::RestApi
+    Properties:
+      Name: !Sub '${AWS::StackName}-api'
+      Description: 'REST API for Curriculum Alignment System'
+      
+      # API Configuration
+      EndpointConfiguration:
+        Types:
+          - REGIONAL
+      
+      # Request Validation
+      RequestValidatorId: !Ref RequestValidator
+      
+      # Binary Media Types
+      BinaryMediaTypes:
+        - 'application/pdf'
+        - 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        - 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+        - 'image/*'
+      
+      # Policy for resource access
+      Policy:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal: '*'
+            Action: execute-api:Invoke
+            Resource: '*'
+            Condition:
+              IpAddress:
+                aws:SourceIp:
+                  - '0.0.0.0/0'  # Allow all IPs (customize as needed)
+      
+      Tags:
+        - Key: Name
+          Value: !Sub '${AWS::StackName}-api'
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: Project
+          Value: curriculum-alignment
+
+  # Request Validator
+  RequestValidator:
+    Type: AWS::ApiGateway::RequestValidator
+    Properties:
+      RestApiId: !Ref CurriculumAlignmentAPI
+      Name: !Sub '${AWS::StackName}-request-validator'
+      ValidateRequestBody: true
+      ValidateRequestParameters: true
+
+  # Cognito Authorizer
+  CognitoAuthorizer:
+    Type: AWS::ApiGateway::Authorizer
+    Properties:
+      Name: !Sub '${AWS::StackName}-cognito-authorizer'
+      Type: COGNITO_USER_POOLS
+      IdentitySource: method.request.header.Authorization
+      RestApiId: !Ref CurriculumAlignmentAPI
+      ProviderARNs:
+        - !Ref UserPoolArn
+
+  # API Resources and Methods
+  
+  # /api resource
+  ApiResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref CurriculumAlignmentAPI
+      ParentId: !GetAtt CurriculumAlignmentAPI.RootResourceId
+      PathPart: api
+
+  # /api/v1 resource
+  ApiV1Resource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref CurriculumAlignmentAPI
+      ParentId: !Ref ApiResource
+      PathPart: v1
+
+  # Health Check Endpoint: GET /api/v1/health
+  HealthResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref CurriculumAlignmentAPI
+      ParentId: !Ref ApiV1Resource
+      PathPart: health
+
+  HealthMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref CurriculumAlignmentAPI
+      ResourceId: !Ref HealthResource
+      HttpMethod: GET
+      AuthorizationType: NONE
+      
+      Integration:
+        Type: MOCK
+        IntegrationHttpMethod: POST
+        RequestTemplates:
+          application/json: '{"statusCode": 200}'
+        IntegrationResponses:
+          - StatusCode: 200
+            ResponseTemplates:
+              application/json: |
+                {
+                  "status": "healthy",
+                  "timestamp": "$context.requestTime",
+                  "api": "curriculum-alignment",
+                  "version": "1.0.0",
+                  "environment": "${Environment}"
+                }
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key'"
+      
+      MethodResponses:
+        - StatusCode: 200
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Origin: true
+            method.response.header.Access-Control-Allow-Headers: true
+          ResponseModels:
+            application/json: !Ref HealthResponseModel
+
+  # Auth Endpoints: /api/v1/auth
+  AuthResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref CurriculumAlignmentAPI
+      ParentId: !Ref ApiV1Resource
+      PathPart: auth
+
+  # POST /api/v1/auth/refresh
+  AuthRefreshResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref CurriculumAlignmentAPI
+      ParentId: !Ref AuthResource
+      PathPart: refresh
+
+  AuthRefreshMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref CurriculumAlignmentAPI
+      ResourceId: !Ref AuthRefreshResource
+      HttpMethod: POST
+      AuthorizationType: AWS_IAM
+      RequestValidatorId: !Ref RequestValidator
+      
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri: !Sub 'arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${LambdaFunctionArnPrefix}:auth-service/invocations'
+        
+      MethodResponses:
+        - StatusCode: 200
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Origin: true
+            method.response.header.Access-Control-Allow-Headers: true
+
+  # Analysis Endpoints: /api/v1/analysis
+  AnalysisResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref CurriculumAlignmentAPI
+      ParentId: !Ref ApiV1Resource
+      PathPart: analysis
+
+  # POST /api/v1/analysis/start
+  AnalysisStartResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref CurriculumAlignmentAPI
+      ParentId: !Ref AnalysisResource
+      PathPart: start
+
+  AnalysisStartMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref CurriculumAlignmentAPI
+      ResourceId: !Ref AnalysisStartResource
+      HttpMethod: POST
+      AuthorizationType: COGNITO_USER_POOLS
+      AuthorizerId: !Ref CognitoAuthorizer
+      RequestValidatorId: !Ref RequestValidator
+      RequestModels:
+        application/json: !Ref AnalysisRequestModel
+      
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri: !Sub 'arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${LambdaFunctionArnPrefix}:coordinator/invocations'
+        
+      MethodResponses:
+        - StatusCode: 200
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Origin: true
+
+  # GET /api/v1/analysis/{id}/status
+  AnalysisStatusResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref CurriculumAlignmentAPI
+      ParentId: !Ref AnalysisResource
+      PathPart: '{id}'
+
+  AnalysisStatusSubResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref CurriculumAlignmentAPI
+      ParentId: !Ref AnalysisStatusResource
+      PathPart: status
+
+  AnalysisStatusMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref CurriculumAlignmentAPI
+      ResourceId: !Ref AnalysisStatusSubResource
+      HttpMethod: GET
+      AuthorizationType: COGNITO_USER_POOLS
+      AuthorizerId: !Ref CognitoAuthorizer
+      RequestParameters:
+        method.request.path.id: true
+        
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri: !Sub 'arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${LambdaFunctionArnPrefix}:coordinator/invocations'
+        RequestParameters:
+          integration.request.path.id: method.request.path.id
+
+  # Programs Endpoints: /api/v1/programs
+  ProgramsResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref CurriculumAlignmentAPI
+      ParentId: !Ref ApiV1Resource
+      PathPart: programs
+
+  # GET /api/v1/programs
+  ProgramsGetMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref CurriculumAlignmentAPI
+      ResourceId: !Ref ProgramsResource
+      HttpMethod: GET
+      AuthorizationType: COGNITO_USER_POOLS
+      AuthorizerId: !Ref CognitoAuthorizer
+      
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri: !Sub 'arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${LambdaFunctionArnPrefix}:coordinator/invocations'
+
+  # POST /api/v1/programs
+  ProgramsPostMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref CurriculumAlignmentAPI
+      ResourceId: !Ref ProgramsResource
+      HttpMethod: POST
+      AuthorizationType: COGNITO_USER_POOLS
+      AuthorizerId: !Ref CognitoAuthorizer
+      RequestValidatorId: !Ref RequestValidator
+      RequestModels:
+        application/json: !Ref ProgramRequestModel
+      
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri: !Sub 'arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${LambdaFunctionArnPrefix}:coordinator/invocations'
+
+  # Documents Endpoints: /api/v1/documents
+  DocumentsResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref CurriculumAlignmentAPI
+      ParentId: !Ref ApiV1Resource
+      PathPart: documents
+
+  # POST /api/v1/documents/upload
+  DocumentsUploadResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref CurriculumAlignmentAPI
+      ParentId: !Ref DocumentsResource
+      PathPart: upload
+
+  DocumentsUploadMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref CurriculumAlignmentAPI
+      ResourceId: !Ref DocumentsUploadResource
+      HttpMethod: POST
+      AuthorizationType: COGNITO_USER_POOLS
+      AuthorizerId: !Ref CognitoAuthorizer
+      
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri: !Sub 'arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${LambdaFunctionArnPrefix}:document-processing/invocations'
+
+  # Chat Endpoints: /api/v1/chat
+  ChatResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref CurriculumAlignmentAPI
+      ParentId: !Ref ApiV1Resource
+      PathPart: chat
+
+  # POST /api/v1/chat/message
+  ChatMessageResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref CurriculumAlignmentAPI
+      ParentId: !Ref ChatResource
+      PathPart: message
+
+  ChatMessageMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref CurriculumAlignmentAPI
+      ResourceId: !Ref ChatMessageResource
+      HttpMethod: POST
+      AuthorizationType: COGNITO_USER_POOLS
+      AuthorizerId: !Ref CognitoAuthorizer
+      RequestValidatorId: !Ref RequestValidator
+      RequestModels:
+        application/json: !Ref ChatMessageRequestModel
+      
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri: !Sub 'arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${LambdaFunctionArnPrefix}:chat-interface/invocations'
+
+  # Reports Endpoints: /api/v1/reports
+  ReportsResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref CurriculumAlignmentAPI
+      ParentId: !Ref ApiV1Resource
+      PathPart: reports
+
+  # POST /api/v1/reports/generate
+  ReportsGenerateResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref CurriculumAlignmentAPI
+      ParentId: !Ref ReportsResource
+      PathPart: generate
+
+  ReportsGenerateMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref CurriculumAlignmentAPI
+      ResourceId: !Ref ReportsGenerateResource
+      HttpMethod: POST
+      AuthorizationType: COGNITO_USER_POOLS
+      AuthorizerId: !Ref CognitoAuthorizer
+      RequestValidatorId: !Ref RequestValidator
+      RequestModels:
+        application/json: !Ref ReportRequestModel
+      
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri: !Sub 'arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${LambdaFunctionArnPrefix}:coordinator/invocations'
+
+  # CORS Options methods for all resources
+  ApiV1OptionsMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref CurriculumAlignmentAPI
+      ResourceId: !Ref ApiV1Resource
+      HttpMethod: OPTIONS
+      AuthorizationType: NONE
+      Integration:
+        Type: MOCK
+        IntegrationHttpMethod: POST
+        IntegrationResponses:
+          - StatusCode: 200
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+              method.response.header.Access-Control-Allow-Methods: "'GET,POST,PUT,DELETE,OPTIONS'"
+              method.response.header.Access-Control-Max-Age: "'86400'"
+        RequestTemplates:
+          application/json: '{"statusCode": 200}'
+      MethodResponses:
+        - StatusCode: 200
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Origin: true
+            method.response.header.Access-Control-Allow-Headers: true
+            method.response.header.Access-Control-Allow-Methods: true
+            method.response.header.Access-Control-Max-Age: true
+
+  # Model Definitions
+  HealthResponseModel:
+    Type: AWS::ApiGateway::Model
+    Properties:
+      RestApiId: !Ref CurriculumAlignmentAPI
+      ContentType: application/json
+      Name: HealthResponse
+      Schema:
+        $schema: 'http://json-schema.org/draft-04/schema#'
+        title: Health Check Response
+        type: object
+        properties:
+          status:
+            type: string
+            enum: [healthy, unhealthy]
+          timestamp:
+            type: string
+          api:
+            type: string
+          version:
+            type: string
+          environment:
+            type: string
+        required: [status, timestamp, api, version, environment]
+
+  AnalysisRequestModel:
+    Type: AWS::ApiGateway::Model
+    Properties:
+      RestApiId: !Ref CurriculumAlignmentAPI
+      ContentType: application/json
+      Name: AnalysisRequest
+      Schema:
+        $schema: 'http://json-schema.org/draft-04/schema#'
+        title: Analysis Request
+        type: object
+        properties:
+          programId:
+            type: string
+            pattern: '^[a-zA-Z0-9-_]+$'
+          documentIds:
+            type: array
+            items:
+              type: string
+            minItems: 1
+          analysisType:
+            type: string
+            enum: [curriculum-gap, peer-comparison, accreditation-compliance]
+          llmModelConfig:
+            type: object
+            properties:
+              provider:
+                type: string
+                enum: [anthropic, openai, grok]
+              model:
+                type: string
+              temperature:
+                type: number
+                minimum: 0
+                maximum: 2
+        required: [programId, documentIds, analysisType]
+
+  ProgramRequestModel:
+    Type: AWS::ApiGateway::Model
+    Properties:
+      RestApiId: !Ref CurriculumAlignmentAPI
+      ContentType: application/json
+      Name: ProgramRequest
+      Schema:
+        $schema: 'http://json-schema.org/draft-04/schema#'
+        title: Program Request
+        type: object
+        properties:
+          name:
+            type: string
+            minLength: 1
+            maxLength: 100
+          description:
+            type: string
+            maxLength: 500
+          department:
+            type: string
+            enum: [Computer Science, Mathematics, Economics, Political Science, History, Philosophy, Business, Law, Public Policy, Environmental Science]
+          level:
+            type: string
+            enum: [undergraduate, graduate, phd]
+          credits:
+            type: number
+            minimum: 1
+            maximum: 300
+          duration:
+            type: string
+            enum: [1-year, 2-year, 3-year, 4-year]
+        required: [name, department, level, credits, duration]
+
+  ChatMessageRequestModel:
+    Type: AWS::ApiGateway::Model
+    Properties:
+      RestApiId: !Ref CurriculumAlignmentAPI
+      ContentType: application/json
+      Name: ChatMessageRequest
+      Schema:
+        $schema: 'http://json-schema.org/draft-04/schema#'
+        title: Chat Message Request
+        type: object
+        properties:
+          message:
+            type: string
+            minLength: 1
+            maxLength: 2000
+          context:
+            type: object
+            properties:
+              programId:
+                type: string
+              analysisId:
+                type: string
+              conversationId:
+                type: string
+        required: [message]
+
+  ReportRequestModel:
+    Type: AWS::ApiGateway::Model
+    Properties:
+      RestApiId: !Ref CurriculumAlignmentAPI
+      ContentType: application/json
+      Name: ReportRequest
+      Schema:
+        $schema: 'http://json-schema.org/draft-04/schema#'
+        title: Report Request
+        type: object
+        properties:
+          programId:
+            type: string
+          analysisId:
+            type: string
+          reportType:
+            type: string
+            enum: [gap-analysis, peer-comparison, compliance-report, executive-summary]
+          format:
+            type: string
+            enum: [pdf, excel, word]
+          includeCharts:
+            type: boolean
+          includeRecommendations:
+            type: boolean
+        required: [programId, reportType, format]
+
+  # API Gateway Deployment
+  ApiDeployment:
+    Type: AWS::ApiGateway::Deployment
+    DependsOn:
+      - HealthMethod
+      - AuthRefreshMethod
+      - AnalysisStartMethod
+      - AnalysisStatusMethod
+      - ProgramsGetMethod
+      - ProgramsPostMethod
+      - DocumentsUploadMethod
+      - ChatMessageMethod
+      - ReportsGenerateMethod
+      - ApiV1OptionsMethod
+    Properties:
+      RestApiId: !Ref CurriculumAlignmentAPI
+      Description: !Sub 'Deployment for ${Environment} environment'
+
+  # API Gateway Stage
+  ApiStage:
+    Type: AWS::ApiGateway::Stage
+    Properties:
+      RestApiId: !Ref CurriculumAlignmentAPI
+      DeploymentId: !Ref ApiDeployment
+      StageName: !Ref Environment
+      
+      # Throttling
+      ThrottleSettings:
+        RateLimit: !Ref ThrottleRateLimit
+        BurstLimit: !Ref ThrottleBurstLimit
+      
+      # Method Settings
+      MethodSettings:
+        - ResourcePath: '/*'
+          HttpMethod: '*'
+          LoggingLevel: !If [IsProd, 'ERROR', 'INFO']
+          DataTraceEnabled: !If [IsProd, false, true]
+          MetricsEnabled: true
+          ThrottlingRateLimit: !Ref ThrottleRateLimit
+          ThrottlingBurstLimit: !Ref ThrottleBurstLimit
+          CachingEnabled: !If [IsProd, true, false]
+          CacheTtlInSeconds: 300
+          CacheKeyParameters: []
+      
+      # Access Logging
+      AccessLogSetting:
+        DestinationArn: !GetAtt ApiGatewayLogGroup.Arn
+        Format: !Sub |
+          {
+            "requestId": "$context.requestId",
+            "extendedRequestId": "$context.extendedRequestId",
+            "ip": "$context.identity.sourceIp",
+            "caller": "$context.identity.caller",
+            "user": "$context.identity.user",
+            "requestTime": "$context.requestTime",
+            "httpMethod": "$context.httpMethod",
+            "resourcePath": "$context.resourcePath",
+            "status": "$context.status",
+            "protocol": "$context.protocol",
+            "responseLength": "$context.responseLength",
+            "requestTime": "$context.requestTime",
+            "responseTime": "$context.responseTime",
+            "error.message": "$context.error.message",
+            "error.messageString": "$context.error.messageString"
+          }
+      
+      Tags:
+        - Key: Name
+          Value: !Sub '${AWS::StackName}-stage-${Environment}'
+        - Key: Environment
+          Value: !Ref Environment
+
+  # Custom Domain (Optional)
+  ApiDomainName:
+    Type: AWS::ApiGateway::DomainName
+    Condition: HasCustomDomain
+    Properties:
+      DomainName: !Ref CustomDomainName
+      CertificateArn: !Ref CertificateArn
+      EndpointConfiguration:
+        Types:
+          - REGIONAL
+      SecurityPolicy: TLS_1_2
+      Tags:
+        - Key: Name
+          Value: !Sub '${AWS::StackName}-domain'
+        - Key: Environment
+          Value: !Ref Environment
+
+  ApiBasePathMapping:
+    Type: AWS::ApiGateway::BasePathMapping
+    Condition: HasCustomDomain
+    Properties:
+      DomainName: !Ref ApiDomainName
+      RestApiId: !Ref CurriculumAlignmentAPI
+      Stage: !Ref ApiStage
+
+  # CloudWatch Log Group
+  ApiGatewayLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/aws/apigateway/${AWS::StackName}'
+      RetentionInDays: !If [IsProd, 30, 7]
+
+  # Usage Plan
+  ApiUsagePlan:
+    Type: AWS::ApiGateway::UsagePlan
+    Properties:
+      UsagePlanName: !Sub '${AWS::StackName}-usage-plan'
+      Description: !Sub 'Usage plan for ${Environment} environment'
+      ApiStages:
+        - ApiId: !Ref CurriculumAlignmentAPI
+          Stage: !Ref ApiStage
+      Throttle:
+        RateLimit: !Ref ThrottleRateLimit
+        BurstLimit: !Ref ThrottleBurstLimit
+      Quota:
+        Limit: !If [IsProd, 1000000, 100000]  # Monthly request limit
+        Period: MONTH
+
+  # API Key for external integrations
+  ApiKey:
+    Type: AWS::ApiGateway::ApiKey
+    Properties:
+      Name: !Sub '${AWS::StackName}-api-key'
+      Description: !Sub 'API Key for ${Environment} environment'
+      Enabled: true
+      StageKeys:
+        - RestApiId: !Ref CurriculumAlignmentAPI
+          StageName: !Ref ApiStage
+
+  # Usage Plan Key association
+  UsagePlanKey:
+    Type: AWS::ApiGateway::UsagePlanKey
+    Properties:
+      KeyId: !Ref ApiKey
+      KeyType: API_KEY
+      UsagePlanId: !Ref ApiUsagePlan
+
+  # CloudWatch Alarms
+  ApiGateway4xxErrorAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub '${AWS::StackName}-4xx-errors'
+      AlarmDescription: 'API Gateway 4xx error rate is high'
+      MetricName: 4XXError
+      Namespace: AWS/ApiGateway
+      Statistic: Sum
+      Period: 300
+      EvaluationPeriods: 2
+      Threshold: 10
+      ComparisonOperator: GreaterThanThreshold
+      Dimensions:
+        - Name: ApiName
+          Value: !Sub '${AWS::StackName}-api'
+        - Name: Stage
+          Value: !Ref Environment
+      AlarmActions:
+        - !Ref ApiAlertTopic
+
+  ApiGateway5xxErrorAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub '${AWS::StackName}-5xx-errors'
+      AlarmDescription: 'API Gateway 5xx error rate is high'
+      MetricName: 5XXError
+      Namespace: AWS/ApiGateway
+      Statistic: Sum
+      Period: 300
+      EvaluationPeriods: 1
+      Threshold: 5
+      ComparisonOperator: GreaterThanThreshold
+      Dimensions:
+        - Name: ApiName
+          Value: !Sub '${AWS::StackName}-api'
+        - Name: Stage
+          Value: !Ref Environment
+      AlarmActions:
+        - !Ref ApiAlertTopic
+
+  ApiGatewayLatencyAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub '${AWS::StackName}-high-latency'
+      AlarmDescription: 'API Gateway latency is high'
+      MetricName: Latency
+      Namespace: AWS/ApiGateway
+      Statistic: Average
+      Period: 300
+      EvaluationPeriods: 3
+      Threshold: 5000
+      ComparisonOperator: GreaterThanThreshold
+      Dimensions:
+        - Name: ApiName
+          Value: !Sub '${AWS::StackName}-api'
+        - Name: Stage
+          Value: !Ref Environment
+      AlarmActions:
+        - !Ref ApiAlertTopic
+
+  # SNS Topic for API alerts
+  ApiAlertTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: !Sub '${AWS::StackName}-api-alerts'
+      DisplayName: 'API Gateway Alerts'
+
+Outputs:
+  ApiGatewayId:
+    Description: 'API Gateway REST API ID'
+    Value: !Ref CurriculumAlignmentAPI
+    Export:
+      Name: !Sub '${AWS::StackName}-api-id'
+
+  ApiGatewayRootResourceId:
+    Description: 'API Gateway Root Resource ID'
+    Value: !GetAtt CurriculumAlignmentAPI.RootResourceId
+    Export:
+      Name: !Sub '${AWS::StackName}-root-resource-id'
+
+  ApiEndpoint:
+    Description: 'API Gateway Endpoint URL'
+    Value: !Sub 'https://${CurriculumAlignmentAPI}.execute-api.${AWS::Region}.amazonaws.com/${Environment}'
+    Export:
+      Name: !Sub '${AWS::StackName}-api-endpoint'
+
+  CustomDomainEndpoint:
+    Condition: HasCustomDomain
+    Description: 'Custom Domain Endpoint URL'
+    Value: !Sub 'https://${CustomDomainName}'
+    Export:
+      Name: !Sub '${AWS::StackName}-custom-domain-endpoint'
+
+  ApiKeyId:
+    Description: 'API Key ID'
+    Value: !Ref ApiKey
+    Export:
+      Name: !Sub '${AWS::StackName}-api-key-id'
+
+  UsagePlanId:
+    Description: 'Usage Plan ID'
+    Value: !Ref ApiUsagePlan
+    Export:
+      Name: !Sub '${AWS::StackName}-usage-plan-id'
+
+  CognitoAuthorizerId:
+    Description: 'Cognito Authorizer ID'
+    Value: !Ref CognitoAuthorizer
+    Export:
+      Name: !Sub '${AWS::StackName}-cognito-authorizer-id'
+
+  ApiAlertTopicArn:
+    Description: 'SNS Topic ARN for API alerts'
+    Value: !Ref ApiAlertTopic
+    Export:
+      Name: !Sub '${AWS::StackName}-api-alert-topic-arn'

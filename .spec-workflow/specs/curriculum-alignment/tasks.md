@@ -6,9 +6,9 @@ This document breaks down the implementation of the Multi-Agent Curriculum Align
 
 ## Progress Tracking
 - **Total Tasks**: 70
-- **Completed**: 3
+- **Completed**: 7
 - **In Progress**: 0  
-- **Pending**: 67
+- **Pending**: 63
 
 ## Task Organization
 
@@ -89,7 +89,7 @@ Tasks are organized by component and phase:
     - Success: Complete SAM template ready for deployment
     - Mark this task as in-progress in tasks.md, then complete when done
 
-- [-] 6. Setup S3 Buckets
+- [x] 6. Setup S3 Buckets
   - **Files**: `infrastructure/s3-buckets.yaml`
   - **Requirements**: Document storage requirements from design document
   - **Description**: Create S3 buckets for document storage and static website hosting
@@ -102,8 +102,8 @@ Tasks are organized by component and phase:
     - Success: S3 buckets created with proper security and access policies
     - Mark this task as in-progress in tasks.md, then complete when done
 
-- [ ] 7. Configure CloudFront CDN
-  - **Files**: `infrastructure/cloudfront.yaml`
+- [x] 7. Configure CloudFront CDN
+  - **Files**: `infrastructure/cloudfront-distribution.yaml`
   - **Requirements**: CDN requirements from design document
   - **Description**: Setup CloudFront distribution for static content delivery
   - **_Prompt**: Implement the task for spec curriculum-alignment, first run spec-workflow-guide to get the workflow guide then implement the task:
@@ -115,8 +115,8 @@ Tasks are organized by component and phase:
     - Success: CloudFront distribution active with S3 origin
     - Mark this task as in-progress in tasks.md, then complete when done
 
-- [ ] 8. Setup AWS Cognito User Pool
-  - **Files**: `infrastructure/cognito.yaml`, `src/auth/cognito-config.ts`
+- [x] 8. Setup AWS Cognito User Pool
+  - **Files**: `infrastructure/cognito-user-pool.yaml`, `src/auth/cognito-config.ts`
   - **Requirements**: Authentication requirements from design document
   - **Description**: Configure AWS Cognito for user authentication
   - **_Prompt**: Implement the task for spec curriculum-alignment, first run spec-workflow-guide to get the workflow guide then implement the task:
@@ -128,7 +128,7 @@ Tasks are organized by component and phase:
     - Success: Cognito user pool configured with proper security settings
     - Mark this task as in-progress in tasks.md, then complete when done
 
-- [ ] 9. Configure API Gateway
+- [x] 9. Configure API Gateway
   - **Files**: `infrastructure/api-gateway.yaml`, `openapi.yaml`
   - **Requirements**: API specifications from design document
   - **Description**: Setup API Gateway with request validation and CORS

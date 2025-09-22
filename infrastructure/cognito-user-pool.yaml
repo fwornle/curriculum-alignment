@@ -1,0 +1,597 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'AWS Cognito User Pool Configuration for Curriculum Alignment System'
+
+Parameters:
+  Environment:
+    Type: String
+    Default: dev
+    AllowedValues: [dev, staging, prod]
+    Description: Deployment environment
+  
+  AdminEmail:
+    Type: String
+    Description: Administrator email address for initial setup
+    Default: admin@ceu.edu
+  
+  EnableMFA:
+    Type: String
+    Default: 'true'
+    AllowedValues: ['true', 'false']
+    Description: Enable Multi-Factor Authentication
+  
+  PasswordMinLength:
+    Type: Number
+    Default: 12
+    MinValue: 8
+    MaxValue: 128
+    Description: Minimum password length
+  
+  PasswordRequireUppercase:
+    Type: String
+    Default: 'true'
+    AllowedValues: ['true', 'false']
+    Description: Require uppercase letters in password
+  
+  PasswordRequireLowercase:
+    Type: String
+    Default: 'true'
+    AllowedValues: ['true', 'false']
+    Description: Require lowercase letters in password
+  
+  PasswordRequireNumbers:
+    Type: String
+    Default: 'true'
+    AllowedValues: ['true', 'false']
+    Description: Require numbers in password
+  
+  PasswordRequireSymbols:
+    Type: String
+    Default: 'true'
+    AllowedValues: ['true', 'false']
+    Description: Require symbols in password
+  
+  TokenValidityDays:
+    Type: Number
+    Default: 30
+    MinValue: 1
+    MaxValue: 3650
+    Description: Token validity period in days
+
+Conditions:
+  IsProd: !Equals [!Ref Environment, 'prod']
+  EnableMFACondition: !Equals [!Ref EnableMFA, 'true']
+
+Resources:
+  # Cognito User Pool
+  CurriculumAlignmentUserPool:
+    Type: AWS::Cognito::UserPool
+    Properties:
+      UserPoolName: !Sub '${AWS::StackName}-user-pool'
+      
+      # Account Recovery Settings
+      AccountRecoverySetting:
+        RecoveryMechanisms:
+          - Name: verified_email
+            Priority: 1
+          - Name: verified_phone_number
+            Priority: 2
+      
+      # User Attributes
+      AliasAttributes:
+        - email
+        - preferred_username
+      
+      AutoVerifiedAttributes:
+        - email
+      
+      UsernameAttributes:
+        - email
+      
+      # Schema Configuration
+      Schema:
+        # Required attributes
+        - Name: email
+          AttributeDataType: String
+          Required: true
+          Mutable: true
+        
+        - Name: given_name
+          AttributeDataType: String
+          Required: true
+          Mutable: true
+        
+        - Name: family_name
+          AttributeDataType: String
+          Required: true
+          Mutable: true
+        
+        # Custom attributes for CEU
+        - Name: department
+          AttributeDataType: String
+          Required: false
+          Mutable: true
+          DeveloperOnlyAttribute: false
+        
+        - Name: role
+          AttributeDataType: String
+          Required: false
+          Mutable: true
+          DeveloperOnlyAttribute: false
+        
+        - Name: university_id
+          AttributeDataType: String
+          Required: false
+          Mutable: true
+          DeveloperOnlyAttribute: false
+        
+        - Name: access_level
+          AttributeDataType: String
+          Required: false
+          Mutable: true
+          DeveloperOnlyAttribute: false
+      
+      # Password Policy
+      Policies:
+        PasswordPolicy:
+          MinimumLength: !Ref PasswordMinLength
+          RequireUppercase: !Ref PasswordRequireUppercase
+          RequireLowercase: !Ref PasswordRequireLowercase
+          RequireNumbers: !Ref PasswordRequireNumbers
+          RequireSymbols: !Ref PasswordRequireSymbols
+          TemporaryPasswordValidityDays: 7
+      
+      # MFA Configuration
+      MfaConfiguration: !If 
+        - EnableMFACondition
+        - 'ON'
+        - 'OFF'
+      
+      EnabledMfas: !If
+        - EnableMFACondition
+        - - SMS_MFA
+          - SOFTWARE_TOKEN_MFA
+        - !Ref 'AWS::NoValue'
+      
+      # SMS Configuration for MFA
+      SmsConfiguration: !If
+        - EnableMFACondition
+        - SnsCallerArn: !GetAtt CognitoSMSRole.Arn
+          ExternalId: !Sub '${AWS::StackName}-external-id'
+        - !Ref 'AWS::NoValue'
+      
+      # Email Configuration
+      EmailConfiguration:
+        EmailSendingAccount: COGNITO_DEFAULT
+        ReplyToEmailAddress: !Ref AdminEmail
+        SourceArn: !If
+          - IsProd
+          - !Sub 'arn:aws:ses:${AWS::Region}:${AWS::AccountId}:identity/${AdminEmail}'
+          - !Ref 'AWS::NoValue'
+      
+      # Verification Messages
+      EmailVerificationSubject: 'CEU Curriculum Alignment System - Verify your email'
+      EmailVerificationMessage: |
+        Welcome to the CEU Curriculum Alignment System!
+        
+        Please verify your email address by clicking the link below:
+        {##Verify Email##}
+        
+        This verification code will expire in 24 hours.
+        
+        If you didn't create an account, please ignore this email.
+        
+        Best regards,
+        CEU IT Services
+      
+      SmsVerificationMessage: 'CEU Curriculum Alignment verification code: {####}'
+      
+      # User Pool Add-ons
+      UserPoolAddOns:
+        AdvancedSecurityMode: !If [IsProd, 'ENFORCED', 'AUDIT']
+      
+      # Device Configuration
+      DeviceConfiguration:
+        ChallengeRequiredOnNewDevice: true
+        DeviceOnlyRememberedOnUserPrompt: false
+      
+      # Admin Create User Config
+      AdminCreateUserConfig:
+        AllowAdminCreateUserOnly: false
+        InviteMessageAction: EMAIL
+        TemporaryPasswordValidityDays: 7
+        MessageAction: EMAIL
+      
+      # Lambda Triggers (optional)
+      # LambdaConfig:
+      #   PreSignUp: !GetAtt PreSignUpLambda.Arn
+      #   PostConfirmation: !GetAtt PostConfirmationLambda.Arn
+      
+      # Deletion Protection
+      DeletionProtection: !If [IsProd, 'ACTIVE', 'INACTIVE']
+      
+      UserPoolTags:
+        Name: !Sub '${AWS::StackName}-user-pool'
+        Environment: !Ref Environment
+        Project: curriculum-alignment
+        ManagedBy: CloudFormation
+
+  # User Pool Domain
+  CurriculumAlignmentUserPoolDomain:
+    Type: AWS::Cognito::UserPoolDomain
+    Properties:
+      Domain: !Sub '${AWS::StackName}-${Environment}-auth'
+      UserPoolId: !Ref CurriculumAlignmentUserPool
+
+  # Web Application Client
+  CurriculumAlignmentWebClient:
+    Type: AWS::Cognito::UserPoolClient
+    Properties:
+      ClientName: !Sub '${AWS::StackName}-web-client'
+      UserPoolId: !Ref CurriculumAlignmentUserPool
+      
+      # OAuth Configuration
+      AllowedOAuthFlows:
+        - code
+        - implicit
+      
+      AllowedOAuthScopes:
+        - email
+        - openid
+        - profile
+        - aws.cognito.signin.user.admin
+      
+      AllowedOAuthFlowsUserPoolClient: true
+      
+      # Callback URLs
+      CallbackURLs:
+        - !Sub 'https://${AWS::StackName}-${Environment}.curriculum-alignment.ceu.edu/auth/callback'
+        - 'http://localhost:3000/auth/callback'  # For development
+      
+      LogoutURLs:
+        - !Sub 'https://${AWS::StackName}-${Environment}.curriculum-alignment.ceu.edu/auth/logout'
+        - 'http://localhost:3000/auth/logout'    # For development
+      
+      # Security Settings
+      GenerateSecret: false  # Public client for SPA
+      ExplicitAuthFlows:
+        - ALLOW_USER_PASSWORD_AUTH
+        - ALLOW_USER_SRP_AUTH
+        - ALLOW_REFRESH_TOKEN_AUTH
+        - ALLOW_CUSTOM_AUTH
+      
+      # Token Configuration
+      RefreshTokenValidity: !Ref TokenValidityDays
+      AccessTokenValidity: 60  # 1 hour
+      IdTokenValidity: 60      # 1 hour
+      
+      TokenValidityUnits:
+        AccessToken: minutes
+        IdToken: minutes
+        RefreshToken: days
+      
+      # Prevent user existence errors
+      PreventUserExistenceErrors: ENABLED
+      
+      # Enable token revocation
+      EnableTokenRevocation: true
+      
+      # Read and write attributes
+      ReadAttributes:
+        - email
+        - email_verified
+        - given_name
+        - family_name
+        - custom:department
+        - custom:role
+        - custom:university_id
+        - custom:access_level
+      
+      WriteAttributes:
+        - email
+        - given_name
+        - family_name
+        - custom:department
+        - custom:role
+        - custom:university_id
+
+  # Mobile Application Client (for future mobile app)
+  CurriculumAlignmentMobileClient:
+    Type: AWS::Cognito::UserPoolClient
+    Properties:
+      ClientName: !Sub '${AWS::StackName}-mobile-client'
+      UserPoolId: !Ref CurriculumAlignmentUserPool
+      GenerateSecret: true  # Confidential client for mobile
+      
+      ExplicitAuthFlows:
+        - ALLOW_USER_PASSWORD_AUTH
+        - ALLOW_USER_SRP_AUTH
+        - ALLOW_REFRESH_TOKEN_AUTH
+      
+      RefreshTokenValidity: !Ref TokenValidityDays
+      AccessTokenValidity: 60
+      IdTokenValidity: 60
+      
+      PreventUserExistenceErrors: ENABLED
+      EnableTokenRevocation: true
+
+  # Identity Pool for AWS service access
+  CurriculumAlignmentIdentityPool:
+    Type: AWS::Cognito::IdentityPool
+    Properties:
+      IdentityPoolName: !Sub '${AWS::StackName}-identity-pool'
+      AllowUnauthenticatedIdentities: false
+      CognitoIdentityProviders:
+        - ClientId: !Ref CurriculumAlignmentWebClient
+          ProviderName: !GetAtt CurriculumAlignmentUserPool.ProviderName
+        - ClientId: !Ref CurriculumAlignmentMobileClient
+          ProviderName: !GetAtt CurriculumAlignmentUserPool.ProviderName
+
+  # IAM Roles for Cognito Identity Pool
+  CognitoAuthenticatedRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub '${AWS::StackName}-authenticated-role'
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Federated: cognito-identity.amazonaws.com
+            Action: sts:AssumeRoleWithWebIdentity
+            Condition:
+              StringEquals:
+                'cognito-identity.amazonaws.com:aud': !Ref CurriculumAlignmentIdentityPool
+              'ForAnyValue:StringLike':
+                'cognito-identity.amazonaws.com:amr': authenticated
+      
+      Policies:
+        - PolicyName: CognitoAuthenticatedPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              # S3 Access for authenticated users
+              - Effect: Allow
+                Action:
+                  - s3:GetObject
+                  - s3:PutObject
+                  - s3:DeleteObject
+                Resource:
+                  - !Sub 'arn:aws:s3:::${AWS::StackName}-documents-*/*'
+                  - !Sub 'arn:aws:s3:::${AWS::StackName}-temp-*/*'
+              
+              # API Gateway access
+              - Effect: Allow
+                Action:
+                  - execute-api:Invoke
+                Resource:
+                  - !Sub 'arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:*/*/api/*'
+              
+              # CloudWatch Logs (for client-side logging)
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource:
+                  - !Sub 'arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/cognito/*'
+
+  # SMS Role for MFA
+  CognitoSMSRole:
+    Type: AWS::IAM::Role
+    Condition: EnableMFACondition
+    Properties:
+      RoleName: !Sub '${AWS::StackName}-sms-role'
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: cognito-idp.amazonaws.com
+            Action: sts:AssumeRole
+            Condition:
+              StringEquals:
+                'sts:ExternalId': !Sub '${AWS::StackName}-external-id'
+      
+      Policies:
+        - PolicyName: CognitoSMSPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - sns:Publish
+                Resource: '*'
+
+  # Identity Pool Role Attachment
+  IdentityPoolRoleAttachment:
+    Type: AWS::Cognito::IdentityPoolRoleAttachment
+    Properties:
+      IdentityPoolId: !Ref CurriculumAlignmentIdentityPool
+      Roles:
+        authenticated: !GetAtt CognitoAuthenticatedRole.Arn
+
+  # User Groups
+  AdminGroup:
+    Type: AWS::Cognito::UserPoolGroup
+    Properties:
+      GroupName: administrators
+      UserPoolId: !Ref CurriculumAlignmentUserPool
+      Description: 'System administrators with full access'
+      Precedence: 1
+      RoleArn: !GetAtt AdminGroupRole.Arn
+
+  FacultyGroup:
+    Type: AWS::Cognito::UserPoolGroup
+    Properties:
+      GroupName: faculty
+      UserPoolId: !Ref CurriculumAlignmentUserPool
+      Description: 'Faculty members with curriculum management access'
+      Precedence: 2
+      RoleArn: !GetAtt FacultyGroupRole.Arn
+
+  StudentGroup:
+    Type: AWS::Cognito::UserPoolGroup
+    Properties:
+      GroupName: students
+      UserPoolId: !Ref CurriculumAlignmentUserPool
+      Description: 'Students with read-only access'
+      Precedence: 3
+      RoleArn: !GetAtt StudentGroupRole.Arn
+
+  # IAM Roles for User Groups
+  AdminGroupRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub '${AWS::StackName}-admin-group-role'
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Federated: cognito-identity.amazonaws.com
+            Action: sts:AssumeRoleWithWebIdentity
+      
+      Policies:
+        - PolicyName: AdminGroupPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:*
+                  - lambda:InvokeFunction
+                  - dynamodb:*
+                  - cognito-identity:*
+                  - cognito-idp:*
+                Resource: '*'
+
+  FacultyGroupRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub '${AWS::StackName}-faculty-group-role'
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Federated: cognito-identity.amazonaws.com
+            Action: sts:AssumeRoleWithWebIdentity
+      
+      Policies:
+        - PolicyName: FacultyGroupPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:GetObject
+                  - s3:PutObject
+                  - lambda:InvokeFunction
+                  - dynamodb:GetItem
+                  - dynamodb:PutItem
+                  - dynamodb:UpdateItem
+                  - dynamodb:Query
+                  - dynamodb:Scan
+                Resource: '*'
+
+  StudentGroupRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub '${AWS::StackName}-student-group-role'
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Federated: cognito-identity.amazonaws.com
+            Action: sts:AssumeRoleWithWebIdentity
+      
+      Policies:
+        - PolicyName: StudentGroupPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:GetObject
+                  - lambda:InvokeFunction
+                  - dynamodb:GetItem
+                  - dynamodb:Query
+                Resource: '*'
+
+  # CloudWatch Alarms for Security Monitoring
+  FailedSignInAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub '${AWS::StackName}-failed-signin-attempts'
+      AlarmDescription: 'High number of failed sign-in attempts'
+      MetricName: SignInSuccesses
+      Namespace: AWS/Cognito
+      Statistic: Sum
+      Period: 300
+      EvaluationPeriods: 2
+      Threshold: 10
+      ComparisonOperator: GreaterThanThreshold
+      Dimensions:
+        - Name: UserPool
+          Value: !Ref CurriculumAlignmentUserPool
+        - Name: UserPoolClient
+          Value: !Ref CurriculumAlignmentWebClient
+      AlarmActions:
+        - !Ref SecurityAlertTopic
+
+  # SNS Topic for Security Alerts
+  SecurityAlertTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: !Sub '${AWS::StackName}-security-alerts'
+      DisplayName: 'Cognito Security Alerts'
+
+Outputs:
+  UserPoolId:
+    Description: 'Cognito User Pool ID'
+    Value: !Ref CurriculumAlignmentUserPool
+    Export:
+      Name: !Sub '${AWS::StackName}-user-pool-id'
+
+  UserPoolArn:
+    Description: 'Cognito User Pool ARN'
+    Value: !GetAtt CurriculumAlignmentUserPool.Arn
+    Export:
+      Name: !Sub '${AWS::StackName}-user-pool-arn'
+
+  WebClientId:
+    Description: 'Web Application Client ID'
+    Value: !Ref CurriculumAlignmentWebClient
+    Export:
+      Name: !Sub '${AWS::StackName}-web-client-id'
+
+  MobileClientId:
+    Description: 'Mobile Application Client ID'
+    Value: !Ref CurriculumAlignmentMobileClient
+    Export:
+      Name: !Sub '${AWS::StackName}-mobile-client-id'
+
+  IdentityPoolId:
+    Description: 'Cognito Identity Pool ID'
+    Value: !Ref CurriculumAlignmentIdentityPool
+    Export:
+      Name: !Sub '${AWS::StackName}-identity-pool-id'
+
+  UserPoolDomain:
+    Description: 'User Pool Domain'
+    Value: !Sub 'https://${CurriculumAlignmentUserPoolDomain}.auth.${AWS::Region}.amazoncognito.com'
+    Export:
+      Name: !Sub '${AWS::StackName}-user-pool-domain'
+
+  HostedUIURL:
+    Description: 'Hosted UI URL for authentication'
+    Value: !Sub 'https://${CurriculumAlignmentUserPoolDomain}.auth.${AWS::Region}.amazoncognito.com/login?client_id=${CurriculumAlignmentWebClient}&response_type=code&scope=email+openid+profile&redirect_uri=http://localhost:3000/auth/callback'
+    Export:
+      Name: !Sub '${AWS::StackName}-hosted-ui-url'
+
+  SecurityAlertTopicArn:
+    Description: 'SNS Topic ARN for security alerts'
+    Value: !Ref SecurityAlertTopic
+    Export:
+      Name: !Sub '${AWS::StackName}-security-alert-topic-arn'
