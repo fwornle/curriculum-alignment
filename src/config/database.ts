@@ -51,7 +51,6 @@ export class DatabaseConnection {
         ssl: this.config.ssl ? { rejectUnauthorized: false } : false,
         max: this.config.connectionLimit,
         min: 2,
-        acquireTimeoutMillis: this.config.poolTimeout,
         idleTimeoutMillis: this.config.idleTimeout,
         connectionTimeoutMillis: 10000,
         application_name: 'curriculum-alignment-system'

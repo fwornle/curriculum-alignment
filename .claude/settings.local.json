@@ -13,7 +13,8 @@
       "Bash(chmod:*)",
       "Bash(npm run typecheck:*)",
       "Bash(npx tsc:*)",
-      "Bash(npm run sam:validate:*)"
+      "Bash(npm run sam:validate:*)",
+      "Bash(npm install:*)"
     ],
     "additionalDirectories": []
   },

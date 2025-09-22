@@ -62,6 +62,9 @@
     "api:docs": "./scripts/setup-api-gateway.sh docs",
     "api:permissions": "./scripts/setup-api-gateway.sh permissions",
     "api:monitor": "./scripts/setup-api-gateway.sh monitor",
+    "env:validate": "ts-node src/config/environment.ts",
+    "env:check": "ts-node -e \"import('./src/config/environment.js').then(m => m.validateEnvironment())\"",
+    "env:info": "ts-node -e \"import('./src/config/environment.js').then(m => console.log(JSON.stringify(m.env, null, 2)))\"",
     "migrate:up": "cd database && npm run migrate:up",
     "migrate:down": "cd database && npm run migrate:down",
     "seed": "cd database && npm run seed"
@@ -91,7 +94,7 @@
   "devDependencies": {
     "@types/aws-lambda": "^8.10.130",
     "@types/jest": "^29.5.11",
-    "@types/node": "^20.10.6",
+    "@types/node": "^20.19.17",
     "@typescript-eslint/eslint-plugin": "^6.17.0",
     "@typescript-eslint/parser": "^6.17.0",
     "concurrently": "^8.2.2",
@@ -107,15 +110,15 @@
     "typescript": "^5.3.3"
   },
   "dependencies": {
-    "aws-lambda": "^1.0.7",
-    "aws-sdk": "^2.1528.0",
     "@aws-sdk/client-cognito-identity": "^3.490.0",
     "@aws-sdk/client-cognito-identity-provider": "^3.490.0",
-    "dotenv": "^16.3.1",
-    "pg": "^8.11.3",
+    "@qdrant/js-client-rest": "^1.8.2",
     "@supabase/supabase-js": "^2.38.5",
     "@types/pg": "^8.10.9",
-    "@qdrant/js-client-rest": "^1.8.2"
+    "aws-lambda": "^1.0.7",
+    "aws-sdk": "^2.1528.0",
+    "dotenv": "^16.3.1",
+    "pg": "^8.11.3"
   },
   "workspaces": [
     "frontend",
