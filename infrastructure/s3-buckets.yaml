@@ -1,0 +1,572 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'S3 Buckets Configuration for Curriculum Alignment System'
+
+Parameters:
+  Environment:
+    Type: String
+    Default: dev
+    AllowedValues:
+      - dev
+      - staging
+      - prod
+    Description: "Deployment environment"
+    
+  RetentionPeriod:
+    Type: Number
+    Default: 90
+    MinValue: 30
+    MaxValue: 365
+    Description: "Document retention period in days"
+    
+  EnableVersioning:
+    Type: String
+    Default: Enabled
+    AllowedValues:
+      - Enabled
+      - Suspended
+    Description: "Enable S3 versioning"
+
+Conditions:
+  IsProduction: !Equals [!Ref Environment, prod]
+  IsNotProduction: !Not [!Equals [!Ref Environment, prod]]
+
+Resources:
+  # =====================================================
+  # Documents Storage Bucket
+  # =====================================================
+  DocumentsBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub "curriculum-alignment-documents-${Environment}-${AWS::AccountId}"
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+            BucketKeyEnabled: true
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      VersioningConfiguration:
+        Status: !Ref EnableVersioning
+      LoggingConfiguration:
+        DestinationBucketName: !Ref AccessLogsBucket
+        LogFilePrefix: documents-access/
+      NotificationConfiguration:
+        LambdaConfigurations:
+          - Event: s3:ObjectCreated:*
+            Function: !Sub 
+              - "${DocumentProcessingFunction}"
+              - DocumentProcessingFunction: !ImportValue
+                  Fn::Sub: "curriculum-alignment-${Environment}-document-processing-arn"
+            Filter:
+              S3Key:
+                Rules:
+                  - Name: suffix
+                    Value: .pdf
+          - Event: s3:ObjectCreated:*
+            Function: !Sub 
+              - "${DocumentProcessingFunction}"
+              - DocumentProcessingFunction: !ImportValue
+                  Fn::Sub: "curriculum-alignment-${Environment}-document-processing-arn"
+            Filter:
+              S3Key:
+                Rules:
+                  - Name: suffix
+                    Value: .docx
+          - Event: s3:ObjectCreated:*
+            Function: !Sub 
+              - "${DocumentProcessingFunction}"
+              - DocumentProcessingFunction: !ImportValue
+                  Fn::Sub: "curriculum-alignment-${Environment}-document-processing-arn"
+            Filter:
+              S3Key:
+                Rules:
+                  - Name: suffix
+                    Value: .xlsx
+      LifecycleConfiguration:
+        Rules:
+          - Id: DeleteOldVersions
+            Status: Enabled
+            NoncurrentVersionExpirationInDays: 30
+          - Id: AbortIncompleteMultipartUploads
+            Status: Enabled
+            AbortIncompleteMultipartUpload:
+              DaysAfterInitiation: 1
+          - Id: TransitionToIA
+            Status: Enabled
+            Transition:
+              StorageClass: STANDARD_IA
+              TransitionInDays: 30
+          - Id: TransitionToGlacier
+            Status: !If [IsProduction, Enabled, Disabled]
+            Transition:
+              StorageClass: GLACIER
+              TransitionInDays: 90
+          - Id: DeleteOldDocuments
+            Status: Enabled
+            ExpirationInDays: !Ref RetentionPeriod
+      CorsConfiguration:
+        CorsRules:
+          - Id: AllowFrontendAccess
+            AllowedHeaders:
+              - "*"
+            AllowedMethods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - HEAD
+            AllowedOrigins:
+              - !If 
+                - IsProduction
+                - "https://curriculum-alignment.ceu.edu"
+                - "*"
+            ExposedHeaders:
+              - ETag
+              - x-amz-meta-custom-header
+            MaxAge: 3600
+      Tags:
+        - Key: Project
+          Value: CurriculumAlignment
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: Purpose
+          Value: DocumentStorage
+
+  # Documents Bucket Policy
+  DocumentsBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref DocumentsBucket
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: DenyInsecureConnections
+            Effect: Deny
+            Principal: "*"
+            Action: "s3:*"
+            Resource:
+              - !Sub "${DocumentsBucket}/*"
+              - !Ref DocumentsBucket
+            Condition:
+              Bool:
+                "aws:SecureTransport": "false"
+          - Sid: AllowLambdaAccess
+            Effect: Allow
+            Principal:
+              AWS: !Sub "arn:aws:iam::${AWS::AccountId}:role/curriculum-alignment-${Environment}-*"
+            Action:
+              - s3:GetObject
+              - s3:PutObject
+              - s3:DeleteObject
+            Resource: !Sub "${DocumentsBucket}/*"
+          - Sid: AllowLambdaListAccess
+            Effect: Allow
+            Principal:
+              AWS: !Sub "arn:aws:iam::${AWS::AccountId}:role/curriculum-alignment-${Environment}-*"
+            Action:
+              - s3:ListBucket
+            Resource: !Ref DocumentsBucket
+
+  # =====================================================
+  # Static Website Hosting Bucket
+  # =====================================================
+  StaticWebsiteBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub "curriculum-alignment-static-${Environment}-${AWS::AccountId}"
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+            BucketKeyEnabled: true
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: false
+        BlockPublicPolicy: false
+        IgnorePublicAcls: false
+        RestrictPublicBuckets: false
+      VersioningConfiguration:
+        Status: !Ref EnableVersioning
+      LoggingConfiguration:
+        DestinationBucketName: !Ref AccessLogsBucket
+        LogFilePrefix: static-access/
+      WebsiteConfiguration:
+        IndexDocument: index.html
+        ErrorDocument: error.html
+        RoutingRules:
+          - RoutingRuleCondition:
+              HttpErrorCodeReturnedEquals: 404
+            RedirectRule:
+              ReplaceKeyWith: index.html
+      LifecycleConfiguration:
+        Rules:
+          - Id: DeleteOldVersions
+            Status: Enabled
+            NoncurrentVersionExpirationInDays: 7
+          - Id: AbortIncompleteMultipartUploads
+            Status: Enabled
+            AbortIncompleteMultipartUpload:
+              DaysAfterInitiation: 1
+      CorsConfiguration:
+        CorsRules:
+          - Id: AllowWebsiteAccess
+            AllowedHeaders:
+              - "*"
+            AllowedMethods:
+              - GET
+              - HEAD
+            AllowedOrigins:
+              - "*"
+            MaxAge: 3600
+      Tags:
+        - Key: Project
+          Value: CurriculumAlignment
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: Purpose
+          Value: StaticWebsite
+
+  # Static Website Bucket Policy
+  StaticWebsiteBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref StaticWebsiteBucket
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: PublicReadGetObject
+            Effect: Allow
+            Principal: "*"
+            Action: "s3:GetObject"
+            Resource: !Sub "${StaticWebsiteBucket}/*"
+          - Sid: DenyInsecureConnections
+            Effect: Deny
+            Principal: "*"
+            Action: "s3:*"
+            Resource:
+              - !Sub "${StaticWebsiteBucket}/*"
+              - !Ref StaticWebsiteBucket
+            Condition:
+              Bool:
+                "aws:SecureTransport": "false"
+
+  # =====================================================
+  # Backup Storage Bucket
+  # =====================================================
+  BackupBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub "curriculum-alignment-backup-${Environment}-${AWS::AccountId}"
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+            BucketKeyEnabled: true
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      VersioningConfiguration:
+        Status: !Ref EnableVersioning
+      LoggingConfiguration:
+        DestinationBucketName: !Ref AccessLogsBucket
+        LogFilePrefix: backup-access/
+      LifecycleConfiguration:
+        Rules:
+          - Id: TransitionToIA
+            Status: Enabled
+            Transition:
+              StorageClass: STANDARD_IA
+              TransitionInDays: 30
+          - Id: TransitionToGlacier
+            Status: Enabled
+            Transition:
+              StorageClass: GLACIER
+              TransitionInDays: 90
+          - Id: TransitionToDeepArchive
+            Status: !If [IsProduction, Enabled, Disabled]
+            Transition:
+              StorageClass: DEEP_ARCHIVE
+              TransitionInDays: 365
+          - Id: DeleteOldVersions
+            Status: Enabled
+            NoncurrentVersionExpirationInDays: 90
+          - Id: AbortIncompleteMultipartUploads
+            Status: Enabled
+            AbortIncompleteMultipartUpload:
+              DaysAfterInitiation: 1
+      ReplicationConfiguration: !If
+        - IsProduction
+        - Role: !GetAtt BackupReplicationRole.Arn
+          Rules:
+            - Id: ReplicateToSecondaryRegion
+              Status: Enabled
+              Prefix: critical/
+              Destination:
+                Bucket: !Sub "arn:aws:s3:::curriculum-alignment-backup-${Environment}-${AWS::AccountId}-replica"
+                StorageClass: STANDARD_IA
+        - !Ref AWS::NoValue
+      Tags:
+        - Key: Project
+          Value: CurriculumAlignment
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: Purpose
+          Value: BackupStorage
+
+  # Backup Bucket Policy
+  BackupBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref BackupBucket
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: DenyInsecureConnections
+            Effect: Deny
+            Principal: "*"
+            Action: "s3:*"
+            Resource:
+              - !Sub "${BackupBucket}/*"
+              - !Ref BackupBucket
+            Condition:
+              Bool:
+                "aws:SecureTransport": "false"
+          - Sid: AllowBackupServices
+            Effect: Allow
+            Principal:
+              AWS: !Sub "arn:aws:iam::${AWS::AccountId}:role/curriculum-alignment-${Environment}-*"
+            Action:
+              - s3:PutObject
+              - s3:GetObject
+              - s3:DeleteObject
+              - s3:ListBucket
+            Resource:
+              - !Sub "${BackupBucket}/*"
+              - !Ref BackupBucket
+
+  # =====================================================
+  # Access Logs Bucket
+  # =====================================================
+  AccessLogsBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub "curriculum-alignment-logs-${Environment}-${AWS::AccountId}"
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+            BucketKeyEnabled: true
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      LifecycleConfiguration:
+        Rules:
+          - Id: DeleteLogFiles
+            Status: Enabled
+            ExpirationInDays: 30
+          - Id: TransitionLogsToIA
+            Status: Enabled
+            Transition:
+              StorageClass: STANDARD_IA
+              TransitionInDays: 7
+          - Id: AbortIncompleteMultipartUploads
+            Status: Enabled
+            AbortIncompleteMultipartUpload:
+              DaysAfterInitiation: 1
+      Tags:
+        - Key: Project
+          Value: CurriculumAlignment
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: Purpose
+          Value: AccessLogs
+
+  # =====================================================
+  # Temporary Processing Bucket
+  # =====================================================
+  TempProcessingBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub "curriculum-alignment-temp-${Environment}-${AWS::AccountId}"
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+            BucketKeyEnabled: true
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      LifecycleConfiguration:
+        Rules:
+          - Id: DeleteTempFiles
+            Status: Enabled
+            ExpirationInDays: 1
+          - Id: AbortIncompleteMultipartUploads
+            Status: Enabled
+            AbortIncompleteMultipartUpload:
+              DaysAfterInitiation: 1
+      Tags:
+        - Key: Project
+          Value: CurriculumAlignment
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: Purpose
+          Value: TemporaryProcessing
+
+  # =====================================================
+  # IAM Roles for Cross-Region Replication
+  # =====================================================
+  BackupReplicationRole:
+    Type: AWS::IAM::Role
+    Condition: IsProduction
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: s3.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: ReplicationPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:GetObjectVersionForReplication
+                  - s3:GetObjectVersionAcl
+                Resource: !Sub "${BackupBucket}/*"
+              - Effect: Allow
+                Action:
+                  - s3:ListBucket
+                Resource: !Ref BackupBucket
+              - Effect: Allow
+                Action:
+                  - s3:ReplicateObject
+                  - s3:ReplicateDelete
+                Resource: !Sub "arn:aws:s3:::curriculum-alignment-backup-${Environment}-${AWS::AccountId}-replica/*"
+
+  # =====================================================
+  # CloudWatch Alarms for Monitoring
+  # =====================================================
+  DocumentsBucketSizeAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub "curriculum-alignment-${Environment}-documents-bucket-size"
+      AlarmDescription: "Monitor documents bucket size"
+      MetricName: BucketSizeBytes
+      Namespace: AWS/S3
+      Statistic: Average
+      Period: 86400
+      EvaluationPeriods: 1
+      Threshold: 1073741824  # 1GB
+      ComparisonOperator: GreaterThanThreshold
+      Dimensions:
+        - Name: BucketName
+          Value: !Ref DocumentsBucket
+        - Name: StorageType
+          Value: StandardStorage
+      AlarmActions:
+        - !Ref StorageAlertTopic
+
+  DocumentsBucketObjectCountAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub "curriculum-alignment-${Environment}-documents-object-count"
+      AlarmDescription: "Monitor documents bucket object count"
+      MetricName: NumberOfObjects
+      Namespace: AWS/S3
+      Statistic: Average
+      Period: 86400
+      EvaluationPeriods: 1
+      Threshold: 1000
+      ComparisonOperator: GreaterThanThreshold
+      Dimensions:
+        - Name: BucketName
+          Value: !Ref DocumentsBucket
+        - Name: StorageType
+          Value: AllStorageTypes
+      AlarmActions:
+        - !Ref StorageAlertTopic
+
+  # =====================================================
+  # SNS Topic for Storage Alerts
+  # =====================================================
+  StorageAlertTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: !Sub "curriculum-alignment-${Environment}-storage-alerts"
+      DisplayName: "Storage Alerts"
+      Tags:
+        - Key: Project
+          Value: CurriculumAlignment
+        - Key: Environment
+          Value: !Ref Environment
+
+Outputs:
+  # Bucket Names
+  DocumentsBucketName:
+    Description: "S3 bucket name for document storage"
+    Value: !Ref DocumentsBucket
+    Export:
+      Name: !Sub "curriculum-alignment-${Environment}-documents-bucket"
+
+  StaticWebsiteBucketName:
+    Description: "S3 bucket name for static website hosting"
+    Value: !Ref StaticWebsiteBucket
+    Export:
+      Name: !Sub "curriculum-alignment-${Environment}-static-bucket"
+
+  BackupBucketName:
+    Description: "S3 bucket name for backup storage"
+    Value: !Ref BackupBucket
+    Export:
+      Name: !Sub "curriculum-alignment-${Environment}-backup-bucket"
+
+  TempProcessingBucketName:
+    Description: "S3 bucket name for temporary processing"
+    Value: !Ref TempProcessingBucket
+    Export:
+      Name: !Sub "curriculum-alignment-${Environment}-temp-bucket"
+
+  AccessLogsBucketName:
+    Description: "S3 bucket name for access logs"
+    Value: !Ref AccessLogsBucket
+    Export:
+      Name: !Sub "curriculum-alignment-${Environment}-logs-bucket"
+
+  # Bucket ARNs
+  DocumentsBucketArn:
+    Description: "S3 documents bucket ARN"
+    Value: !GetAtt DocumentsBucket.Arn
+    Export:
+      Name: !Sub "curriculum-alignment-${Environment}-documents-bucket-arn"
+
+  StaticWebsiteBucketArn:
+    Description: "S3 static website bucket ARN"
+    Value: !GetAtt StaticWebsiteBucket.Arn
+    Export:
+      Name: !Sub "curriculum-alignment-${Environment}-static-bucket-arn"
+
+  # Website URLs
+  StaticWebsiteURL:
+    Description: "S3 static website URL"
+    Value: !GetAtt StaticWebsiteBucket.WebsiteURL
+    Export:
+      Name: !Sub "curriculum-alignment-${Environment}-website-url"
+
+  # CloudWatch Monitoring
+  StorageAlertTopicArn:
+    Description: "SNS topic ARN for storage alerts"
+    Value: !Ref StorageAlertTopic
+    Export:
+      Name: !Sub "curriculum-alignment-${Environment}-storage-alerts-topic"

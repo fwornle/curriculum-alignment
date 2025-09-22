@@ -10,7 +10,10 @@
       "mcp__spec-workflow__approvals",
       "mcp__spec-workflow__steering-guide",
       "mcp__spec-workflow__spec-status",
-      "Bash(chmod:*)"
+      "Bash(chmod:*)",
+      "Bash(npm run typecheck:*)",
+      "Bash(npx tsc:*)",
+      "Bash(npm run sam:validate:*)"
     ],
     "additionalDirectories": []
   },

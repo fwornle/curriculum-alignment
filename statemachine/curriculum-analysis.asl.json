@@ -1,0 +1,393 @@
+{
+  "Comment": "Curriculum Analysis Workflow - Multi-agent orchestration for curriculum alignment analysis",
+  "StartAt": "InitializeAnalysis",
+  "States": {
+    "InitializeAnalysis": {
+      "Type": "Task",
+      "Resource": "${CoordinatorFunctionArn}",
+      "Parameters": {
+        "action": "initialize",
+        "input.$": "$"
+      },
+      "ResultPath": "$.analysis",
+      "Next": "CheckInputType",
+      "Retry": [
+        {
+          "ErrorEquals": ["Lambda.ServiceException", "Lambda.AWSLambdaException", "Lambda.SdkClientException"],
+          "IntervalSeconds": 2,
+          "MaxAttempts": 3,
+          "BackoffRate": 2.0
+        }
+      ],
+      "Catch": [
+        {
+          "ErrorEquals": ["States.ALL"],
+          "ResultPath": "$.error",
+          "Next": "HandleError"
+        }
+      ]
+    },
+
+    "CheckInputType": {
+      "Type": "Choice",
+      "Choices": [
+        {
+          "Variable": "$.analysis.inputType",
+          "StringEquals": "url",
+          "Next": "WebScraping"
+        },
+        {
+          "Variable": "$.analysis.inputType",
+          "StringEquals": "document",
+          "Next": "DocumentProcessing"
+        },
+        {
+          "Variable": "$.analysis.inputType",
+          "StringEquals": "text",
+          "Next": "DirectAnalysis"
+        }
+      ],
+      "Default": "WebSearch"
+    },
+
+    "WebSearch": {
+      "Type": "Task",
+      "Resource": "${WebSearchFunctionArn}",
+      "Parameters": {
+        "action": "search",
+        "query.$": "$.analysis.searchQuery",
+        "filters.$": "$.analysis.filters"
+      },
+      "ResultPath": "$.webSearch",
+      "Next": "ProcessSearchResults",
+      "Retry": [
+        {
+          "ErrorEquals": ["Lambda.ServiceException", "Lambda.AWSLambdaException", "Lambda.SdkClientException"],
+          "IntervalSeconds": 5,
+          "MaxAttempts": 3,
+          "BackoffRate": 2.0
+        }
+      ],
+      "Catch": [
+        {
+          "ErrorEquals": ["States.ALL"],
+          "ResultPath": "$.error",
+          "Next": "HandleError"
+        }
+      ]
+    },
+
+    "ProcessSearchResults": {
+      "Type": "Map",
+      "ItemsPath": "$.webSearch.results",
+      "Parameters": {
+        "url.$": "$$.Map.Item.Value.url",
+        "metadata.$": "$$.Map.Item.Value.metadata"
+      },
+      "Iterator": {
+        "StartAt": "ScrapePage",
+        "States": {
+          "ScrapePage": {
+            "Type": "Task",
+            "Resource": "${BrowserFunctionArn}",
+            "Parameters": {
+              "action": "scrape",
+              "url.$": "$.url",
+              "options.$": "$.metadata"
+            },
+            "End": true,
+            "Retry": [
+              {
+                "ErrorEquals": ["Lambda.ServiceException"],
+                "IntervalSeconds": 10,
+                "MaxAttempts": 2,
+                "BackoffRate": 2.0
+              }
+            ]
+          }
+        }
+      },
+      "ResultPath": "$.scrapedData",
+      "Next": "CombineWebData",
+      "MaxConcurrency": 3
+    },
+
+    "CombineWebData": {
+      "Type": "Task",
+      "Resource": "${CoordinatorFunctionArn}",
+      "Parameters": {
+        "action": "combineWebData",
+        "scrapedData.$": "$.scrapedData",
+        "searchResults.$": "$.webSearch.results"
+      },
+      "ResultPath": "$.combinedData",
+      "Next": "QualityAssurance"
+    },
+
+    "WebScraping": {
+      "Type": "Task",
+      "Resource": "${BrowserFunctionArn}",
+      "Parameters": {
+        "action": "scrape",
+        "url.$": "$.analysis.url",
+        "options.$": "$.analysis.scrapeOptions"
+      },
+      "ResultPath": "$.scrapedData",
+      "Next": "QualityAssurance",
+      "Retry": [
+        {
+          "ErrorEquals": ["Lambda.ServiceException"],
+          "IntervalSeconds": 10,
+          "MaxAttempts": 3,
+          "BackoffRate": 2.0
+        }
+      ],
+      "Catch": [
+        {
+          "ErrorEquals": ["States.ALL"],
+          "ResultPath": "$.error",
+          "Next": "HandleError"
+        }
+      ]
+    },
+
+    "DocumentProcessing": {
+      "Type": "Task",
+      "Resource": "${DocumentProcessingFunctionArn}",
+      "Parameters": {
+        "action": "process",
+        "document.$": "$.analysis.document",
+        "options.$": "$.analysis.processingOptions"
+      },
+      "ResultPath": "$.processedDocument",
+      "Next": "QualityAssurance",
+      "Retry": [
+        {
+          "ErrorEquals": ["Lambda.ServiceException"],
+          "IntervalSeconds": 5,
+          "MaxAttempts": 3,
+          "BackoffRate": 2.0
+        }
+      ],
+      "Catch": [
+        {
+          "ErrorEquals": ["States.ALL"],
+          "ResultPath": "$.error",
+          "Next": "HandleError"
+        }
+      ]
+    },
+
+    "DirectAnalysis": {
+      "Type": "Pass",
+      "Parameters": {
+        "text.$": "$.analysis.text",
+        "metadata.$": "$.analysis.metadata"
+      },
+      "ResultPath": "$.directInput",
+      "Next": "QualityAssurance"
+    },
+
+    "QualityAssurance": {
+      "Type": "Task",
+      "Resource": "${QAAgentFunctionArn}",
+      "Parameters": {
+        "action": "validate",
+        "data.$": "$",
+        "qualityRules.$": "$.analysis.qualityRules"
+      },
+      "ResultPath": "$.qaResults",
+      "Next": "CheckQualityResults",
+      "Retry": [
+        {
+          "ErrorEquals": ["Lambda.ServiceException"],
+          "IntervalSeconds": 3,
+          "MaxAttempts": 2,
+          "BackoffRate": 2.0
+        }
+      ]
+    },
+
+    "CheckQualityResults": {
+      "Type": "Choice",
+      "Choices": [
+        {
+          "Variable": "$.qaResults.status",
+          "StringEquals": "passed",
+          "Next": "SemanticAnalysis"
+        },
+        {
+          "Variable": "$.qaResults.status",
+          "StringEquals": "warning",
+          "Next": "SemanticAnalysis"
+        }
+      ],
+      "Default": "QualityFailure"
+    },
+
+    "QualityFailure": {
+      "Type": "Fail",
+      "Cause": "Data quality validation failed",
+      "Error": "QualityAssuranceError"
+    },
+
+    "SemanticAnalysis": {
+      "Type": "Parallel",
+      "Branches": [
+        {
+          "StartAt": "SemanticSearch",
+          "States": {
+            "SemanticSearch": {
+              "Type": "Task",
+              "Resource": "${SemanticSearchFunctionArn}",
+              "Parameters": {
+                "action": "search",
+                "data.$": "$",
+                "searchOptions.$": "$.analysis.semanticOptions"
+              },
+              "End": true,
+              "Retry": [
+                {
+                  "ErrorEquals": ["Lambda.ServiceException"],
+                  "IntervalSeconds": 5,
+                  "MaxAttempts": 3,
+                  "BackoffRate": 2.0
+                }
+              ]
+            }
+          }
+        },
+        {
+          "StartAt": "AccreditationAnalysis",
+          "States": {
+            "AccreditationAnalysis": {
+              "Type": "Task",
+              "Resource": "${AccreditationExpertFunctionArn}",
+              "Parameters": {
+                "action": "analyze",
+                "data.$": "$",
+                "analysisOptions.$": "$.analysis.accreditationOptions"
+              },
+              "End": true,
+              "Retry": [
+                {
+                  "ErrorEquals": ["Lambda.ServiceException"],
+                  "IntervalSeconds": 5,
+                  "MaxAttempts": 3,
+                  "BackoffRate": 2.0
+                }
+              ]
+            }
+          }
+        }
+      ],
+      "ResultPath": "$.parallelResults",
+      "Next": "CombineResults",
+      "Catch": [
+        {
+          "ErrorEquals": ["States.ALL"],
+          "ResultPath": "$.error",
+          "Next": "HandleError"
+        }
+      ]
+    },
+
+    "CombineResults": {
+      "Type": "Task",
+      "Resource": "${CoordinatorFunctionArn}",
+      "Parameters": {
+        "action": "combineResults",
+        "semanticResults.$": "$.parallelResults[0]",
+        "accreditationResults.$": "$.parallelResults[1]",
+        "qaResults.$": "$.qaResults",
+        "originalData.$": "$"
+      },
+      "ResultPath": "$.finalResults",
+      "Next": "FinalQualityCheck"
+    },
+
+    "FinalQualityCheck": {
+      "Type": "Task",
+      "Resource": "${QAAgentFunctionArn}",
+      "Parameters": {
+        "action": "finalValidation",
+        "results.$": "$.finalResults",
+        "validationRules.$": "$.analysis.finalValidationRules"
+      },
+      "ResultPath": "$.finalQA",
+      "Next": "GenerateReport",
+      "Retry": [
+        {
+          "ErrorEquals": ["Lambda.ServiceException"],
+          "IntervalSeconds": 3,
+          "MaxAttempts": 2,
+          "BackoffRate": 2.0
+        }
+      ]
+    },
+
+    "GenerateReport": {
+      "Type": "Task",
+      "Resource": "${CoordinatorFunctionArn}",
+      "Parameters": {
+        "action": "generateReport",
+        "analysis.$": "$.finalResults",
+        "qa.$": "$.finalQA",
+        "reportOptions.$": "$.analysis.reportOptions"
+      },
+      "ResultPath": "$.report",
+      "Next": "StoreResults"
+    },
+
+    "StoreResults": {
+      "Type": "Task",
+      "Resource": "${CoordinatorFunctionArn}",
+      "Parameters": {
+        "action": "storeResults",
+        "report.$": "$.report",
+        "analysis.$": "$.finalResults",
+        "metadata.$": "$.analysis"
+      },
+      "ResultPath": "$.storage",
+      "Next": "NotifyCompletion"
+    },
+
+    "NotifyCompletion": {
+      "Type": "Task",
+      "Resource": "${CoordinatorFunctionArn}",
+      "Parameters": {
+        "action": "notifyCompletion",
+        "analysisId.$": "$.analysis.id",
+        "status": "completed",
+        "report.$": "$.report",
+        "storage.$": "$.storage"
+      },
+      "End": true
+    },
+
+    "HandleError": {
+      "Type": "Task",
+      "Resource": "${CoordinatorFunctionArn}",
+      "Parameters": {
+        "action": "handleError",
+        "error.$": "$.error",
+        "analysisId.$": "$.analysis.id",
+        "state.$": "$"
+      },
+      "ResultPath": "$.errorHandling",
+      "Next": "NotifyFailure"
+    },
+
+    "NotifyFailure": {
+      "Type": "Task",
+      "Resource": "${CoordinatorFunctionArn}",
+      "Parameters": {
+        "action": "notifyFailure",
+        "analysisId.$": "$.analysis.id",
+        "error.$": "$.error",
+        "errorHandling.$": "$.errorHandling"
+      },
+      "End": true
+    }
+  }
+}

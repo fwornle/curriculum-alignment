@@ -1,0 +1,210 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Qdrant Vector Database Configuration for Curriculum Alignment System'
+
+Parameters:
+  Environment:
+    Type: String
+    Default: dev
+    AllowedValues:
+      - dev
+      - staging
+      - prod
+    Description: "Deployment environment"
+    
+  QdrantProvider:
+    Type: String
+    Default: qdrant-cloud
+    AllowedValues:
+      - qdrant-cloud
+      - docker-local
+    Description: "Qdrant provider (Qdrant Cloud or local Docker)"
+
+  QdrantCluster:
+    Type: String
+    Default: free
+    AllowedValues:
+      - free
+      - standard
+      - premium
+    Description: "Qdrant Cloud cluster size"
+
+Resources:
+  # Qdrant connection credentials stored in AWS Secrets Manager
+  QdrantCredentials:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      Name: !Sub "curriculum-alignment/${Environment}/qdrant"
+      Description: "Qdrant vector database connection credentials"
+      SecretString: !Sub |
+        {
+          "host": "${QdrantHost}",
+          "port": "6333",
+          "api_key": "${QdrantApiKey}",
+          "cluster": "${QdrantCluster}",
+          "collection_config": {
+            "curriculum_embeddings": {
+              "vector_size": 1536,
+              "distance": "Cosine",
+              "index": "HNSW"
+            },
+            "course_descriptions": {
+              "vector_size": 1536,
+              "distance": "Cosine", 
+              "index": "HNSW"
+            },
+            "learning_outcomes": {
+              "vector_size": 1536,
+              "distance": "Cosine",
+              "index": "HNSW"
+            }
+          },
+          "hnsw_config": {
+            "m": 16,
+            "ef_construct": 100,
+            "full_scan_threshold": 10000
+          }
+        }
+      Tags:
+        - Key: Project
+          Value: CurriculumAlignment
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: Component
+          Value: VectorDatabase
+
+  # Lambda function for Qdrant health checks
+  QdrantHealthCheck:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub "curriculum-alignment-${Environment}-qdrant-health"
+      Runtime: nodejs18.x
+      Handler: index.handler
+      Code:
+        ZipFile: |
+          const https = require('https');
+          const { URL } = require('url');
+          
+          exports.handler = async (event) => {
+            try {
+              const qdrantUrl = process.env.QDRANT_URL;
+              const apiKey = process.env.QDRANT_API_KEY;
+              
+              if (!qdrantUrl) {
+                throw new Error('QDRANT_URL not configured');
+              }
+              
+              const url = new URL('/collections', qdrantUrl);
+              const options = {
+                method: 'GET',
+                headers: {
+                  'api-key': apiKey || '',
+                  'Content-Type': 'application/json'
+                }
+              };
+              
+              const response = await new Promise((resolve, reject) => {
+                const req = https.request(url, options, (res) => {
+                  let data = '';
+                  res.on('data', chunk => data += chunk);
+                  res.on('end', () => resolve({ statusCode: res.statusCode, data }));
+                });
+                req.on('error', reject);
+                req.setTimeout(10000, () => reject(new Error('Request timeout')));
+                req.end();
+              });
+              
+              if (response.statusCode === 200) {
+                return {
+                  statusCode: 200,
+                  body: JSON.stringify({
+                    status: 'healthy',
+                    collections: JSON.parse(response.data),
+                    timestamp: new Date().toISOString()
+                  })
+                };
+              } else {
+                throw new Error(`Qdrant returned status ${response.statusCode}`);
+              }
+            } catch (error) {
+              return {
+                statusCode: 500,
+                body: JSON.stringify({
+                  status: 'unhealthy',
+                  error: error.message,
+                  timestamp: new Date().toISOString()
+                })
+              };
+            }
+          };
+      Environment:
+        Variables:
+          QDRANT_URL: !Sub "{{resolve:secretsmanager:curriculum-alignment/${Environment}/qdrant:SecretString:url}}"
+          QDRANT_API_KEY: !Sub "{{resolve:secretsmanager:curriculum-alignment/${Environment}/qdrant:SecretString:api_key}}"
+      Timeout: 30
+      Tags:
+        - Key: Project
+          Value: CurriculumAlignment
+        - Key: Environment
+          Value: !Ref Environment
+
+  # CloudWatch Log Group for Qdrant operations
+  QdrantLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/curriculum-alignment-${Environment}-qdrant"
+      RetentionInDays: 14
+      Tags:
+        - Key: Project
+          Value: CurriculumAlignment
+        - Key: Environment
+          Value: !Ref Environment
+
+  # CloudWatch Alarm for Qdrant health
+  QdrantHealthAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub "curriculum-alignment-${Environment}-qdrant-unhealthy"
+      AlarmDescription: "Qdrant vector database is unhealthy"
+      MetricName: Errors
+      Namespace: AWS/Lambda
+      Statistic: Sum
+      Period: 300
+      EvaluationPeriods: 2
+      Threshold: 1
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Dimensions:
+        - Name: FunctionName
+          Value: !Ref QdrantHealthCheck
+      AlarmActions:
+        - !Ref QdrantHealthTopic
+
+  # SNS Topic for Qdrant alerts
+  QdrantHealthTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: !Sub "curriculum-alignment-${Environment}-qdrant-alerts"
+      DisplayName: "Qdrant Health Alerts"
+      Tags:
+        - Key: Project
+          Value: CurriculumAlignment
+        - Key: Environment
+          Value: !Ref Environment
+
+Outputs:
+  QdrantSecretArn:
+    Description: "ARN of the Qdrant credentials secret"
+    Value: !Ref QdrantCredentials
+    Export:
+      Name: !Sub "curriculum-alignment-${Environment}-qdrant-secret"
+      
+  QdrantHealthCheckArn:
+    Description: "ARN of the Qdrant health check function"
+    Value: !GetAtt QdrantHealthCheck.Arn
+    Export:
+      Name: !Sub "curriculum-alignment-${Environment}-qdrant-health-function"
+
+  QdrantHealthTopicArn:
+    Description: "ARN of the Qdrant health monitoring topic"
+    Value: !Ref QdrantHealthTopic
+    Export:
+      Name: !Sub "curriculum-alignment-${Environment}-qdrant-topic"

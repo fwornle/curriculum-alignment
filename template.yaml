@@ -1,0 +1,853 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  Multi-Agent Curriculum Alignment System (MACAS)
+  Serverless infrastructure for CEU curriculum analysis and alignment
+
+Metadata:
+  AWS::ServerlessRepo::Application:
+    Name: curriculum-alignment-system
+    Description: Multi-agent system for curriculum analysis and alignment
+    Author: CEU IT Services
+    SpdxLicenseId: MIT
+    LicenseUrl: LICENSE
+    ReadmeUrl: README.md
+    Labels: ['education', 'curriculum', 'ai', 'multi-agent']
+    HomePageUrl: https://github.com/fwornle/curriculum-alignment
+    SemanticVersion: 1.0.0
+    SourceCodeUrl: https://github.com/fwornle/curriculum-alignment
+
+# Global configuration for all functions
+Globals:
+  Function:
+    Timeout: 300
+    MemorySize: 1024
+    Runtime: nodejs18.x
+    Architectures:
+      - x86_64
+    Environment:
+      Variables:
+        NODE_ENV: !Ref Environment
+        LOG_LEVEL: !Ref LogLevel
+        REGION: !Ref AWS::Region
+        ACCOUNT_ID: !Ref AWS::AccountId
+    Tracing: Active
+    Tags:
+      Project: CurriculumAlignment
+      Environment: !Ref Environment
+
+  Api:
+    TracingConfig:
+      TracingEnabled: true
+    Cors:
+      AllowMethods: "'DELETE,GET,HEAD,OPTIONS,PATCH,POST,PUT'"
+      AllowHeaders: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+      AllowOrigin: "'*'"
+    Auth:
+      DefaultAuthorizer: CognitoAuthorizer
+      Authorizers:
+        CognitoAuthorizer:
+          UserPoolArn: !GetAtt UserPool.Arn
+
+Parameters:
+  Environment:
+    Type: String
+    Default: dev
+    AllowedValues:
+      - dev
+      - staging
+      - prod
+    Description: Deployment environment
+    
+  LogLevel:
+    Type: String
+    Default: info
+    AllowedValues:
+      - debug
+      - info
+      - warn
+      - error
+    Description: Logging level
+    
+  CorsOrigin:
+    Type: String
+    Default: "*"
+    Description: CORS origin for API Gateway
+
+Conditions:
+  IsProduction: !Equals [!Ref Environment, prod]
+  IsNotProduction: !Not [!Equals [!Ref Environment, prod]]
+
+Resources:
+  # =====================================================
+  # API Gateway
+  # =====================================================
+  CurriculumAlignmentApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      Name: !Sub "curriculum-alignment-api-${Environment}"
+      StageName: !Ref Environment
+      Description: REST API for Curriculum Alignment System
+      EndpointConfiguration:
+        Type: REGIONAL
+      TracingEnabled: true
+      MethodSettings:
+        - ResourcePath: "/*"
+          HttpMethod: "*"
+          LoggingLevel: INFO
+          DataTraceEnabled: true
+          MetricsEnabled: true
+          ThrottlingRateLimit: 100
+          ThrottlingBurstLimit: 200
+      AccessLogSetting:
+        DestinationArn: !GetAtt ApiGatewayLogGroup.Arn
+        Format: >
+          {
+            "requestId": "$context.requestId",
+            "ip": "$context.identity.sourceIp",
+            "caller": "$context.identity.caller",
+            "user": "$context.identity.user",
+            "requestTime": "$context.requestTime",
+            "httpMethod": "$context.httpMethod",
+            "resourcePath": "$context.resourcePath",
+            "status": "$context.status",
+            "protocol": "$context.protocol",
+            "responseLength": "$context.responseLength",
+            "responseTime": "$context.responseTime",
+            "error": "$context.error.message",
+            "integrationError": "$context.integration.error"
+          }
+
+  # =====================================================
+  # Cognito User Pool for Authentication
+  # =====================================================
+  UserPool:
+    Type: AWS::Cognito::UserPool
+    Properties:
+      UserPoolName: !Sub "curriculum-alignment-${Environment}"
+      AutoVerifiedAttributes:
+        - email
+      UsernameAttributes:
+        - email
+      Policies:
+        PasswordPolicy:
+          MinimumLength: 8
+          RequireUppercase: true
+          RequireLowercase: true
+          RequireNumbers: true
+          RequireSymbols: true
+      MfaConfiguration: OPTIONAL
+      EnabledMfas:
+        - SOFTWARE_TOKEN_MFA
+      Schema:
+        - Name: email
+          AttributeDataType: String
+          Required: true
+        - Name: given_name
+          AttributeDataType: String
+          Required: true
+        - Name: family_name
+          AttributeDataType: String
+          Required: true
+      UserPoolTags:
+        Project: CurriculumAlignment
+        Environment: !Ref Environment
+
+  UserPoolClient:
+    Type: AWS::Cognito::UserPoolClient
+    Properties:
+      UserPoolId: !Ref UserPool
+      ClientName: !Sub "curriculum-alignment-client-${Environment}"
+      GenerateSecret: false
+      ExplicitAuthFlows:
+        - ALLOW_USER_SRP_AUTH
+        - ALLOW_REFRESH_TOKEN_AUTH
+      TokenValidityUnits:
+        AccessToken: hours
+        IdToken: hours
+        RefreshToken: days
+      AccessTokenValidity: 1
+      IdTokenValidity: 1
+      RefreshTokenValidity: 30
+
+  # =====================================================
+  # Lambda Functions - Agent Architecture
+  # =====================================================
+  
+  # Coordinator Agent - Central orchestration
+  CoordinatorFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub "curriculum-alignment-${Environment}-coordinator"
+      CodeUri: lambda/coordinator/
+      Handler: index.handler
+      Description: Central orchestration agent managing all workflows
+      Environment:
+        Variables:
+          DATABASE_SECRET_ARN: !ImportValue 
+            Fn::Sub: "curriculum-alignment-${Environment}-database-secret"
+          QDRANT_SECRET_ARN: !ImportValue
+            Fn::Sub: "curriculum-alignment-${Environment}-qdrant-secret"
+      Policies:
+        - Version: "2012-10-17"
+          Statement:
+            - Effect: Allow
+              Action:
+                - secretsmanager:GetSecretValue
+              Resource:
+                - !ImportValue 
+                  Fn::Sub: "curriculum-alignment-${Environment}-database-secret"
+                - !ImportValue
+                  Fn::Sub: "curriculum-alignment-${Environment}-qdrant-secret"
+            - Effect: Allow
+              Action:
+                - states:StartExecution
+                - states:DescribeExecution
+                - states:StopExecution
+              Resource: "*"
+            - Effect: Allow
+              Action:
+                - lambda:InvokeFunction
+              Resource: "*"
+      Events:
+        CoordinatorApi:
+          Type: Api
+          Properties:
+            RestApiId: !Ref CurriculumAlignmentApi
+            Path: /coordinator/{proxy+}
+            Method: ANY
+
+  # Web Search Agent
+  WebSearchFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub "curriculum-alignment-${Environment}-web-search"
+      CodeUri: lambda/web-search/
+      Handler: index.handler
+      Description: Web search agent for discovering peer university curricula
+      Timeout: 600
+      Environment:
+        Variables:
+          DATABASE_SECRET_ARN: !ImportValue 
+            Fn::Sub: "curriculum-alignment-${Environment}-database-secret"
+      Policies:
+        - Version: "2012-10-17"
+          Statement:
+            - Effect: Allow
+              Action:
+                - secretsmanager:GetSecretValue
+              Resource:
+                - !ImportValue 
+                  Fn::Sub: "curriculum-alignment-${Environment}-database-secret"
+      Events:
+        WebSearchApi:
+          Type: Api
+          Properties:
+            RestApiId: !Ref CurriculumAlignmentApi
+            Path: /web-search/{proxy+}
+            Method: ANY
+
+  # Browser Agent
+  BrowserFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub "curriculum-alignment-${Environment}-browser"
+      CodeUri: lambda/browser/
+      Handler: index.handler
+      Description: Browser agent for web scraping with Stagehand/MCP
+      Timeout: 900
+      MemorySize: 2048
+      Environment:
+        Variables:
+          DATABASE_SECRET_ARN: !ImportValue 
+            Fn::Sub: "curriculum-alignment-${Environment}-database-secret"
+      Policies:
+        - Version: "2012-10-17"
+          Statement:
+            - Effect: Allow
+              Action:
+                - secretsmanager:GetSecretValue
+              Resource:
+                - !ImportValue 
+                  Fn::Sub: "curriculum-alignment-${Environment}-database-secret"
+      Events:
+        BrowserApi:
+          Type: Api
+          Properties:
+            RestApiId: !Ref CurriculumAlignmentApi
+            Path: /browser/{proxy+}
+            Method: ANY
+
+  # Document Processing Agent
+  DocumentProcessingFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub "curriculum-alignment-${Environment}-document-processing"
+      CodeUri: lambda/document-processing/
+      Handler: index.handler
+      Description: Document processing agent for Excel/Word/PDF processing
+      Timeout: 900
+      MemorySize: 3008
+      Environment:
+        Variables:
+          DATABASE_SECRET_ARN: !ImportValue 
+            Fn::Sub: "curriculum-alignment-${Environment}-database-secret"
+          S3_DOCUMENTS_BUCKET: !Ref DocumentsBucket
+      Policies:
+        - Version: "2012-10-17"
+          Statement:
+            - Effect: Allow
+              Action:
+                - secretsmanager:GetSecretValue
+              Resource:
+                - !ImportValue 
+                  Fn::Sub: "curriculum-alignment-${Environment}-database-secret"
+            - Effect: Allow
+              Action:
+                - s3:GetObject
+                - s3:PutObject
+                - s3:DeleteObject
+              Resource: !Sub "${DocumentsBucket}/*"
+      Events:
+        DocumentProcessingApi:
+          Type: Api
+          Properties:
+            RestApiId: !Ref CurriculumAlignmentApi
+            Path: /document-processing/{proxy+}
+            Method: ANY
+        S3Upload:
+          Type: S3
+          Properties:
+            Bucket: !Ref DocumentsBucket
+            Events: s3:ObjectCreated:*
+            Filter:
+              S3Key:
+                Rules:
+                  - Name: suffix
+                    Value: .pdf
+                  - Name: suffix
+                    Value: .docx
+                  - Name: suffix
+                    Value: .xlsx
+
+  # Accreditation Expert Agent
+  AccreditationExpertFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub "curriculum-alignment-${Environment}-accreditation-expert"
+      CodeUri: lambda/accreditation-expert/
+      Handler: index.handler
+      Description: Accreditation expert agent for curriculum analysis and gap identification
+      Environment:
+        Variables:
+          DATABASE_SECRET_ARN: !ImportValue 
+            Fn::Sub: "curriculum-alignment-${Environment}-database-secret"
+          QDRANT_SECRET_ARN: !ImportValue
+            Fn::Sub: "curriculum-alignment-${Environment}-qdrant-secret"
+      Policies:
+        - Version: "2012-10-17"
+          Statement:
+            - Effect: Allow
+              Action:
+                - secretsmanager:GetSecretValue
+              Resource:
+                - !ImportValue 
+                  Fn::Sub: "curriculum-alignment-${Environment}-database-secret"
+                - !ImportValue
+                  Fn::Sub: "curriculum-alignment-${Environment}-qdrant-secret"
+      Events:
+        AccreditationExpertApi:
+          Type: Api
+          Properties:
+            RestApiId: !Ref CurriculumAlignmentApi
+            Path: /accreditation-expert/{proxy+}
+            Method: ANY
+
+  # QA Agent
+  QAAgentFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub "curriculum-alignment-${Environment}-qa-agent"
+      CodeUri: lambda/qa-agent/
+      Handler: index.handler
+      Description: QA agent for terminology standardization and quality control
+      Environment:
+        Variables:
+          DATABASE_SECRET_ARN: !ImportValue 
+            Fn::Sub: "curriculum-alignment-${Environment}-database-secret"
+      Policies:
+        - Version: "2012-10-17"
+          Statement:
+            - Effect: Allow
+              Action:
+                - secretsmanager:GetSecretValue
+              Resource:
+                - !ImportValue 
+                  Fn::Sub: "curriculum-alignment-${Environment}-database-secret"
+      Events:
+        QAAgentApi:
+          Type: Api
+          Properties:
+            RestApiId: !Ref CurriculumAlignmentApi
+            Path: /qa-agent/{proxy+}
+            Method: ANY
+
+  # Semantic Search Agent
+  SemanticSearchFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub "curriculum-alignment-${Environment}-semantic-search"
+      CodeUri: lambda/semantic-search/
+      Handler: index.handler
+      Description: Semantic search agent for vector similarity searches
+      Environment:
+        Variables:
+          DATABASE_SECRET_ARN: !ImportValue 
+            Fn::Sub: "curriculum-alignment-${Environment}-database-secret"
+          QDRANT_SECRET_ARN: !ImportValue
+            Fn::Sub: "curriculum-alignment-${Environment}-qdrant-secret"
+      Policies:
+        - Version: "2012-10-17"
+          Statement:
+            - Effect: Allow
+              Action:
+                - secretsmanager:GetSecretValue
+              Resource:
+                - !ImportValue 
+                  Fn::Sub: "curriculum-alignment-${Environment}-database-secret"
+                - !ImportValue
+                  Fn::Sub: "curriculum-alignment-${Environment}-qdrant-secret"
+      Events:
+        SemanticSearchApi:
+          Type: Api
+          Properties:
+            RestApiId: !Ref CurriculumAlignmentApi
+            Path: /semantic-search/{proxy+}
+            Method: ANY
+
+  # Chat Interface Agent
+  ChatInterfaceFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub "curriculum-alignment-${Environment}-chat-interface"
+      CodeUri: lambda/chat-interface/
+      Handler: index.handler
+      Description: Chat interface agent for natural language Q&A
+      Environment:
+        Variables:
+          DATABASE_SECRET_ARN: !ImportValue 
+            Fn::Sub: "curriculum-alignment-${Environment}-database-secret"
+          QDRANT_SECRET_ARN: !ImportValue
+            Fn::Sub: "curriculum-alignment-${Environment}-qdrant-secret"
+          WEBSOCKET_API_ENDPOINT: !Sub "wss://${WebSocketApi}.execute-api.${AWS::Region}.amazonaws.com/${Environment}"
+      Policies:
+        - Version: "2012-10-17"
+          Statement:
+            - Effect: Allow
+              Action:
+                - secretsmanager:GetSecretValue
+              Resource:
+                - !ImportValue 
+                  Fn::Sub: "curriculum-alignment-${Environment}-database-secret"
+                - !ImportValue
+                  Fn::Sub: "curriculum-alignment-${Environment}-qdrant-secret"
+            - Effect: Allow
+              Action:
+                - execute-api:ManageConnections
+              Resource: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${WebSocketApi}/*/*"
+      Events:
+        ChatInterfaceApi:
+          Type: Api
+          Properties:
+            RestApiId: !Ref CurriculumAlignmentApi
+            Path: /chat/{proxy+}
+            Method: ANY
+
+  # Dead Letter Queue Handler
+  DLQHandlerFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub "curriculum-alignment-${Environment}-dlq-handler"
+      CodeUri: lambda/dlq-handler/
+      Handler: index.handler
+      Description: Dead letter queue handler for failed agent tasks
+      Environment:
+        Variables:
+          DATABASE_SECRET_ARN: !ImportValue 
+            Fn::Sub: "curriculum-alignment-${Environment}-database-secret"
+      Policies:
+        - Version: "2012-10-17"
+          Statement:
+            - Effect: Allow
+              Action:
+                - secretsmanager:GetSecretValue
+              Resource:
+                - !ImportValue 
+                  Fn::Sub: "curriculum-alignment-${Environment}-database-secret"
+            - Effect: Allow
+              Action:
+                - sns:Publish
+              Resource: !Ref DLQAlertTopic
+      Events:
+        DLQEvent:
+          Type: SQS
+          Properties:
+            Queue: !GetAtt DeadLetterQueue.Arn
+            BatchSize: 1
+
+  # =====================================================
+  # WebSocket API for Real-time Communication
+  # =====================================================
+  WebSocketApi:
+    Type: AWS::ApiGatewayV2::Api
+    Properties:
+      Name: !Sub "curriculum-alignment-websocket-${Environment}"
+      ProtocolType: WEBSOCKET
+      RouteSelectionExpression: "$request.body.action"
+      Description: WebSocket API for real-time chat and status updates
+
+  WebSocketStage:
+    Type: AWS::ApiGatewayV2::Stage
+    Properties:
+      StageName: !Ref Environment
+      Description: WebSocket API stage
+      DeploymentId: !Ref WebSocketDeployment
+      ApiId: !Ref WebSocketApi
+
+  WebSocketDeployment:
+    Type: AWS::ApiGatewayV2::Deployment
+    DependsOn:
+      - ConnectRoute
+      - DisconnectRoute
+      - DefaultRoute
+    Properties:
+      ApiId: !Ref WebSocketApi
+
+  # WebSocket Routes
+  ConnectRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref WebSocketApi
+      RouteKey: $connect
+      AuthorizationType: NONE
+      OperationName: ConnectRoute
+      Target: !Sub "integrations/${ConnectInteg}"
+
+  DisconnectRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref WebSocketApi
+      RouteKey: $disconnect
+      AuthorizationType: NONE
+      OperationName: DisconnectRoute
+      Target: !Sub "integrations/${DisconnectInteg}"
+
+  DefaultRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref WebSocketApi
+      RouteKey: $default
+      AuthorizationType: NONE
+      OperationName: DefaultRoute
+      Target: !Sub "integrations/${DefaultInteg}"
+
+  # WebSocket Integrations
+  ConnectInteg:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties:
+      ApiId: !Ref WebSocketApi
+      Description: Connect Integration
+      IntegrationType: AWS_PROXY
+      IntegrationUri: !Sub "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${WebSocketHandlerFunction.Arn}/invocations"
+
+  DisconnectInteg:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties:
+      ApiId: !Ref WebSocketApi
+      Description: Disconnect Integration
+      IntegrationType: AWS_PROXY
+      IntegrationUri: !Sub "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${WebSocketHandlerFunction.Arn}/invocations"
+
+  DefaultInteg:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties:
+      ApiId: !Ref WebSocketApi
+      Description: Default Integration
+      IntegrationType: AWS_PROXY
+      IntegrationUri: !Sub "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${WebSocketHandlerFunction.Arn}/invocations"
+
+  # WebSocket Handler Function
+  WebSocketHandlerFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub "curriculum-alignment-${Environment}-websocket"
+      CodeUri: lambda/websocket-handler/
+      Handler: index.handler
+      Description: WebSocket connection handler for real-time communication
+      Environment:
+        Variables:
+          CONNECTION_TABLE: !Ref ConnectionTable
+      Policies:
+        - Version: "2012-10-17"
+          Statement:
+            - Effect: Allow
+              Action:
+                - dynamodb:PutItem
+                - dynamodb:DeleteItem
+                - dynamodb:GetItem
+                - dynamodb:Scan
+              Resource: !GetAtt ConnectionTable.Arn
+
+  # WebSocket Permissions
+  ConnectPermission:
+    Type: AWS::Lambda::Permission
+    DependsOn:
+      - WebSocketApi
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !Ref WebSocketHandlerFunction
+      Principal: apigateway.amazonaws.com
+
+  # =====================================================
+  # Step Functions for Workflow Orchestration
+  # =====================================================
+  CurriculumAnalysisStateMachine:
+    Type: AWS::Serverless::StateMachine
+    Properties:
+      Name: !Sub "curriculum-alignment-${Environment}-analysis"
+      DefinitionUri: statemachine/curriculum-analysis.asl.json
+      DefinitionSubstitutions:
+        CoordinatorFunctionArn: !GetAtt CoordinatorFunction.Arn
+        WebSearchFunctionArn: !GetAtt WebSearchFunction.Arn
+        BrowserFunctionArn: !GetAtt BrowserFunction.Arn
+        DocumentProcessingFunctionArn: !GetAtt DocumentProcessingFunction.Arn
+        AccreditationExpertFunctionArn: !GetAtt AccreditationExpertFunction.Arn
+        QAAgentFunctionArn: !GetAtt QAAgentFunction.Arn
+        SemanticSearchFunctionArn: !GetAtt SemanticSearchFunction.Arn
+      Policies:
+        - LambdaInvokePolicy:
+            FunctionName: !Ref CoordinatorFunction
+        - LambdaInvokePolicy:
+            FunctionName: !Ref WebSearchFunction
+        - LambdaInvokePolicy:
+            FunctionName: !Ref BrowserFunction
+        - LambdaInvokePolicy:
+            FunctionName: !Ref DocumentProcessingFunction
+        - LambdaInvokePolicy:
+            FunctionName: !Ref AccreditationExpertFunction
+        - LambdaInvokePolicy:
+            FunctionName: !Ref QAAgentFunction
+        - LambdaInvokePolicy:
+            FunctionName: !Ref SemanticSearchFunction
+      Events:
+        AnalysisApi:
+          Type: Api
+          Properties:
+            RestApiId: !Ref CurriculumAlignmentApi
+            Path: /analysis/start
+            Method: POST
+
+  # =====================================================
+  # S3 Buckets
+  # =====================================================
+  DocumentsBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub "curriculum-alignment-documents-${Environment}-${AWS::AccountId}"
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      VersioningConfiguration:
+        Status: Enabled
+      LifecycleConfiguration:
+        Rules:
+          - Id: DeleteOldVersions
+            Status: Enabled
+            NoncurrentVersionExpirationInDays: 30
+          - Id: AbortIncompleteMultipartUploads
+            Status: Enabled
+            AbortIncompleteMultipartUpload:
+              DaysAfterInitiation: 1
+
+  StaticWebsiteBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub "curriculum-alignment-static-${Environment}-${AWS::AccountId}"
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: false
+        BlockPublicPolicy: false
+        IgnorePublicAcls: false
+        RestrictPublicBuckets: false
+      WebsiteConfiguration:
+        IndexDocument: index.html
+        ErrorDocument: error.html
+
+  # =====================================================
+  # DynamoDB Tables
+  # =====================================================
+  ConnectionTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub "curriculum-alignment-connections-${Environment}"
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: connectionId
+          AttributeType: S
+      KeySchema:
+        - AttributeName: connectionId
+          KeyType: HASH
+      TimeToLiveSpecification:
+        AttributeName: ttl
+        Enabled: true
+      Tags:
+        - Key: Project
+          Value: CurriculumAlignment
+        - Key: Environment
+          Value: !Ref Environment
+
+  # =====================================================
+  # SQS and SNS for Message Processing
+  # =====================================================
+  MessageQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: !Sub "curriculum-alignment-messages-${Environment}"
+      VisibilityTimeoutSeconds: 300
+      MessageRetentionPeriod: 1209600  # 14 days
+      RedrivePolicy:
+        deadLetterTargetArn: !GetAtt DeadLetterQueue.Arn
+        maxReceiveCount: 3
+
+  DeadLetterQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: !Sub "curriculum-alignment-dlq-${Environment}"
+      MessageRetentionPeriod: 1209600  # 14 days
+
+  DLQAlertTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: !Sub "curriculum-alignment-dlq-alerts-${Environment}"
+      DisplayName: "Curriculum Alignment DLQ Alerts"
+
+  # =====================================================
+  # CloudWatch Log Groups
+  # =====================================================
+  ApiGatewayLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "/aws/apigateway/curriculum-alignment-${Environment}"
+      RetentionInDays: 14
+
+  # =====================================================
+  # IAM Roles for Cross-Service Access
+  # =====================================================
+  ApiGatewayRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: apigateway.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: CloudWatchLogs
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:DescribeLogGroups
+                  - logs:DescribeLogStreams
+                  - logs:PutLogEvents
+                  - logs:GetLogEvents
+                  - logs:FilterLogEvents
+                Resource: "*"
+
+Outputs:
+  # API Endpoints
+  CurriculumAlignmentApiUrl:
+    Description: "API Gateway endpoint URL for Curriculum Alignment System"
+    Value: !Sub "https://${CurriculumAlignmentApi}.execute-api.${AWS::Region}.amazonaws.com/${Environment}/"
+    Export:
+      Name: !Sub "curriculum-alignment-${Environment}-api-url"
+
+  WebSocketApiUrl:
+    Description: "WebSocket API endpoint URL for real-time communication"
+    Value: !Sub "wss://${WebSocketApi}.execute-api.${AWS::Region}.amazonaws.com/${Environment}"
+    Export:
+      Name: !Sub "curriculum-alignment-${Environment}-websocket-url"
+
+  # Cognito Configuration
+  UserPoolId:
+    Description: "Cognito User Pool ID"
+    Value: !Ref UserPool
+    Export:
+      Name: !Sub "curriculum-alignment-${Environment}-user-pool-id"
+
+  UserPoolClientId:
+    Description: "Cognito User Pool Client ID"
+    Value: !Ref UserPoolClient
+    Export:
+      Name: !Sub "curriculum-alignment-${Environment}-user-pool-client-id"
+
+  # S3 Buckets
+  DocumentsBucketName:
+    Description: "S3 bucket name for document storage"
+    Value: !Ref DocumentsBucket
+    Export:
+      Name: !Sub "curriculum-alignment-${Environment}-documents-bucket"
+
+  StaticWebsiteBucketName:
+    Description: "S3 bucket name for static website hosting"
+    Value: !Ref StaticWebsiteBucket
+    Export:
+      Name: !Sub "curriculum-alignment-${Environment}-static-bucket"
+
+  # Lambda Function ARNs
+  CoordinatorFunctionArn:
+    Description: "Coordinator function ARN"
+    Value: !GetAtt CoordinatorFunction.Arn
+    Export:
+      Name: !Sub "curriculum-alignment-${Environment}-coordinator-arn"
+
+  # Step Functions
+  CurriculumAnalysisStateMachineArn:
+    Description: "Curriculum analysis state machine ARN"
+    Value: !Ref CurriculumAnalysisStateMachine
+    Export:
+      Name: !Sub "curriculum-alignment-${Environment}-analysis-sm-arn"
+
+  # DynamoDB Tables
+  ConnectionTableName:
+    Description: "DynamoDB table for WebSocket connections"
+    Value: !Ref ConnectionTable
+    Export:
+      Name: !Sub "curriculum-alignment-${Environment}-connection-table"
+
+  # SQS Queues
+  MessageQueueUrl:
+    Description: "SQS message queue URL"
+    Value: !Ref MessageQueue
+    Export:
+      Name: !Sub "curriculum-alignment-${Environment}-message-queue-url"
+
+  DeadLetterQueueUrl:
+    Description: "SQS dead letter queue URL"
+    Value: !Ref DeadLetterQueue
+    Export:
+      Name: !Sub "curriculum-alignment-${Environment}-dlq-url"

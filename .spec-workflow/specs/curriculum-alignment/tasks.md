@@ -63,7 +63,7 @@ Tasks are organized by component and phase:
     - Success: PostgreSQL instance running with connection string in environment variables
     - Mark this task as in-progress in tasks.md, then complete when done
 
-- [ ] 4. Setup Qdrant Vector Database
+- [x] 4. Setup Qdrant Vector Database
   - **Files**: `infrastructure/qdrant-config.yaml`, `scripts/init-qdrant.ts`
   - **Requirements**: Semantic search requirements from design document
   - **Description**: Configure Qdrant instance for vector similarity searches
@@ -76,7 +76,7 @@ Tasks are organized by component and phase:
     - Success: Qdrant instance configured with collections for curriculum embeddings
     - Mark this task as in-progress in tasks.md, then complete when done
 
-- [ ] 5. Initialize AWS SAM Project
+- [x] 5. Initialize AWS SAM Project
   - **Files**: `template.yaml`, `samconfig.toml`
   - **Requirements**: Infrastructure as Code from design document
   - **Description**: Create AWS SAM template for serverless infrastructure
@@ -89,7 +89,7 @@ Tasks are organized by component and phase:
     - Success: Complete SAM template ready for deployment
     - Mark this task as in-progress in tasks.md, then complete when done
 
-- [ ] 6. Setup S3 Buckets
+- [-] 6. Setup S3 Buckets
   - **Files**: `infrastructure/s3-buckets.yaml`
   - **Requirements**: Document storage requirements from design document
   - **Description**: Create S3 buckets for document storage and static website hosting
