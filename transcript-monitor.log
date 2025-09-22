@@ -20,3 +20,25 @@ Found project with .specstory at: /Users/q284340/Agentic/coding
 [EnhancedTranscriptMonitor] 2025-09-21T15:50:00.578Z Semantic analyzer initialized for content classification (fallback)
 ❌ No current transcript file found. Make sure Claude Code is running.
 [EnhancedTranscriptMonitor] 2025-09-21T15:50:00.578Z Reliable coding classifier initialized with three-layer architecture
+Checking project paths: ["/Users/q284340/Agentic/coding","/Users/q284340/Agentic/curriculum-alignment"]
+Found project with .specstory at: /Users/q284340/Agentic/coding
+[EnhancedTranscriptMonitor] 2025-09-22T05:17:38.445Z Looking for transcripts in: /Users/q284340/.claude/projects/-Users-q284340-Agentic-coding
+[EnhancedTranscriptMonitor] 2025-09-22T05:17:38.446Z Transcript too old: 738032067ms > 14400000ms
+[LSLFileManager] File size monitoring started
+[PathAnalyzer] PathAnalyzer initialized with coding repo: /Users/q284340/Agentic/coding
+[SemanticAnalyzerAdapter] SemanticAnalyzerAdapter initialized with xai provider
+[KeywordMatcher] Loaded keywords from /Users/q284340/Agentic/coding/scripts/coding-keywords.json
+[KeywordMatcher] KeywordMatcher initialized with 112 keywords
+[OperationalLogger:system] OperationalLogger initialized
+[PerformanceMonitor] PerformanceMonitor initialized with targets:
+{
+  "pathAnalyzer": 1,
+  "semanticAnalyzer": 10,
+  "keywordMatcher": 10,
+  "overall": 15,
+  "initialization": 50
+}
+[ReliableCodingClassifier] ReliableCodingClassifier initialized in 0ms
+[EnhancedTranscriptMonitor] 2025-09-22T05:17:38.452Z Semantic analyzer initialized for content classification (fallback)
+❌ No current transcript file found. Make sure Claude Code is running.
+[EnhancedTranscriptMonitor] 2025-09-22T05:17:38.452Z Reliable coding classifier initialized with three-layer architecture
