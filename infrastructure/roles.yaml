@@ -1,0 +1,174 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'IAM Roles for Curriculum Alignment Multi-Agent System - Following principle of least privilege'
+
+Parameters:
+  Environment:
+    Type: String
+    Default: dev
+    AllowedValues:
+      - dev
+      - staging
+      - prod
+    Description: "Deployment environment"
+    
+  ProjectName:
+    Type: String
+    Default: curriculum-alignment
+    Description: "Project name for resource naming"
+    
+  ResourcePrefix:
+    Type: String
+    Default: ca-dev
+    Description: "Resource prefix for naming (e.g., ca-dev, ca-prod)"
+    
+  AccountId:
+    Type: String
+    Default: "930500114053"
+    Description: "AWS Account ID for resource scoping"
+
+Resources:
+  # Core Agent Roles
+  CoordinatorAgentRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "${ResourcePrefix}-CoordinatorAgent"
+      Description: "Central orchestration agent for managing multi-agent workflows"
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyName: CoordinatorAgentCustomPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - lambda:InvokeFunction
+                Resource:
+                  - !Sub "arn:aws:lambda:*:*:function:curriculum-alignment-*"
+              - Effect: Allow
+                Action:
+                  - states:StartExecution
+                  - states:DescribeExecution
+                  - states:StopExecution
+                Resource:
+                  - !Sub "arn:aws:states:*:*:stateMachine:curriculum-alignment-*"
+              - Effect: Allow
+                Action:
+                  - events:PutEvents
+                Resource:
+                  - !Sub "arn:aws:events:*:*:event-bus/curriculum-alignment-*"
+              - Effect: Allow
+                Action:
+                  - sqs:SendMessage
+                  - sqs:ReceiveMessage
+                  - sqs:DeleteMessage
+                  - sqs:GetQueueAttributes
+                Resource:
+                  - !Sub "arn:aws:sqs:*:*:curriculum-alignment-*"
+      Tags:
+        - Key: Project
+          Value: CurriculumAlignment
+        - Key: Component
+          Value: CoordinatorAgent
+        - Key: Environment
+          Value: !Ref Environment
+
+  WebSearchAgentRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "${ResourcePrefix}-WebSearchAgent"
+      Description: "Web search agent for discovering peer university curricula"
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyName: WebSearchAgentCustomPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - secretsmanager:GetSecretValue
+                Resource:
+                  - !Sub "arn:aws:secretsmanager:*:*:secret:curriculum-alignment/*"
+              - Effect: Allow
+                Action:
+                  - s3:PutObject
+                  - s3:GetObject
+                  - s3:DeleteObject
+                Resource:
+                  - !Sub "arn:aws:s3:::curriculum-alignment-*/*"
+      Tags:
+        - Key: Project
+          Value: CurriculumAlignment
+        - Key: Component
+          Value: WebSearchAgent
+
+  BrowserAgentRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "${ResourcePrefix}-BrowserAgent"
+      Description: "Browser automation agent using Stagehand/MCP for web scraping"
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyName: BrowserAgentCustomPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - secretsmanager:GetSecretValue
+                Resource:
+                  - !Sub "arn:aws:secretsmanager:*:*:secret:curriculum-alignment/*"
+              - Effect: Allow
+                Action:
+                  - s3:PutObject
+                  - s3:GetObject
+                  - s3:DeleteObject
+                Resource:
+                  - !Sub "arn:aws:s3:::curriculum-alignment-*/*"
+      Tags:
+        - Key: Project
+          Value: CurriculumAlignment
+        - Key: Component
+          Value: BrowserAgent
+
+Outputs:
+  CoordinatorAgentRoleArn:
+    Description: "ARN of the Coordinator Agent Role"
+    Value: !GetAtt CoordinatorAgentRole.Arn
+    Export:
+      Name: !Sub "${ProjectName}-${Environment}-CoordinatorAgentRole"
+      
+  WebSearchAgentRoleArn:
+    Description: "ARN of the Web Search Agent Role"
+    Value: !GetAtt WebSearchAgentRole.Arn
+    Export:
+      Name: !Sub "${ProjectName}-${Environment}-WebSearchAgentRole"
+      
+  BrowserAgentRoleArn:
+    Description: "ARN of the Browser Agent Role"
+    Value: !GetAtt BrowserAgentRole.Arn
+    Export:
+      Name: !Sub "${ProjectName}-${Environment}-BrowserAgentRole"

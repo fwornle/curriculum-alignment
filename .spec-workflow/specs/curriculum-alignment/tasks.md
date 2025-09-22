@@ -4,6 +4,12 @@
 
 This document breaks down the implementation of the Multi-Agent Curriculum Alignment System into atomic, executable tasks. Each task is designed to be completed independently while contributing to the overall system development.
 
+## Progress Tracking
+- **Total Tasks**: 70
+- **Completed**: 3
+- **In Progress**: 0  
+- **Pending**: 67
+
 ## Task Organization
 
 Tasks are organized by component and phase:
@@ -18,289 +24,269 @@ Tasks are organized by component and phase:
 
 ## Phase 1: Infrastructure Setup
 
-### Task 1: Initialize Project Repository
-- [ ] **Status**: Pending
-- **Files**: `README.md`, `.gitignore`, `package.json`
-- **Requirements**: Project overview from requirements document
-- **Description**: Create project repository with proper structure and initial configuration files
-- **_Prompt**: Implement the task for spec curriculum-alignment, first run spec-workflow-guide to get the workflow guide then implement the task:
-  - Role: DevOps Engineer
-  - Task: Initialize a new Git repository for the CEU Curriculum Alignment System with proper directory structure
-  - Restrictions: Do not include unnecessary files, follow TypeScript/React best practices
-  - _Leverage: Standard Node.js project structure
-  - _Requirements: Project setup from requirements document
-  - Success: Repository initialized with proper .gitignore, README, and package.json
-  - Mark this task as in-progress in tasks.md, then complete when done
+- [x] 1. Initialize Project Repository
+  - **Files**: `README.md`, `.gitignore`, `package.json`
+  - **Requirements**: Project overview from requirements document
+  - **Description**: Create project repository with proper structure and initial configuration files
+  - **_Prompt**: Implement the task for spec curriculum-alignment, first run spec-workflow-guide to get the workflow guide then implement the task:
+    - Role: DevOps Engineer
+    - Task: Initialize a new Git repository for the CEU Curriculum Alignment System with proper directory structure
+    - Restrictions: Do not include unnecessary files, follow TypeScript/React best practices
+    - _Leverage: Standard Node.js project structure
+    - _Requirements: Project setup from requirements document
+    - Success: Repository initialized with proper .gitignore, README, and package.json
+    - Mark this task as in-progress in tasks.md, then complete when done
 
-### Task 2: Setup AWS Account and IAM Roles
-- [ ] **Status**: Pending
-- **Files**: `infrastructure/iam-policies.json`, `infrastructure/roles.yaml`
-- **Requirements**: AWS infrastructure requirements from design document
-- **Description**: Configure AWS account with necessary IAM roles and policies for Lambda functions
-- **_Prompt**: Implement the task for spec curriculum-alignment, first run spec-workflow-guide to get the workflow guide then implement the task:
-  - Role: Cloud Infrastructure Engineer
-  - Task: Create IAM policies and roles for Lambda functions with least privilege access
-  - Restrictions: Follow AWS security best practices, minimize permissions
-  - _Leverage: AWS SAM template from design document
-  - _Requirements: Security requirements from design document
-  - Success: IAM roles created with proper policies for each Lambda function
-  - Mark this task as in-progress in tasks.md, then complete when done
+- [x] 2. Setup AWS Account and IAM Roles
+  - **Files**: `infrastructure/iam-policies.json`, `infrastructure/roles.yaml`
+  - **Requirements**: AWS infrastructure requirements from design document
+  - **Description**: Configure AWS account with necessary IAM roles and policies for Lambda functions
+  - **_Prompt**: Implement the task for spec curriculum-alignment, first run spec-workflow-guide to get the workflow guide then implement the task:
+    - Role: Cloud Infrastructure Engineer
+    - Task: Create IAM policies and roles for Lambda functions with least privilege access
+    - Restrictions: Follow AWS security best practices, minimize permissions
+    - _Leverage: AWS SAM template from design document
+    - _Requirements: Security requirements from design document
+    - Success: IAM roles created with proper policies for each Lambda function
+    - Mark this task as in-progress in tasks.md, then complete when done
 
-### Task 3: Configure PostgreSQL Database (Supabase/Neon)
-- [ ] **Status**: Pending
-- **Files**: `infrastructure/database-config.yaml`, `.env.example`
-- **Requirements**: PostgreSQL data model from design document
-- **Description**: Setup PostgreSQL instance with Supabase or Neon, configure connection pooling
-- **_Prompt**: Implement the task for spec curriculum-alignment, first run spec-workflow-guide to get the workflow guide then implement the task:
-  - Role: Database Administrator
-  - Task: Configure PostgreSQL database instance with free tier Supabase or Neon
-  - Restrictions: Use free tier, enable SSL, configure connection pooling
-  - _Leverage: Database schema from design document
-  - _Requirements: Data model specifications from design document
-  - Success: PostgreSQL instance running with connection string in environment variables
-  - Mark this task as in-progress in tasks.md, then complete when done
+- [x] 3. Configure PostgreSQL Database (Supabase/Neon)
+  - **Files**: `infrastructure/database-config.yaml`, `.env.example`
+  - **Requirements**: PostgreSQL data model from design document
+  - **Description**: Setup PostgreSQL instance with Supabase or Neon, configure connection pooling
+  - **_Prompt**: Implement the task for spec curriculum-alignment, first run spec-workflow-guide to get the workflow guide then implement the task:
+    - Role: Database Administrator
+    - Task: Configure PostgreSQL database instance with free tier Supabase or Neon
+    - Restrictions: Use free tier, enable SSL, configure connection pooling
+    - _Leverage: Database schema from design document
+    - _Requirements: Data model specifications from design document
+    - Success: PostgreSQL instance running with connection string in environment variables
+    - Mark this task as in-progress in tasks.md, then complete when done
 
-### Task 4: Setup Qdrant Vector Database
-- [ ] **Status**: Pending
-- **Files**: `infrastructure/qdrant-config.yaml`, `scripts/init-qdrant.ts`
-- **Requirements**: Semantic search requirements from design document
-- **Description**: Configure Qdrant instance for vector similarity searches
-- **_Prompt**: Implement the task for spec curriculum-alignment, first run spec-workflow-guide to get the workflow guide then implement the task:
-  - Role: Data Engineer
-  - Task: Setup Qdrant vector database instance with proper collections and indexes
-  - Restrictions: Optimize for curriculum document embeddings, configure proper dimensions
-  - _Leverage: Semantic search specifications from design document
-  - _Requirements: Vector database requirements from design document
-  - Success: Qdrant instance configured with collections for curriculum embeddings
-  - Mark this task as in-progress in tasks.md, then complete when done
+- [ ] 4. Setup Qdrant Vector Database
+  - **Files**: `infrastructure/qdrant-config.yaml`, `scripts/init-qdrant.ts`
+  - **Requirements**: Semantic search requirements from design document
+  - **Description**: Configure Qdrant instance for vector similarity searches
+  - **_Prompt**: Implement the task for spec curriculum-alignment, first run spec-workflow-guide to get the workflow guide then implement the task:
+    - Role: Data Engineer
+    - Task: Setup Qdrant vector database instance with proper collections and indexes
+    - Restrictions: Optimize for curriculum document embeddings, configure proper dimensions
+    - _Leverage: Semantic search specifications from design document
+    - _Requirements: Vector database requirements from design document
+    - Success: Qdrant instance configured with collections for curriculum embeddings
+    - Mark this task as in-progress in tasks.md, then complete when done
 
-### Task 5: Initialize AWS SAM Project
-- [ ] **Status**: Pending
-- **Files**: `template.yaml`, `samconfig.toml`
-- **Requirements**: Infrastructure as Code from design document
-- **Description**: Create AWS SAM template for serverless infrastructure
-- **_Prompt**: Implement the task for spec curriculum-alignment, first run spec-workflow-guide to get the workflow guide then implement the task:
-  - Role: Cloud Architect
-  - Task: Create AWS SAM template with all Lambda functions, API Gateway, and resources
-  - Restrictions: Use TypeScript for Lambda functions, include all agents
-  - _Leverage: SAM template structure from design document
-  - _Requirements: Serverless architecture from design document
-  - Success: Complete SAM template ready for deployment
-  - Mark this task as in-progress in tasks.md, then complete when done
+- [ ] 5. Initialize AWS SAM Project
+  - **Files**: `template.yaml`, `samconfig.toml`
+  - **Requirements**: Infrastructure as Code from design document
+  - **Description**: Create AWS SAM template for serverless infrastructure
+  - **_Prompt**: Implement the task for spec curriculum-alignment, first run spec-workflow-guide to get the workflow guide then implement the task:
+    - Role: Cloud Architect
+    - Task: Create AWS SAM template with all Lambda functions, API Gateway, and resources
+    - Restrictions: Use TypeScript for Lambda functions, include all agents
+    - _Leverage: SAM template structure from design document
+    - _Requirements: Serverless architecture from design document
+    - Success: Complete SAM template ready for deployment
+    - Mark this task as in-progress in tasks.md, then complete when done
 
-### Task 6: Setup S3 Buckets
-- [ ] **Status**: Pending
-- **Files**: `infrastructure/s3-buckets.yaml`
-- **Requirements**: Document storage requirements from design document
-- **Description**: Create S3 buckets for document storage and static website hosting
-- **_Prompt**: Implement the task for spec curriculum-alignment, first run spec-workflow-guide to get the workflow guide then implement the task:
-  - Role: Cloud Storage Engineer
-  - Task: Configure S3 buckets with proper encryption and versioning
-  - Restrictions: Enable encryption at rest, configure CORS for frontend
-  - _Leverage: S3 configuration from design document
-  - _Requirements: Storage requirements from design document
-  - Success: S3 buckets created with proper security and access policies
-  - Mark this task as in-progress in tasks.md, then complete when done
+- [ ] 6. Setup S3 Buckets
+  - **Files**: `infrastructure/s3-buckets.yaml`
+  - **Requirements**: Document storage requirements from design document
+  - **Description**: Create S3 buckets for document storage and static website hosting
+  - **_Prompt**: Implement the task for spec curriculum-alignment, first run spec-workflow-guide to get the workflow guide then implement the task:
+    - Role: Cloud Storage Engineer
+    - Task: Configure S3 buckets with proper encryption and versioning
+    - Restrictions: Enable encryption at rest, configure CORS for frontend
+    - _Leverage: S3 configuration from design document
+    - _Requirements: Storage requirements from design document
+    - Success: S3 buckets created with proper security and access policies
+    - Mark this task as in-progress in tasks.md, then complete when done
 
-### Task 7: Configure CloudFront CDN
-- [ ] **Status**: Pending
-- **Files**: `infrastructure/cloudfront.yaml`
-- **Requirements**: CDN requirements from design document
-- **Description**: Setup CloudFront distribution for static content delivery
-- **_Prompt**: Implement the task for spec curriculum-alignment, first run spec-workflow-guide to get the workflow guide then implement the task:
-  - Role: CDN Specialist
-  - Task: Configure CloudFront distribution for React application
-  - Restrictions: Enable caching, configure SSL/TLS, set proper headers
-  - _Leverage: CloudFront configuration from design document
-  - _Requirements: Performance requirements from design document
-  - Success: CloudFront distribution active with S3 origin
-  - Mark this task as in-progress in tasks.md, then complete when done
+- [ ] 7. Configure CloudFront CDN
+  - **Files**: `infrastructure/cloudfront.yaml`
+  - **Requirements**: CDN requirements from design document
+  - **Description**: Setup CloudFront distribution for static content delivery
+  - **_Prompt**: Implement the task for spec curriculum-alignment, first run spec-workflow-guide to get the workflow guide then implement the task:
+    - Role: CDN Specialist
+    - Task: Configure CloudFront distribution for React application
+    - Restrictions: Enable caching, configure SSL/TLS, set proper headers
+    - _Leverage: CloudFront configuration from design document
+    - _Requirements: Performance requirements from design document
+    - Success: CloudFront distribution active with S3 origin
+    - Mark this task as in-progress in tasks.md, then complete when done
 
-### Task 8: Setup AWS Cognito User Pool
-- [ ] **Status**: Pending
-- **Files**: `infrastructure/cognito.yaml`, `src/auth/cognito-config.ts`
-- **Requirements**: Authentication requirements from design document
-- **Description**: Configure AWS Cognito for user authentication
-- **_Prompt**: Implement the task for spec curriculum-alignment, first run spec-workflow-guide to get the workflow guide then implement the task:
-  - Role: Security Engineer
-  - Task: Setup AWS Cognito user pool with email verification
-  - Restrictions: Enable MFA, configure password policies, setup user groups
-  - _Leverage: Cognito configuration from design document
-  - _Requirements: Authentication requirements from design document
-  - Success: Cognito user pool configured with proper security settings
-  - Mark this task as in-progress in tasks.md, then complete when done
+- [ ] 8. Setup AWS Cognito User Pool
+  - **Files**: `infrastructure/cognito.yaml`, `src/auth/cognito-config.ts`
+  - **Requirements**: Authentication requirements from design document
+  - **Description**: Configure AWS Cognito for user authentication
+  - **_Prompt**: Implement the task for spec curriculum-alignment, first run spec-workflow-guide to get the workflow guide then implement the task:
+    - Role: Security Engineer
+    - Task: Setup AWS Cognito user pool with email verification
+    - Restrictions: Enable MFA, configure password policies, setup user groups
+    - _Leverage: Cognito configuration from design document
+    - _Requirements: Authentication requirements from design document
+    - Success: Cognito user pool configured with proper security settings
+    - Mark this task as in-progress in tasks.md, then complete when done
 
-### Task 9: Configure API Gateway
-- [ ] **Status**: Pending
-- **Files**: `infrastructure/api-gateway.yaml`, `openapi.yaml`
-- **Requirements**: API specifications from design document
-- **Description**: Setup API Gateway with request validation and CORS
-- **_Prompt**: Implement the task for spec curriculum-alignment, first run spec-workflow-guide to get the workflow guide then implement the task:
-  - Role: API Architect
-  - Task: Configure API Gateway with all endpoints and request validation
-  - Restrictions: Enable throttling, setup CORS, integrate with Cognito
-  - _Leverage: API design from design document
-  - _Requirements: API specifications from design document
-  - Success: API Gateway configured with all endpoints and security
-  - Mark this task as in-progress in tasks.md, then complete when done
+- [ ] 9. Configure API Gateway
+  - **Files**: `infrastructure/api-gateway.yaml`, `openapi.yaml`
+  - **Requirements**: API specifications from design document
+  - **Description**: Setup API Gateway with request validation and CORS
+  - **_Prompt**: Implement the task for spec curriculum-alignment, first run spec-workflow-guide to get the workflow guide then implement the task:
+    - Role: API Architect
+    - Task: Configure API Gateway with all endpoints and request validation
+    - Restrictions: Enable throttling, setup CORS, integrate with Cognito
+    - _Leverage: API design from design document
+    - _Requirements: API specifications from design document
+    - Success: API Gateway configured with all endpoints and security
+    - Mark this task as in-progress in tasks.md, then complete when done
 
-### Task 10: Setup Environment Configuration
-- [ ] **Status**: Pending
-- **Files**: `.env.example`, `.env.development`, `.env.production`
-- **Requirements**: Configuration management from requirements document
-- **Description**: Create environment configuration files for all environments
-- **_Prompt**: Implement the task for spec curriculum-alignment, first run spec-workflow-guide to get the workflow guide then implement the task:
-  - Role: Configuration Manager
-  - Task: Create environment configuration files with all required variables
-  - Restrictions: Never commit actual credentials, use AWS Secrets Manager references
-  - _Leverage: Environment variables from design document
-  - _Requirements: Configuration requirements from design document
-  - Success: Environment files created with proper structure
-  - Mark this task as in-progress in tasks.md, then complete when done
+- [ ] 10. Setup Environment Configuration
+  - **Files**: `.env.example`, `.env.development`, `.env.production`
+  - **Requirements**: Configuration management from requirements document
+  - **Description**: Create environment configuration files for all environments
+  - **_Prompt**: Implement the task for spec curriculum-alignment, first run spec-workflow-guide to get the workflow guide then implement the task:
+    - Role: Configuration Manager
+    - Task: Create environment configuration files with all required variables
+    - Restrictions: Never commit actual credentials, use AWS Secrets Manager references
+    - _Leverage: Environment variables from design document
+    - _Requirements: Configuration requirements from design document
+    - Success: Environment files created with proper structure
+    - Mark this task as in-progress in tasks.md, then complete when done
 
 ---
 
 ## Phase 2: Database and Core Services
 
-### Task 11: Implement PostgreSQL Schema
-- [ ] **Status**: Pending
-- **Files**: `database/migrations/001_initial_schema.sql`
-- **Requirements**: Database schema from design document
-- **Description**: Create all PostgreSQL tables with proper relationships and indexes
-- **_Prompt**: Implement the task for spec curriculum-alignment, first run spec-workflow-guide to get the workflow guide then implement the task:
-  - Role: Database Developer
-  - Task: Implement complete PostgreSQL schema with all tables and relationships
-  - Restrictions: Include all indexes, constraints, and triggers
-  - _Leverage: Database schema from design document
-  - _Requirements: Data model from design document
-  - Success: All tables created with proper relationships and indexes
-  - Mark this task as in-progress in tasks.md, then complete when done
+- [ ] 11. Implement PostgreSQL Schema
+  - **Files**: `database/migrations/001_initial_schema.sql`
+  - **Requirements**: Database schema from design document
+  - **Description**: Create all PostgreSQL tables with proper relationships and indexes
+  - **_Prompt**: Implement the task for spec curriculum-alignment, first run spec-workflow-guide to get the workflow guide then implement the task:
+    - Role: Database Developer
+    - Task: Implement complete PostgreSQL schema with all tables and relationships
+    - Restrictions: Include all indexes, constraints, and triggers
+    - _Leverage: Database schema from design document
+    - _Requirements: Data model from design document
+    - Success: All tables created with proper relationships and indexes
+    - Mark this task as in-progress in tasks.md, then complete when done
 
-### Task 12: Create Database Access Layer
-- [ ] **Status**: Pending
-- **Files**: `src/database/index.ts`, `src/database/models/*.ts`
-- **Requirements**: Database operations from design document
-- **Description**: Implement TypeScript database access layer with connection pooling
-- **_Prompt**: Implement the task for spec curriculum-alignment, first run spec-workflow-guide to get the workflow guide then implement the task:
-  - Role: Backend Developer
-  - Task: Create TypeScript database access layer with Prisma or TypeORM
-  - Restrictions: Use connection pooling, implement proper error handling
-  - _Leverage: Database schema from previous task
-  - _Requirements: Database specifications from design document
-  - Success: Database access layer working with all CRUD operations
-  - Mark this task as in-progress in tasks.md, then complete when done
+- [ ] 12. Create Database Access Layer
+  - **Files**: `src/database/index.ts`, `src/database/models/*.ts`
+  - **Requirements**: Database operations from design document
+  - **Description**: Implement TypeScript database access layer with connection pooling
+  - **_Prompt**: Implement the task for spec curriculum-alignment, first run spec-workflow-guide to get the workflow guide then implement the task:
+    - Role: Backend Developer
+    - Task: Create TypeScript database access layer with Prisma or TypeORM
+    - Restrictions: Use connection pooling, implement proper error handling
+    - _Leverage: Database schema from previous task
+    - _Requirements: Database specifications from design document
+    - Success: Database access layer working with all CRUD operations
+    - Mark this task as in-progress in tasks.md, then complete when done
 
-### Task 13: Implement Authentication Service
-- [ ] **Status**: Pending
-- **Files**: `src/services/auth.service.ts`, `src/middleware/auth.middleware.ts`
-- **Requirements**: Authentication flow from design document
-- **Description**: Create authentication service integrating with AWS Cognito
-- **_Prompt**: Implement the task for spec curriculum-alignment, first run spec-workflow-guide to get the workflow guide then implement the task:
-  - Role: Security Developer
-  - Task: Implement authentication service with JWT validation
-  - Restrictions: Validate all tokens, implement refresh logic, handle errors
-  - _Leverage: Cognito configuration from infrastructure setup
-  - _Requirements: Security requirements from design document
-  - Success: Authentication service working with token validation
-  - Mark this task as in-progress in tasks.md, then complete when done
+- [ ] 13. Implement Authentication Service
+  - **Files**: `src/services/auth.service.ts`, `src/middleware/auth.middleware.ts`
+  - **Requirements**: Authentication flow from design document
+  - **Description**: Create authentication service integrating with AWS Cognito
+  - **_Prompt**: Implement the task for spec curriculum-alignment, first run spec-workflow-guide to get the workflow guide then implement the task:
+    - Role: Security Developer
+    - Task: Implement authentication service with JWT validation
+    - Restrictions: Validate all tokens, implement refresh logic, handle errors
+    - _Leverage: Cognito configuration from infrastructure setup
+    - _Requirements: Security requirements from design document
+    - Success: Authentication service working with token validation
+    - Mark this task as in-progress in tasks.md, then complete when done
 
-### Task 14: Create LLM Model Configuration Service
-- [ ] **Status**: Pending
-- **Files**: `src/services/llm-config.service.ts`, `src/types/llm-models.ts`
-- **Requirements**: LLM model configuration from requirements document
-- **Description**: Implement service for managing LLM model configurations per agent
-- **_Prompt**: Implement the task for spec curriculum-alignment, first run spec-workflow-guide to get the workflow guide then implement the task:
-  - Role: AI Systems Developer
-  - Task: Create LLM configuration service with model selection and cost tracking
-  - Restrictions: Support all specified providers, validate API keys, track costs
-  - _Leverage: LLM model specifications from requirements document
-  - _Requirements: Model configuration requirements from requirements document
-  - Success: LLM configuration service with per-agent model selection
-  - Mark this task as in-progress in tasks.md, then complete when done
+- [ ] 14. Create LLM Model Configuration Service
+  - **Files**: `src/services/llm-config.service.ts`, `src/types/llm-models.ts`
+  - **Requirements**: LLM model configuration from requirements document
+  - **Description**: Implement service for managing LLM model configurations per agent
+  - **_Prompt**: Implement the task for spec curriculum-alignment, first run spec-workflow-guide to get the workflow guide then implement the task:
+    - Role: AI Systems Developer
+    - Task: Create LLM configuration service with model selection and cost tracking
+    - Restrictions: Support all specified providers, validate API keys, track costs
+    - _Leverage: LLM model specifications from requirements document
+    - _Requirements: Model configuration requirements from requirements document
+    - Success: LLM configuration service with per-agent model selection
+    - Mark this task as in-progress in tasks.md, then complete when done
 
-### Task 15: Implement Secrets Management
-- [ ] **Status**: Pending
-- **Files**: `src/services/secrets.service.ts`
-- **Requirements**: Secure credential management from design document
-- **Description**: Create service for managing API keys and credentials via AWS Secrets Manager
-- **_Prompt**: Implement the task for spec curriculum-alignment, first run spec-workflow-guide to get the workflow guide then implement the task:
-  - Role: Security Engineer
-  - Task: Implement secrets management service with AWS Secrets Manager
-  - Restrictions: Never log credentials, implement caching, handle rotation
-  - _Leverage: AWS SDK and Secrets Manager
-  - _Requirements: Security requirements from design document
-  - Success: Secrets service retrieving credentials securely
-  - Mark this task as in-progress in tasks.md, then complete when done
+- [ ] 15. Implement Secrets Management
+  - **Files**: `src/services/secrets.service.ts`
+  - **Requirements**: Secure credential management from design document
+  - **Description**: Create service for managing API keys and credentials via AWS Secrets Manager
+  - **_Prompt**: Implement the task for spec curriculum-alignment, first run spec-workflow-guide to get the workflow guide then implement the task:
+    - Role: Security Engineer
+    - Task: Implement secrets management service with AWS Secrets Manager
+    - Restrictions: Never log credentials, implement caching, handle rotation
+    - _Leverage: AWS SDK and Secrets Manager
+    - _Requirements: Security requirements from design document
+    - Success: Secrets service retrieving credentials securely
+    - Mark this task as in-progress in tasks.md, then complete when done
 
-### Task 16: Create Logging and Monitoring Service
-- [ ] **Status**: Pending
-- **Files**: `src/services/logging.service.ts`, `src/services/metrics.service.ts`
-- **Requirements**: Monitoring requirements from design document
-- **Description**: Implement centralized logging and metrics collection
-- **_Prompt**: Implement the task for spec curriculum-alignment, first run spec-workflow-guide to get the workflow guide then implement the task:
-  - Role: DevOps Developer
-  - Task: Create logging service with CloudWatch integration
-  - Restrictions: Structure logs for searchability, track performance metrics
-  - _Leverage: CloudWatch SDK
-  - _Requirements: Monitoring specifications from design document
-  - Success: Logging service sending structured logs to CloudWatch
-  - Mark this task as in-progress in tasks.md, then complete when done
+- [ ] 16. Create Logging and Monitoring Service
+  - **Files**: `src/services/logging.service.ts`, `src/services/metrics.service.ts`
+  - **Requirements**: Monitoring requirements from design document
+  - **Description**: Implement centralized logging and metrics collection
+  - **_Prompt**: Implement the task for spec curriculum-alignment, first run spec-workflow-guide to get the workflow guide then implement the task:
+    - Role: DevOps Developer
+    - Task: Create logging service with CloudWatch integration
+    - Restrictions: Structure logs for searchability, track performance metrics
+    - _Leverage: CloudWatch SDK
+    - _Requirements: Monitoring specifications from design document
+    - Success: Logging service sending structured logs to CloudWatch
+    - Mark this task as in-progress in tasks.md, then complete when done
 
-### Task 17: Implement Cost Tracking Service
-- [ ] **Status**: Pending
-- **Files**: `src/services/cost-tracking.service.ts`
-- **Requirements**: Cost optimization from requirements document
-- **Description**: Create service for tracking LLM and AWS resource costs
-- **_Prompt**: Implement the task for spec curriculum-alignment, first run spec-workflow-guide to get the workflow guide then implement the task:
-  - Role: FinOps Developer
-  - Task: Implement cost tracking for LLM usage and AWS resources
-  - Restrictions: Track per-user and per-agent costs, implement alerts
-  - _Leverage: Cost metrics from requirements document
-  - _Requirements: Cost optimization requirements
-  - Success: Cost tracking service monitoring all resource usage
-  - Mark this task as in-progress in tasks.md, then complete when done
+- [ ] 17. Implement Cost Tracking Service
+  - **Files**: `src/services/cost-tracking.service.ts`
+  - **Requirements**: Cost optimization from requirements document
+  - **Description**: Create service for tracking LLM and AWS resource costs
+  - **_Prompt**: Implement the task for spec curriculum-alignment, first run spec-workflow-guide to get the workflow guide then implement the task:
+    - Role: FinOps Developer
+    - Task: Implement cost tracking for LLM usage and AWS resources
+    - Restrictions: Track per-user and per-agent costs, implement alerts
+    - _Leverage: Cost metrics from requirements document
+    - _Requirements: Cost optimization requirements
+    - Success: Cost tracking service monitoring all resource usage
+    - Mark this task as in-progress in tasks.md, then complete when done
 
-### Task 18: Create Error Handling Framework
-- [ ] **Status**: Pending
-- **Files**: `src/utils/error-handler.ts`, `src/types/errors.ts`
-- **Requirements**: Error handling from design document
-- **Description**: Implement comprehensive error handling with retry logic
-- **_Prompt**: Implement the task for spec curriculum-alignment, first run spec-workflow-guide to get the workflow guide then implement the task:
-  - Role: Backend Developer
-  - Task: Create error handling framework with exponential backoff
-  - Restrictions: Categorize errors, implement retry for transient failures
-  - _Leverage: Error handling patterns from design document
-  - _Requirements: Reliability requirements from design document
-  - Success: Error handler with proper retry logic and error categorization
-  - Mark this task as in-progress in tasks.md, then complete when done
+- [ ] 18. Create Error Handling Framework
+  - **Files**: `src/utils/error-handler.ts`, `src/types/errors.ts`
+  - **Requirements**: Error handling from design document
+  - **Description**: Implement comprehensive error handling with retry logic
+  - **_Prompt**: Implement the task for spec curriculum-alignment, first run spec-workflow-guide to get the workflow guide then implement the task:
+    - Role: Backend Developer
+    - Task: Create error handling framework with exponential backoff
+    - Restrictions: Categorize errors, implement retry for transient failures
+    - _Leverage: Error handling patterns from design document
+    - _Requirements: Reliability requirements from design document
+    - Success: Error handler with proper retry logic and error categorization
+    - Mark this task as in-progress in tasks.md, then complete when done
 
-### Task 19: Implement File Storage Service
-- [ ] **Status**: Pending
-- **Files**: `src/services/storage.service.ts`
-- **Requirements**: Document storage from design document
-- **Description**: Create service for S3 file operations
-- **_Prompt**: Implement the task for spec curriculum-alignment, first run spec-workflow-guide to get the workflow guide then implement the task:
-  - Role: Storage Engineer
-  - Task: Implement S3 storage service for documents
-  - Restrictions: Enable encryption, implement multipart upload, handle large files
-  - _Leverage: S3 configuration from infrastructure
-  - _Requirements: Storage requirements from design document
-  - Success: Storage service handling all document operations
-  - Mark this task as in-progress in tasks.md, then complete when done
+- [ ] 19. Implement File Storage Service
+  - **Files**: `src/services/storage.service.ts`
+  - **Requirements**: Document storage from design document
+  - **Description**: Create service for S3 file operations
+  - **_Prompt**: Implement the task for spec curriculum-alignment, first run spec-workflow-guide to get the workflow guide then implement the task:
+    - Role: Storage Engineer
+    - Task: Implement S3 storage service for documents
+    - Restrictions: Enable encryption, implement multipart upload, handle large files
+    - _Leverage: S3 configuration from infrastructure
+    - _Requirements: Storage requirements from design document
+    - Success: Storage service handling all document operations
+    - Mark this task as in-progress in tasks.md, then complete when done
 
-### Task 20: Create WebSocket Service
-- [ ] **Status**: Pending
-- **Files**: `src/services/websocket.service.ts`
-- **Requirements**: Real-time communication from design document
-- **Description**: Implement WebSocket service for chat and status updates
-- **_Prompt**: Implement the task for spec curriculum-alignment, first run spec-workflow-guide to get the workflow guide then implement the task:
-  - Role: Real-time Systems Developer
-  - Task: Create WebSocket service for chat and agent status
-  - Restrictions: Handle reconnection, implement heartbeat, manage sessions
-  - _Leverage: WebSocket requirements from design document
-  - _Requirements: Chat interface requirements
-  - Success: WebSocket service enabling real-time communication
-  - Mark this task as in-progress in tasks.md, then complete when done
+- [ ] 20. Create WebSocket Service
+  - **Files**: `src/services/websocket.service.ts`
+  - **Requirements**: Real-time communication from design document
+  - **Description**: Implement WebSocket service for chat and status updates
+  - **_Prompt**: Implement the task for spec curriculum-alignment, first run spec-workflow-guide to get the workflow guide then implement the task:
+    - Role: Real-time Systems Developer
+    - Task: Create WebSocket service for chat and agent status
+    - Restrictions: Handle reconnection, implement heartbeat, manage sessions
+    - _Leverage: WebSocket requirements from design document
+    - _Requirements: Chat interface requirements
+    - Success: WebSocket service enabling real-time communication
+    - Mark this task as in-progress in tasks.md, then complete when done
 
 ---
 

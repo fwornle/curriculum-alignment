@@ -1,0 +1,66 @@
+{
+  "account": {
+    "id": "REPLACE_WITH_PRODUCTION_ACCOUNT_ID",
+    "alias": "REPLACE_WITH_PROD_ALIAS",
+    "name": "Production Account"
+  },
+  "region": "eu-central-1",
+  "environment": "prod",
+  "projectName": "curriculum-alignment",
+  "resourcePrefix": "ca-prod",
+  "tags": {
+    "Project": "CurriculumAlignment",
+    "Environment": "prod",
+    "Owner": "CEU-IT",
+    "ManagedBy": "CloudFormation",
+    "CostCenter": "Production"
+  },
+  "limits": {
+    "maxLambdaConcurrency": 1000,
+    "apiGatewayThrottling": {
+      "burstLimit": 5000,
+      "rateLimit": 2000
+    },
+    "s3StorageLimit": "1TB",
+    "estimatedMonthlyCost": "$500"
+  },
+  "security": {
+    "requireMFA": true,
+    "enableDetailedLogging": true,
+    "retainLogsForDays": 90,
+    "enableCloudTrail": true
+  },
+  "databases": {
+    "postgresql": {
+      "provider": "neon",
+      "tier": "scale",
+      "maxConnections": 1000
+    },
+    "qdrant": {
+      "provider": "qdrant-cloud",
+      "tier": "standard",
+      "maxVectors": 100000000
+    }
+  },
+  "llmProviders": {
+    "default": "claude-3.5-sonnet",
+    "agents": {
+      "coordinator": "claude-3.5-sonnet",
+      "webSearch": "grok-beta",
+      "browser": "grok-beta", 
+      "documentProcessing": "claude-3.5-sonnet",
+      "accreditationExpert": "claude-3.5-sonnet",
+      "qa": "claude-3-haiku",
+      "semanticSearch": "grok-beta",
+      "chatInterface": "claude-3.5-sonnet"
+    },
+    "estimatedMonthlyCost": "$200"
+  },
+  "notifications": {
+    "email": "curriculum-alignment@ceu.edu",
+    "slack": {
+      "enabled": true,
+      "webhook": "REPLACE_WITH_SLACK_WEBHOOK"
+    }
+  }
+}

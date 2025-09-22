@@ -1,0 +1,351 @@
+{
+  "CoordinatorAgentPolicy": {
+    "Version": "2012-10-17",
+    "Statement": [
+      {
+        "Effect": "Allow",
+        "Action": [
+          "logs:CreateLogGroup",
+          "logs:CreateLogStream",
+          "logs:PutLogEvents"
+        ],
+        "Resource": "arn:aws:logs:*:*:*"
+      },
+      {
+        "Effect": "Allow",
+        "Action": [
+          "lambda:InvokeFunction"
+        ],
+        "Resource": [
+          "arn:aws:lambda:*:*:function:curriculum-alignment-*"
+        ]
+      },
+      {
+        "Effect": "Allow",
+        "Action": [
+          "states:StartExecution",
+          "states:DescribeExecution",
+          "states:StopExecution"
+        ],
+        "Resource": [
+          "arn:aws:states:*:*:stateMachine:curriculum-alignment-*"
+        ]
+      },
+      {
+        "Effect": "Allow",
+        "Action": [
+          "events:PutEvents"
+        ],
+        "Resource": [
+          "arn:aws:events:*:*:event-bus/curriculum-alignment-*"
+        ]
+      },
+      {
+        "Effect": "Allow",
+        "Action": [
+          "sqs:SendMessage",
+          "sqs:ReceiveMessage",
+          "sqs:DeleteMessage",
+          "sqs:GetQueueAttributes"
+        ],
+        "Resource": [
+          "arn:aws:sqs:*:*:curriculum-alignment-*"
+        ]
+      }
+    ]
+  },
+  "WebSearchAgentPolicy": {
+    "Version": "2012-10-17",
+    "Statement": [
+      {
+        "Effect": "Allow",
+        "Action": [
+          "logs:CreateLogGroup",
+          "logs:CreateLogStream",
+          "logs:PutLogEvents"
+        ],
+        "Resource": "arn:aws:logs:*:*:*"
+      },
+      {
+        "Effect": "Allow",
+        "Action": [
+          "secretsmanager:GetSecretValue"
+        ],
+        "Resource": [
+          "arn:aws:secretsmanager:*:*:secret:curriculum-alignment/*"
+        ]
+      },
+      {
+        "Effect": "Allow",
+        "Action": [
+          "s3:PutObject",
+          "s3:GetObject",
+          "s3:DeleteObject"
+        ],
+        "Resource": [
+          "arn:aws:s3:::curriculum-alignment-*/*"
+        ]
+      }
+    ]
+  },
+  "BrowserAgentPolicy": {
+    "Version": "2012-10-17",
+    "Statement": [
+      {
+        "Effect": "Allow",
+        "Action": [
+          "logs:CreateLogGroup",
+          "logs:CreateLogStream",
+          "logs:PutLogEvents"
+        ],
+        "Resource": "arn:aws:logs:*:*:*"
+      },
+      {
+        "Effect": "Allow",
+        "Action": [
+          "secretsmanager:GetSecretValue"
+        ],
+        "Resource": [
+          "arn:aws:secretsmanager:*:*:secret:curriculum-alignment/*"
+        ]
+      },
+      {
+        "Effect": "Allow",
+        "Action": [
+          "s3:PutObject",
+          "s3:GetObject",
+          "s3:DeleteObject"
+        ],
+        "Resource": [
+          "arn:aws:s3:::curriculum-alignment-*/*"
+        ]
+      }
+    ]
+  },
+  "DocumentProcessingAgentPolicy": {
+    "Version": "2012-10-17",
+    "Statement": [
+      {
+        "Effect": "Allow",
+        "Action": [
+          "logs:CreateLogGroup",
+          "logs:CreateLogStream",
+          "logs:PutLogEvents"
+        ],
+        "Resource": "arn:aws:logs:*:*:*"
+      },
+      {
+        "Effect": "Allow",
+        "Action": [
+          "s3:PutObject",
+          "s3:GetObject",
+          "s3:DeleteObject",
+          "s3:ListBucket"
+        ],
+        "Resource": [
+          "arn:aws:s3:::curriculum-alignment-*",
+          "arn:aws:s3:::curriculum-alignment-*/*"
+        ]
+      },
+      {
+        "Effect": "Allow",
+        "Action": [
+          "secretsmanager:GetSecretValue"
+        ],
+        "Resource": [
+          "arn:aws:secretsmanager:*:*:secret:curriculum-alignment/*"
+        ]
+      }
+    ]
+  },
+  "AccreditationExpertAgentPolicy": {
+    "Version": "2012-10-17",
+    "Statement": [
+      {
+        "Effect": "Allow",
+        "Action": [
+          "logs:CreateLogGroup",
+          "logs:CreateLogStream",
+          "logs:PutLogEvents"
+        ],
+        "Resource": "arn:aws:logs:*:*:*"
+      },
+      {
+        "Effect": "Allow",
+        "Action": [
+          "secretsmanager:GetSecretValue"
+        ],
+        "Resource": [
+          "arn:aws:secretsmanager:*:*:secret:curriculum-alignment/*"
+        ]
+      },
+      {
+        "Effect": "Allow",
+        "Action": [
+          "s3:GetObject"
+        ],
+        "Resource": [
+          "arn:aws:s3:::curriculum-alignment-*/*"
+        ]
+      }
+    ]
+  },
+  "QAAgentPolicy": {
+    "Version": "2012-10-17",
+    "Statement": [
+      {
+        "Effect": "Allow",
+        "Action": [
+          "logs:CreateLogGroup",
+          "logs:CreateLogStream",
+          "logs:PutLogEvents"
+        ],
+        "Resource": "arn:aws:logs:*:*:*"
+      },
+      {
+        "Effect": "Allow",
+        "Action": [
+          "secretsmanager:GetSecretValue"
+        ],
+        "Resource": [
+          "arn:aws:secretsmanager:*:*:secret:curriculum-alignment/*"
+        ]
+      },
+      {
+        "Effect": "Allow",
+        "Action": [
+          "s3:PutObject",
+          "s3:GetObject"
+        ],
+        "Resource": [
+          "arn:aws:s3:::curriculum-alignment-*/*"
+        ]
+      }
+    ]
+  },
+  "SemanticSearchAgentPolicy": {
+    "Version": "2012-10-17",
+    "Statement": [
+      {
+        "Effect": "Allow",
+        "Action": [
+          "logs:CreateLogGroup",
+          "logs:CreateLogStream",
+          "logs:PutLogEvents"
+        ],
+        "Resource": "arn:aws:logs:*:*:*"
+      },
+      {
+        "Effect": "Allow",
+        "Action": [
+          "secretsmanager:GetSecretValue"
+        ],
+        "Resource": [
+          "arn:aws:secretsmanager:*:*:secret:curriculum-alignment/*"
+        ]
+      }
+    ]
+  },
+  "ChatInterfaceAgentPolicy": {
+    "Version": "2012-10-17",
+    "Statement": [
+      {
+        "Effect": "Allow",
+        "Action": [
+          "logs:CreateLogGroup",
+          "logs:CreateLogStream",
+          "logs:PutLogEvents"
+        ],
+        "Resource": "arn:aws:logs:*:*:*"
+      },
+      {
+        "Effect": "Allow",
+        "Action": [
+          "secretsmanager:GetSecretValue"
+        ],
+        "Resource": [
+          "arn:aws:secretsmanager:*:*:secret:curriculum-alignment/*"
+        ]
+      }
+    ]
+  },
+  "DatabaseAccessPolicy": {
+    "Version": "2012-10-17",
+    "Statement": [
+      {
+        "Effect": "Allow",
+        "Action": [
+          "rds-db:connect"
+        ],
+        "Resource": [
+          "arn:aws:rds-db:*:*:dbuser:*/curriculum-alignment-*"
+        ]
+      }
+    ]
+  },
+  "APIGatewayExecutionPolicy": {
+    "Version": "2012-10-17",
+    "Statement": [
+      {
+        "Effect": "Allow",
+        "Action": [
+          "logs:CreateLogGroup",
+          "logs:CreateLogStream",
+          "logs:PutLogEvents"
+        ],
+        "Resource": "arn:aws:logs:*:*:*"
+      },
+      {
+        "Effect": "Allow",
+        "Action": [
+          "lambda:InvokeFunction"
+        ],
+        "Resource": [
+          "arn:aws:lambda:*:*:function:curriculum-alignment-*"
+        ]
+      }
+    ]
+  },
+  "DeadLetterQueueHandlerPolicy": {
+    "Version": "2012-10-17",
+    "Statement": [
+      {
+        "Effect": "Allow",
+        "Action": [
+          "logs:CreateLogGroup",
+          "logs:CreateLogStream",
+          "logs:PutLogEvents"
+        ],
+        "Resource": "arn:aws:logs:*:*:*"
+      },
+      {
+        "Effect": "Allow",
+        "Action": [
+          "sqs:ReceiveMessage",
+          "sqs:DeleteMessage",
+          "sqs:SendMessage",
+          "sqs:GetQueueAttributes"
+        ],
+        "Resource": [
+          "arn:aws:sqs:*:*:curriculum-alignment-dlq-*"
+        ]
+      },
+      {
+        "Effect": "Allow",
+        "Action": [
+          "lambda:InvokeFunction"
+        ],
+        "Resource": [
+          "arn:aws:lambda:*:*:function:curriculum-alignment-*"
+        ]
+      },
+      {
+        "Effect": "Allow",
+        "Action": [
+          "cloudwatch:PutMetricData"
+        ],
+        "Resource": "*"
+      }
+    ]
+  }
+}

@@ -8,7 +8,9 @@
       "Bash(mkdir:*)",
       "WebSearch",
       "mcp__spec-workflow__approvals",
-      "mcp__spec-workflow__steering-guide"
+      "mcp__spec-workflow__steering-guide",
+      "mcp__spec-workflow__spec-status",
+      "Bash(chmod:*)"
     ],
     "additionalDirectories": []
   },

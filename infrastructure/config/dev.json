@@ -1,0 +1,66 @@
+{
+  "account": {
+    "id": "930500114053",
+    "alias": "tanfra",
+    "name": "Personal Development Account"
+  },
+  "region": "eu-central-1",
+  "environment": "dev",
+  "projectName": "curriculum-alignment",
+  "resourcePrefix": "ca-dev",
+  "tags": {
+    "Project": "CurriculumAlignment",
+    "Environment": "dev",
+    "Owner": "tanfra",
+    "ManagedBy": "CloudFormation",
+    "CostCenter": "Development"
+  },
+  "limits": {
+    "maxLambdaConcurrency": 100,
+    "apiGatewayThrottling": {
+      "burstLimit": 1000,
+      "rateLimit": 500
+    },
+    "s3StorageLimit": "10GB",
+    "estimatedMonthlyCost": "$50"
+  },
+  "security": {
+    "requireMFA": false,
+    "enableDetailedLogging": true,
+    "retainLogsForDays": 7,
+    "enableCloudTrail": true
+  },
+  "databases": {
+    "postgresql": {
+      "provider": "supabase",
+      "tier": "free",
+      "maxConnections": 60
+    },
+    "qdrant": {
+      "provider": "qdrant-cloud",
+      "tier": "free",
+      "maxVectors": 1000000
+    }
+  },
+  "llmProviders": {
+    "default": "grok",
+    "agents": {
+      "coordinator": "grok-beta",
+      "webSearch": "grok-beta", 
+      "browser": "grok-beta",
+      "documentProcessing": "claude-3-haiku",
+      "accreditationExpert": "claude-3.5-sonnet",
+      "qa": "claude-3-haiku",
+      "semanticSearch": "grok-beta",
+      "chatInterface": "claude-3.5-sonnet"
+    },
+    "estimatedMonthlyCost": "$100"
+  },
+  "notifications": {
+    "email": "your-email@example.com",
+    "slack": {
+      "enabled": false,
+      "webhook": ""
+    }
+  }
+}

@@ -1,0 +1,106 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'PostgreSQL Database Configuration for Curriculum Alignment System'
+
+Parameters:
+  Environment:
+    Type: String
+    Default: dev
+    AllowedValues:
+      - dev
+      - staging
+      - prod
+    Description: "Deployment environment"
+    
+  DatabaseProvider:
+    Type: String
+    Default: supabase
+    AllowedValues:
+      - supabase
+      - neon
+    Description: "PostgreSQL provider (Supabase or Neon)"
+
+Resources:
+  # Database connection secrets stored in AWS Secrets Manager
+  DatabaseCredentials:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      Name: !Sub "curriculum-alignment/${Environment}/database"
+      Description: "PostgreSQL database connection credentials"
+      SecretString: !Sub |
+        {
+          "host": "${DatabaseHost}",
+          "port": "5432",
+          "database": "${DatabaseName}",
+          "username": "${DatabaseUsername}",
+          "password": "${DatabasePassword}",
+          "ssl": true,
+          "connection_limit": 20,
+          "pool_timeout": 30000,
+          "idle_timeout": 600000
+        }
+      Tags:
+        - Key: Project
+          Value: CurriculumAlignment
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: Component
+          Value: Database
+
+  # Lambda function for database health checks
+  DatabaseHealthCheck:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub "curriculum-alignment-${Environment}-db-health"
+      Runtime: nodejs18.x
+      Handler: index.handler
+      Code:
+        ZipFile: |
+          const { Client } = require('pg');
+          exports.handler = async (event) => {
+            try {
+              const client = new Client({
+                connectionString: process.env.DATABASE_URL,
+                ssl: { rejectUnauthorized: false }
+              });
+              await client.connect();
+              const result = await client.query('SELECT NOW()');
+              await client.end();
+              return {
+                statusCode: 200,
+                body: JSON.stringify({
+                  status: 'healthy',
+                  timestamp: result.rows[0].now
+                })
+              };
+            } catch (error) {
+              return {
+                statusCode: 500,
+                body: JSON.stringify({
+                  status: 'unhealthy',
+                  error: error.message
+                })
+              };
+            }
+          };
+      Environment:
+        Variables:
+          DATABASE_URL: !Sub "{{resolve:secretsmanager:curriculum-alignment/${Environment}/database:SecretString:connection_string}}"
+      Timeout: 30
+      Tags:
+        - Key: Project
+          Value: CurriculumAlignment
+        - Key: Environment
+          Value: !Ref Environment
+
+Outputs:
+  DatabaseSecretArn:
+    Description: "ARN of the database credentials secret"
+    Value: !Ref DatabaseCredentials
+    Export:
+      Name: !Sub "curriculum-alignment-${Environment}-database-secret"
+      
+  DatabaseHealthCheckArn:
+    Description: "ARN of the database health check function"
+    Value: !GetAtt DatabaseHealthCheck.Arn
+    Export:
+      Name: !Sub "curriculum-alignment-${Environment}-db-health-function"
