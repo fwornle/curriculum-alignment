@@ -197,7 +197,7 @@ Tasks are organized by component and phase:
     - Success: Authentication service working with token validation
     - Mark this task as in-progress in tasks.md, then complete when done
 
-- [ ] 14. Create LLM Model Configuration Service
+- [x] 14. Create LLM Model Configuration Service
   - **Files**: `src/services/llm-config.service.ts`, `src/types/llm-models.ts`
   - **Requirements**: LLM model configuration from requirements document
   - **Description**: Implement service for managing LLM model configurations per agent
@@ -210,7 +210,7 @@ Tasks are organized by component and phase:
     - Success: LLM configuration service with per-agent model selection
     - Mark this task as in-progress in tasks.md, then complete when done
 
-- [ ] 15. Implement Secrets Management
+- [x] 15. Implement Secrets Management
   - **Files**: `src/services/secrets.service.ts`
   - **Requirements**: Secure credential management from design document
   - **Description**: Create service for managing API keys and credentials via AWS Secrets Manager
@@ -223,7 +223,7 @@ Tasks are organized by component and phase:
     - Success: Secrets service retrieving credentials securely
     - Mark this task as in-progress in tasks.md, then complete when done
 
-- [ ] 16. Create Logging and Monitoring Service
+- [x] 16. Create Logging and Monitoring Service
   - **Files**: `src/services/logging.service.ts`, `src/services/metrics.service.ts`
   - **Requirements**: Monitoring requirements from design document
   - **Description**: Implement centralized logging and metrics collection
