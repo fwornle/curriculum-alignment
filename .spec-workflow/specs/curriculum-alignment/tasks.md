@@ -236,7 +236,7 @@ Tasks are organized by component and phase:
     - Success: Logging service sending structured logs to CloudWatch
     - Mark this task as in-progress in tasks.md, then complete when done
 
-- [ ] 17. Implement Cost Tracking Service
+- [x] 17. Implement Cost Tracking Service
   - **Files**: `src/services/cost-tracking.service.ts`
   - **Requirements**: Cost optimization from requirements document
   - **Description**: Create service for tracking LLM and AWS resource costs
@@ -249,7 +249,7 @@ Tasks are organized by component and phase:
     - Success: Cost tracking service monitoring all resource usage
     - Mark this task as in-progress in tasks.md, then complete when done
 
-- [ ] 18. Create Error Handling Framework
+- [x] 18. Create Error Handling Framework
   - **Files**: `src/utils/error-handler.ts`, `src/types/errors.ts`
   - **Requirements**: Error handling from design document
   - **Description**: Implement comprehensive error handling with retry logic
@@ -262,7 +262,7 @@ Tasks are organized by component and phase:
     - Success: Error handler with proper retry logic and error categorization
     - Mark this task as in-progress in tasks.md, then complete when done
 
-- [ ] 19. Implement File Storage Service
+- [x] 19. Implement File Storage Service
   - **Files**: `src/services/storage.service.ts`
   - **Requirements**: Document storage from design document
   - **Description**: Create service for S3 file operations
@@ -275,7 +275,7 @@ Tasks are organized by component and phase:
     - Success: Storage service handling all document operations
     - Mark this task as in-progress in tasks.md, then complete when done
 
-- [ ] 20. Create WebSocket Service
+- [x] 20. Create WebSocket Service
   - **Files**: `src/services/websocket.service.ts`
   - **Requirements**: Real-time communication from design document
   - **Description**: Implement WebSocket service for chat and status updates
