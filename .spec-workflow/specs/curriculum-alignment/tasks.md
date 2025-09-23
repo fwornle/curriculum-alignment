@@ -422,7 +422,7 @@ Tasks are organized by component and phase:
     - Success: Real-time agent status visible in dashboard
     - Mark this task as in-progress in tasks.md, then complete when done
 
-- [ ] 31. Create Step Functions Workflows
+- [x] 31. Create Step Functions Workflows
   - **Files**: `statemachine/workflows/*.asl.json`
   - **Requirements**: Workflow definitions from design document
   - **Description**: Define Step Functions for multi-agent workflows

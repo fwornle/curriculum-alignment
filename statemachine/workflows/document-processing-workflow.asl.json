@@ -1,0 +1,518 @@
+{
+  "Comment": "Document Processing Workflow - Handles batch processing of curriculum documents",
+  "StartAt": "ValidateDocuments",
+  "States": {
+    "ValidateDocuments": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "Parameters": {
+        "FunctionName": "${DocumentProcessingLambdaArn}",
+        "Payload": {
+          "action": "validateDocuments",
+          "documents.$": "$.documents",
+          "requestId.$": "$$.Execution.Name"
+        }
+      },
+      "ResultPath": "$.validation",
+      "Next": "CheckValidationResults",
+      "Retry": [
+        {
+          "ErrorEquals": ["States.TaskFailed"],
+          "IntervalSeconds": 2,
+          "MaxAttempts": 3,
+          "BackoffRate": 2.0
+        }
+      ],
+      "Catch": [
+        {
+          "ErrorEquals": ["States.ALL"],
+          "Next": "DocumentValidationFailed",
+          "ResultPath": "$.error"
+        }
+      ]
+    },
+
+    "CheckValidationResults": {
+      "Type": "Choice",
+      "Choices": [
+        {
+          "Variable": "$.validation.Payload.validDocuments",
+          "IsPresent": true,
+          "Next": "ProcessDocumentBatch"
+        }
+      ],
+      "Default": "DocumentValidationFailed"
+    },
+
+    "DocumentValidationFailed": {
+      "Type": "Fail",
+      "Cause": "Document validation failed",
+      "Error": "DocumentValidationError"
+    },
+
+    "ProcessDocumentBatch": {
+      "Type": "Map",
+      "Comment": "Process each document in parallel",
+      "ItemsPath": "$.validation.Payload.validDocuments",
+      "MaxConcurrency": 5,
+      "Iterator": {
+        "StartAt": "DetermineDocumentType",
+        "States": {
+          "DetermineDocumentType": {
+            "Type": "Task",
+            "Resource": "arn:aws:states:::lambda:invoke",
+            "Parameters": {
+              "FunctionName": "${DocumentProcessingLambdaArn}",
+              "Payload": {
+                "action": "determineDocumentType",
+                "document.$": "$",
+                "requestId.$": "$$.Execution.Name"
+              }
+            },
+            "ResultPath": "$.documentType",
+            "Next": "RouteByDocumentType",
+            "Retry": [
+              {
+                "ErrorEquals": ["States.TaskFailed"],
+                "IntervalSeconds": 2,
+                "MaxAttempts": 3,
+                "BackoffRate": 2.0
+              }
+            ],
+            "Catch": [
+              {
+                "ErrorEquals": ["States.ALL"],
+                "Next": "DocumentTypeDetectionFailed",
+                "ResultPath": "$.error"
+              }
+            ]
+          },
+
+          "DocumentTypeDetectionFailed": {
+            "Type": "Pass",
+            "Parameters": {
+              "status": "failed",
+              "error": "Document type detection failed",
+              "document.$": "$"
+            },
+            "End": true
+          },
+
+          "RouteByDocumentType": {
+            "Type": "Choice",
+            "Choices": [
+              {
+                "Variable": "$.documentType.Payload.type",
+                "StringEquals": "excel",
+                "Next": "ProcessExcelDocument"
+              },
+              {
+                "Variable": "$.documentType.Payload.type",
+                "StringEquals": "word",
+                "Next": "ProcessWordDocument"
+              },
+              {
+                "Variable": "$.documentType.Payload.type",
+                "StringEquals": "pdf",
+                "Next": "ProcessPDFDocument"
+              },
+              {
+                "Variable": "$.documentType.Payload.type",
+                "StringEquals": "csv",
+                "Next": "ProcessCSVDocument"
+              }
+            ],
+            "Default": "UnsupportedDocumentType"
+          },
+
+          "ProcessExcelDocument": {
+            "Type": "Task",
+            "Resource": "arn:aws:states:::lambda:invoke",
+            "Parameters": {
+              "FunctionName": "${DocumentProcessingLambdaArn}",
+              "Payload": {
+                "action": "processExcelDocument",
+                "document.$": "$",
+                "requestId.$": "$$.Execution.Name"
+              }
+            },
+            "ResultPath": "$.processedData",
+            "Next": "ValidateExtractedData",
+            "Retry": [
+              {
+                "ErrorEquals": ["States.TaskFailed"],
+                "IntervalSeconds": 3,
+                "MaxAttempts": 3,
+                "BackoffRate": 2.0
+              }
+            ],
+            "Catch": [
+              {
+                "ErrorEquals": ["States.ALL"],
+                "Next": "DocumentProcessingFailed",
+                "ResultPath": "$.error"
+              }
+            ]
+          },
+
+          "ProcessWordDocument": {
+            "Type": "Task",
+            "Resource": "arn:aws:states:::lambda:invoke",
+            "Parameters": {
+              "FunctionName": "${DocumentProcessingLambdaArn}",
+              "Payload": {
+                "action": "processWordDocument",
+                "document.$": "$",
+                "requestId.$": "$$.Execution.Name"
+              }
+            },
+            "ResultPath": "$.processedData",
+            "Next": "ValidateExtractedData",
+            "Retry": [
+              {
+                "ErrorEquals": ["States.TaskFailed"],
+                "IntervalSeconds": 3,
+                "MaxAttempts": 3,
+                "BackoffRate": 2.0
+              }
+            ],
+            "Catch": [
+              {
+                "ErrorEquals": ["States.ALL"],
+                "Next": "DocumentProcessingFailed",
+                "ResultPath": "$.error"
+              }
+            ]
+          },
+
+          "ProcessPDFDocument": {
+            "Type": "Task",
+            "Resource": "arn:aws:states:::lambda:invoke",
+            "Parameters": {
+              "FunctionName": "${DocumentProcessingLambdaArn}",
+              "Payload": {
+                "action": "processPDFDocument",
+                "document.$": "$",
+                "requestId.$": "$$.Execution.Name"
+              }
+            },
+            "ResultPath": "$.processedData",
+            "Next": "ValidateExtractedData",
+            "Retry": [
+              {
+                "ErrorEquals": ["States.TaskFailed"],
+                "IntervalSeconds": 5,
+                "MaxAttempts": 2,
+                "BackoffRate": 2.0
+              }
+            ],
+            "Catch": [
+              {
+                "ErrorEquals": ["States.ALL"],
+                "Next": "DocumentProcessingFailed",
+                "ResultPath": "$.error"
+              }
+            ]
+          },
+
+          "ProcessCSVDocument": {
+            "Type": "Task",
+            "Resource": "arn:aws:states:::lambda:invoke",
+            "Parameters": {
+              "FunctionName": "${DocumentProcessingLambdaArn}",
+              "Payload": {
+                "action": "processCSVDocument",
+                "document.$": "$",
+                "requestId.$": "$$.Execution.Name"
+              }
+            },
+            "ResultPath": "$.processedData",
+            "Next": "ValidateExtractedData",
+            "Retry": [
+              {
+                "ErrorEquals": ["States.TaskFailed"],
+                "IntervalSeconds": 2,
+                "MaxAttempts": 3,
+                "BackoffRate": 2.0
+              }
+            ],
+            "Catch": [
+              {
+                "ErrorEquals": ["States.ALL"],
+                "Next": "DocumentProcessingFailed",
+                "ResultPath": "$.error"
+              }
+            ]
+          },
+
+          "UnsupportedDocumentType": {
+            "Type": "Pass",
+            "Parameters": {
+              "status": "failed",
+              "error": "Unsupported document type",
+              "document.$": "$",
+              "documentType.$": "$.documentType.Payload.type"
+            },
+            "End": true
+          },
+
+          "DocumentProcessingFailed": {
+            "Type": "Pass",
+            "Parameters": {
+              "status": "failed",
+              "error": "Document processing failed",
+              "document.$": "$",
+              "processingError.$": "$.error"
+            },
+            "End": true
+          },
+
+          "ValidateExtractedData": {
+            "Type": "Task",
+            "Resource": "arn:aws:states:::lambda:invoke",
+            "Parameters": {
+              "FunctionName": "${QALambdaArn}",
+              "Payload": {
+                "action": "validateExtractedData",
+                "data.$": "$.processedData.Payload",
+                "document.$": "$",
+                "requestId.$": "$$.Execution.Name"
+              }
+            },
+            "ResultPath": "$.dataValidation",
+            "Next": "CheckDataQuality",
+            "Retry": [
+              {
+                "ErrorEquals": ["States.TaskFailed"],
+                "IntervalSeconds": 2,
+                "MaxAttempts": 3,
+                "BackoffRate": 2.0
+              }
+            ],
+            "Catch": [
+              {
+                "ErrorEquals": ["States.ALL"],
+                "Next": "DataValidationFailed",
+                "ResultPath": "$.error"
+              }
+            ]
+          },
+
+          "CheckDataQuality": {
+            "Type": "Choice",
+            "Choices": [
+              {
+                "Variable": "$.dataValidation.Payload.qualityScore",
+                "NumericGreaterThan": 0.8,
+                "Next": "StoreProcessedDocument"
+              },
+              {
+                "Variable": "$.dataValidation.Payload.qualityScore",
+                "NumericGreaterThan": 0.6,
+                "Next": "CorrectDataIssues"
+              }
+            ],
+            "Default": "DataValidationFailed"
+          },
+
+          "CorrectDataIssues": {
+            "Type": "Task",
+            "Resource": "arn:aws:states:::lambda:invoke",
+            "Parameters": {
+              "FunctionName": "${QALambdaArn}",
+              "Payload": {
+                "action": "correctDataIssues",
+                "data.$": "$.processedData.Payload",
+                "issues.$": "$.dataValidation.Payload.issues",
+                "requestId.$": "$$.Execution.Name"
+              }
+            },
+            "ResultPath": "$.correctedData",
+            "Next": "StoreProcessedDocument",
+            "Retry": [
+              {
+                "ErrorEquals": ["States.TaskFailed"],
+                "IntervalSeconds": 3,
+                "MaxAttempts": 2,
+                "BackoffRate": 2.0
+              }
+            ],
+            "Catch": [
+              {
+                "ErrorEquals": ["States.ALL"],
+                "Next": "DataValidationFailed",
+                "ResultPath": "$.error"
+              }
+            ]
+          },
+
+          "DataValidationFailed": {
+            "Type": "Pass",
+            "Parameters": {
+              "status": "failed",
+              "error": "Data validation failed",
+              "document.$": "$",
+              "validationError.$": "$.error"
+            },
+            "End": true
+          },
+
+          "StoreProcessedDocument": {
+            "Type": "Task",
+            "Resource": "arn:aws:states:::lambda:invoke",
+            "Parameters": {
+              "FunctionName": "${DocumentProcessingLambdaArn}",
+              "Payload": {
+                "action": "storeProcessedDocument",
+                "document.$": "$",
+                "processedData.$": "$.correctedData.Payload",
+                "requestId.$": "$$.Execution.Name"
+              }
+            },
+            "ResultPath": "$.storageResult",
+            "Next": "DocumentProcessed",
+            "Retry": [
+              {
+                "ErrorEquals": ["States.TaskFailed"],
+                "IntervalSeconds": 2,
+                "MaxAttempts": 3,
+                "BackoffRate": 2.0
+              }
+            ],
+            "Catch": [
+              {
+                "ErrorEquals": ["States.ALL"],
+                "Next": "StorageFailed",
+                "ResultPath": "$.error"
+              }
+            ]
+          },
+
+          "StorageFailed": {
+            "Type": "Pass",
+            "Parameters": {
+              "status": "failed",
+              "error": "Document storage failed",
+              "document.$": "$",
+              "storageError.$": "$.error"
+            },
+            "End": true
+          },
+
+          "DocumentProcessed": {
+            "Type": "Pass",
+            "Parameters": {
+              "status": "completed",
+              "document.$": "$",
+              "processedData.$": "$.correctedData.Payload",
+              "storageResult.$": "$.storageResult.Payload",
+              "processingTime.$": "$$.State.EnteredTime"
+            },
+            "End": true
+          }
+        }
+      },
+      "ResultPath": "$.processedDocuments",
+      "Next": "AggregateResults",
+      "Catch": [
+        {
+          "ErrorEquals": ["States.ALL"],
+          "Next": "BatchProcessingFailed",
+          "ResultPath": "$.error"
+        }
+      ]
+    },
+
+    "BatchProcessingFailed": {
+      "Type": "Fail",
+      "Cause": "Batch document processing failed",
+      "Error": "BatchProcessingError"
+    },
+
+    "AggregateResults": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "Parameters": {
+        "FunctionName": "${DocumentProcessingLambdaArn}",
+        "Payload": {
+          "action": "aggregateProcessingResults",
+          "processedDocuments.$": "$.processedDocuments",
+          "originalRequest.$": "$",
+          "requestId.$": "$$.Execution.Name"
+        }
+      },
+      "ResultPath": "$.aggregatedResults",
+      "Next": "NotifyCompletion",
+      "Retry": [
+        {
+          "ErrorEquals": ["States.TaskFailed"],
+          "IntervalSeconds": 3,
+          "MaxAttempts": 3,
+          "BackoffRate": 2.0
+        }
+      ],
+      "Catch": [
+        {
+          "ErrorEquals": ["States.ALL"],
+          "Next": "AggregationFailed",
+          "ResultPath": "$.error"
+        }
+      ]
+    },
+
+    "AggregationFailed": {
+      "Type": "Fail",
+      "Cause": "Result aggregation failed",
+      "Error": "AggregationError"
+    },
+
+    "NotifyCompletion": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "Parameters": {
+        "FunctionName": "${CoordinatorLambdaArn}",
+        "Payload": {
+          "action": "notifyDocumentProcessingCompletion",
+          "results.$": "$.aggregatedResults.Payload",
+          "requestId.$": "$$.Execution.Name"
+        }
+      },
+      "ResultPath": "$.notification",
+      "Next": "ProcessingComplete",
+      "Retry": [
+        {
+          "ErrorEquals": ["States.TaskFailed"],
+          "IntervalSeconds": 2,
+          "MaxAttempts": 2,
+          "BackoffRate": 2.0
+        }
+      ],
+      "Catch": [
+        {
+          "ErrorEquals": ["States.ALL"],
+          "Next": "ProcessingComplete",
+          "ResultPath": "$.notificationError"
+        }
+      ]
+    },
+
+    "ProcessingComplete": {
+      "Type": "Pass",
+      "Comment": "Document processing completed",
+      "Parameters": {
+        "status": "completed",
+        "requestId.$": "$$.Execution.Name",
+        "completedAt.$": "$$.State.EnteredTime",
+        "results.$": "$.aggregatedResults.Payload",
+        "summary": {
+          "totalDocuments.$": "$.processedDocuments[*].length",
+          "successfullyProcessed.$": "$.processedDocuments[?(@.status=='completed')].length",
+          "failed.$": "$.processedDocuments[?(@.status=='failed')].length"
+        }
+      },
+      "End": true
+    }
+  },
+  "TimeoutSeconds": 1800,
+  "Comment": "This workflow handles batch processing of curriculum documents with quality assurance"
+}

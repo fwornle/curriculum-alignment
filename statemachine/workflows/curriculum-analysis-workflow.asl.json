@@ -1,0 +1,504 @@
+{
+  "Comment": "Multi-Agent Curriculum Analysis Workflow - Orchestrates the complete curriculum analysis process",
+  "StartAt": "ValidateInput",
+  "States": {
+    "ValidateInput": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "Parameters": {
+        "FunctionName": "${ValidatorLambdaArn}",
+        "Payload": {
+          "action": "validateAnalysisRequest",
+          "input.$": "$",
+          "requestId.$": "$$.Execution.Name"
+        }
+      },
+      "ResultPath": "$.validation",
+      "Next": "CheckValidationResult",
+      "Retry": [
+        {
+          "ErrorEquals": ["States.TaskFailed"],
+          "IntervalSeconds": 2,
+          "MaxAttempts": 3,
+          "BackoffRate": 2.0
+        }
+      ],
+      "Catch": [
+        {
+          "ErrorEquals": ["States.ALL"],
+          "Next": "ValidationFailed",
+          "ResultPath": "$.error"
+        }
+      ]
+    },
+
+    "CheckValidationResult": {
+      "Type": "Choice",
+      "Choices": [
+        {
+          "Variable": "$.validation.Payload.isValid",
+          "BooleanEquals": true,
+          "Next": "InitializeAnalysis"
+        }
+      ],
+      "Default": "ValidationFailed"
+    },
+
+    "ValidationFailed": {
+      "Type": "Fail",
+      "Cause": "Input validation failed",
+      "Error": "ValidationError"
+    },
+
+    "InitializeAnalysis": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "Parameters": {
+        "FunctionName": "${CoordinatorLambdaArn}",
+        "Payload": {
+          "action": "initializeAnalysis",
+          "analysisRequest.$": "$",
+          "requestId.$": "$$.Execution.Name"
+        }
+      },
+      "ResultPath": "$.analysis",
+      "Next": "ParallelDataCollection",
+      "Retry": [
+        {
+          "ErrorEquals": ["States.TaskFailed"],
+          "IntervalSeconds": 2,
+          "MaxAttempts": 3,
+          "BackoffRate": 2.0
+        }
+      ],
+      "Catch": [
+        {
+          "ErrorEquals": ["States.ALL"],
+          "Next": "InitializationFailed",
+          "ResultPath": "$.error"
+        }
+      ]
+    },
+
+    "InitializationFailed": {
+      "Type": "Fail",
+      "Cause": "Analysis initialization failed",
+      "Error": "InitializationError"
+    },
+
+    "ParallelDataCollection": {
+      "Type": "Parallel",
+      "Comment": "Collect data from multiple sources simultaneously",
+      "Branches": [
+        {
+          "StartAt": "WebSearchBranch",
+          "States": {
+            "WebSearchBranch": {
+              "Type": "Task",
+              "Resource": "arn:aws:states:::lambda:invoke",
+              "Parameters": {
+                "FunctionName": "${WebSearchLambdaArn}",
+                "Payload": {
+                  "action": "searchUniversityCurricula",
+                  "searchTerms.$": "$.analysis.Payload.searchTerms",
+                  "requestId.$": "$$.Execution.Name"
+                }
+              },
+              "End": true,
+              "Retry": [
+                {
+                  "ErrorEquals": ["States.TaskFailed"],
+                  "IntervalSeconds": 5,
+                  "MaxAttempts": 3,
+                  "BackoffRate": 2.0
+                }
+              ],
+              "Catch": [
+                {
+                  "ErrorEquals": ["States.ALL"],
+                  "Result": {
+                    "status": "failed",
+                    "error": "Web search failed"
+                  },
+                  "End": true
+                }
+              ]
+            }
+          }
+        },
+        {
+          "StartAt": "DocumentProcessingBranch",
+          "States": {
+            "DocumentProcessingBranch": {
+              "Type": "Task",
+              "Resource": "arn:aws:states:::lambda:invoke",
+              "Parameters": {
+                "FunctionName": "${DocumentProcessingLambdaArn}",
+                "Payload": {
+                  "action": "processDocuments",
+                  "documents.$": "$.analysis.Payload.documents",
+                  "requestId.$": "$$.Execution.Name"
+                }
+              },
+              "End": true,
+              "Retry": [
+                {
+                  "ErrorEquals": ["States.TaskFailed"],
+                  "IntervalSeconds": 3,
+                  "MaxAttempts": 3,
+                  "BackoffRate": 2.0
+                }
+              ],
+              "Catch": [
+                {
+                  "ErrorEquals": ["States.ALL"],
+                  "Result": {
+                    "status": "failed",
+                    "error": "Document processing failed"
+                  },
+                  "End": true
+                }
+              ]
+            }
+          }
+        },
+        {
+          "StartAt": "BrowserScrapingBranch",
+          "States": {
+            "BrowserScrapingBranch": {
+              "Type": "Task",
+              "Resource": "arn:aws:states:::lambda:invoke",
+              "Parameters": {
+                "FunctionName": "${BrowserLambdaArn}",
+                "Payload": {
+                  "action": "scrapeUniversityData",
+                  "targets.$": "$.analysis.Payload.scrapingTargets",
+                  "requestId.$": "$$.Execution.Name"
+                }
+              },
+              "End": true,
+              "Retry": [
+                {
+                  "ErrorEquals": ["States.TaskFailed"],
+                  "IntervalSeconds": 10,
+                  "MaxAttempts": 2,
+                  "BackoffRate": 2.0
+                }
+              ],
+              "Catch": [
+                {
+                  "ErrorEquals": ["States.ALL"],
+                  "Result": {
+                    "status": "failed",
+                    "error": "Browser scraping failed"
+                  },
+                  "End": true
+                }
+              ]
+            }
+          }
+        }
+      ],
+      "ResultPath": "$.collectedData",
+      "Next": "ProcessCollectedData",
+      "Catch": [
+        {
+          "ErrorEquals": ["States.ALL"],
+          "Next": "DataCollectionFailed",
+          "ResultPath": "$.error"
+        }
+      ]
+    },
+
+    "DataCollectionFailed": {
+      "Type": "Pass",
+      "Comment": "Handle partial data collection failures",
+      "Parameters": {
+        "status": "partial_failure",
+        "message": "Some data collection failed but continuing with available data",
+        "error.$": "$.error"
+      },
+      "ResultPath": "$.dataCollectionStatus",
+      "Next": "ProcessCollectedData"
+    },
+
+    "ProcessCollectedData": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "Parameters": {
+        "FunctionName": "${CoordinatorLambdaArn}",
+        "Payload": {
+          "action": "processCollectedData",
+          "collectedData.$": "$.collectedData",
+          "analysisContext.$": "$.analysis.Payload",
+          "requestId.$": "$$.Execution.Name"
+        }
+      },
+      "ResultPath": "$.processedData",
+      "Next": "QualityAssurance",
+      "Retry": [
+        {
+          "ErrorEquals": ["States.TaskFailed"],
+          "IntervalSeconds": 3,
+          "MaxAttempts": 3,
+          "BackoffRate": 2.0
+        }
+      ],
+      "Catch": [
+        {
+          "ErrorEquals": ["States.ALL"],
+          "Next": "DataProcessingFailed",
+          "ResultPath": "$.error"
+        }
+      ]
+    },
+
+    "DataProcessingFailed": {
+      "Type": "Fail",
+      "Cause": "Data processing failed",
+      "Error": "DataProcessingError"
+    },
+
+    "QualityAssurance": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "Parameters": {
+        "FunctionName": "${QALambdaArn}",
+        "Payload": {
+          "action": "performQualityCheck",
+          "data.$": "$.processedData.Payload",
+          "requestId.$": "$$.Execution.Name"
+        }
+      },
+      "ResultPath": "$.qualityCheck",
+      "Next": "CheckQualityResults",
+      "Retry": [
+        {
+          "ErrorEquals": ["States.TaskFailed"],
+          "IntervalSeconds": 2,
+          "MaxAttempts": 3,
+          "BackoffRate": 2.0
+        }
+      ],
+      "Catch": [
+        {
+          "ErrorEquals": ["States.ALL"],
+          "Next": "QualityCheckFailed",
+          "ResultPath": "$.error"
+        }
+      ]
+    },
+
+    "CheckQualityResults": {
+      "Type": "Choice",
+      "Choices": [
+        {
+          "Variable": "$.qualityCheck.Payload.qualityScore",
+          "NumericGreaterThan": 0.8,
+          "Next": "AccreditationAnalysis"
+        },
+        {
+          "Variable": "$.qualityCheck.Payload.qualityScore",
+          "NumericGreaterThan": 0.6,
+          "Next": "QualityCorrection"
+        }
+      ],
+      "Default": "QualityCheckFailed"
+    },
+
+    "QualityCorrection": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "Parameters": {
+        "FunctionName": "${QALambdaArn}",
+        "Payload": {
+          "action": "correctQualityIssues",
+          "data.$": "$.processedData.Payload",
+          "issues.$": "$.qualityCheck.Payload.issues",
+          "requestId.$": "$$.Execution.Name"
+        }
+      },
+      "ResultPath": "$.correctedData",
+      "Next": "AccreditationAnalysis",
+      "Retry": [
+        {
+          "ErrorEquals": ["States.TaskFailed"],
+          "IntervalSeconds": 3,
+          "MaxAttempts": 2,
+          "BackoffRate": 2.0
+        }
+      ],
+      "Catch": [
+        {
+          "ErrorEquals": ["States.ALL"],
+          "Next": "QualityCheckFailed",
+          "ResultPath": "$.error"
+        }
+      ]
+    },
+
+    "QualityCheckFailed": {
+      "Type": "Fail",
+      "Cause": "Quality assurance failed",
+      "Error": "QualityError"
+    },
+
+    "AccreditationAnalysis": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "Parameters": {
+        "FunctionName": "${AccreditationExpertLambdaArn}",
+        "Payload": {
+          "action": "performAccreditationAnalysis",
+          "curricula.$": "$.correctedData.Payload",
+          "program.$": "$.analysis.Payload.program",
+          "requestId.$": "$$.Execution.Name"
+        }
+      },
+      "ResultPath": "$.accreditationAnalysis",
+      "Next": "SemanticAnalysis",
+      "Retry": [
+        {
+          "ErrorEquals": ["States.TaskFailed"],
+          "IntervalSeconds": 5,
+          "MaxAttempts": 3,
+          "BackoffRate": 2.0
+        }
+      ],
+      "Catch": [
+        {
+          "ErrorEquals": ["States.ALL"],
+          "Next": "AccreditationAnalysisFailed",
+          "ResultPath": "$.error"
+        }
+      ]
+    },
+
+    "AccreditationAnalysisFailed": {
+      "Type": "Fail",
+      "Cause": "Accreditation analysis failed",
+      "Error": "AccreditationAnalysisError"
+    },
+
+    "SemanticAnalysis": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "Parameters": {
+        "FunctionName": "${SemanticSearchLambdaArn}",
+        "Payload": {
+          "action": "performSemanticAnalysis",
+          "curricula.$": "$.correctedData.Payload",
+          "analysisContext.$": "$.accreditationAnalysis.Payload",
+          "requestId.$": "$$.Execution.Name"
+        }
+      },
+      "ResultPath": "$.semanticAnalysis",
+      "Next": "GenerateReport",
+      "Retry": [
+        {
+          "ErrorEquals": ["States.TaskFailed"],
+          "IntervalSeconds": 3,
+          "MaxAttempts": 3,
+          "BackoffRate": 2.0
+        }
+      ],
+      "Catch": [
+        {
+          "ErrorEquals": ["States.ALL"],
+          "Next": "SemanticAnalysisFailed",
+          "ResultPath": "$.error"
+        }
+      ]
+    },
+
+    "SemanticAnalysisFailed": {
+      "Type": "Fail",
+      "Cause": "Semantic analysis failed",
+      "Error": "SemanticAnalysisError"
+    },
+
+    "GenerateReport": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "Parameters": {
+        "FunctionName": "${CoordinatorLambdaArn}",
+        "Payload": {
+          "action": "generateAnalysisReport",
+          "accreditationAnalysis.$": "$.accreditationAnalysis.Payload",
+          "semanticAnalysis.$": "$.semanticAnalysis.Payload",
+          "originalRequest.$": "$.analysis.Payload",
+          "requestId.$": "$$.Execution.Name"
+        }
+      },
+      "ResultPath": "$.finalReport",
+      "Next": "NotifyCompletion",
+      "Retry": [
+        {
+          "ErrorEquals": ["States.TaskFailed"],
+          "IntervalSeconds": 3,
+          "MaxAttempts": 3,
+          "BackoffRate": 2.0
+        }
+      ],
+      "Catch": [
+        {
+          "ErrorEquals": ["States.ALL"],
+          "Next": "ReportGenerationFailed",
+          "ResultPath": "$.error"
+        }
+      ]
+    },
+
+    "ReportGenerationFailed": {
+      "Type": "Fail",
+      "Cause": "Report generation failed",
+      "Error": "ReportGenerationError"
+    },
+
+    "NotifyCompletion": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "Parameters": {
+        "FunctionName": "${CoordinatorLambdaArn}",
+        "Payload": {
+          "action": "notifyAnalysisCompletion",
+          "report.$": "$.finalReport.Payload",
+          "originalRequest.$": "$.analysis.Payload",
+          "requestId.$": "$$.Execution.Name"
+        }
+      },
+      "ResultPath": "$.notification",
+      "Next": "AnalysisComplete",
+      "Retry": [
+        {
+          "ErrorEquals": ["States.TaskFailed"],
+          "IntervalSeconds": 2,
+          "MaxAttempts": 2,
+          "BackoffRate": 2.0
+        }
+      ],
+      "Catch": [
+        {
+          "ErrorEquals": ["States.ALL"],
+          "Next": "AnalysisComplete",
+          "ResultPath": "$.notificationError"
+        }
+      ]
+    },
+
+    "AnalysisComplete": {
+      "Type": "Pass",
+      "Comment": "Analysis completed successfully",
+      "Parameters": {
+        "status": "completed",
+        "requestId.$": "$$.Execution.Name",
+        "completedAt.$": "$$.State.EnteredTime",
+        "report.$": "$.finalReport.Payload",
+        "executionArn.$": "$$.Execution.Name"
+      },
+      "End": true
+    }
+  },
+  "TimeoutSeconds": 3600,
+  "Comment": "This workflow orchestrates the complete curriculum analysis process using multiple specialized agents"
+}

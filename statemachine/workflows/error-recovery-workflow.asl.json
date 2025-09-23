@@ -1,0 +1,590 @@
+{
+  "Comment": "Error Recovery Workflow - Handles failed agent tasks and implements recovery strategies",
+  "StartAt": "AnalyzeFailure",
+  "States": {
+    "AnalyzeFailure": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "Parameters": {
+        "FunctionName": "${DLQHandlerLambdaArn}",
+        "Payload": {
+          "action": "analyzeFailure",
+          "failedExecution.$": "$",
+          "requestId.$": "$$.Execution.Name"
+        }
+      },
+      "ResultPath": "$.failureAnalysis",
+      "Next": "DetermineRecoveryStrategy",
+      "Retry": [
+        {
+          "ErrorEquals": ["States.TaskFailed"],
+          "IntervalSeconds": 2,
+          "MaxAttempts": 3,
+          "BackoffRate": 2.0
+        }
+      ],
+      "Catch": [
+        {
+          "ErrorEquals": ["States.ALL"],
+          "Next": "AnalysisFailed",
+          "ResultPath": "$.error"
+        }
+      ]
+    },
+
+    "AnalysisFailed": {
+      "Type": "Fail",
+      "Cause": "Failure analysis failed",
+      "Error": "AnalysisError"
+    },
+
+    "DetermineRecoveryStrategy": {
+      "Type": "Choice",
+      "Choices": [
+        {
+          "Variable": "$.failureAnalysis.Payload.recoveryStrategy",
+          "StringEquals": "retry",
+          "Next": "RetryExecution"
+        },
+        {
+          "Variable": "$.failureAnalysis.Payload.recoveryStrategy",
+          "StringEquals": "partial_retry",
+          "Next": "PartialRetry"
+        },
+        {
+          "Variable": "$.failureAnalysis.Payload.recoveryStrategy",
+          "StringEquals": "fallback",
+          "Next": "FallbackExecution"
+        },
+        {
+          "Variable": "$.failureAnalysis.Payload.recoveryStrategy",
+          "StringEquals": "escalate",
+          "Next": "EscalateToOperations"
+        }
+      ],
+      "Default": "ManualIntervention"
+    },
+
+    "RetryExecution": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "Parameters": {
+        "FunctionName": "${DLQHandlerLambdaArn}",
+        "Payload": {
+          "action": "prepareRetry",
+          "failedExecution.$": "$",
+          "retryConfiguration.$": "$.failureAnalysis.Payload.retryConfig",
+          "requestId.$": "$$.Execution.Name"
+        }
+      },
+      "ResultPath": "$.retryPreparation",
+      "Next": "WaitBeforeRetry",
+      "Retry": [
+        {
+          "ErrorEquals": ["States.TaskFailed"],
+          "IntervalSeconds": 2,
+          "MaxAttempts": 3,
+          "BackoffRate": 2.0
+        }
+      ],
+      "Catch": [
+        {
+          "ErrorEquals": ["States.ALL"],
+          "Next": "RetryPreparationFailed",
+          "ResultPath": "$.error"
+        }
+      ]
+    },
+
+    "RetryPreparationFailed": {
+      "Type": "Fail",
+      "Cause": "Retry preparation failed",
+      "Error": "RetryPreparationError"
+    },
+
+    "WaitBeforeRetry": {
+      "Type": "Wait",
+      "SecondsPath": "$.retryPreparation.Payload.waitSeconds",
+      "Next": "ExecuteRetry"
+    },
+
+    "ExecuteRetry": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::aws-sdk:stepfunctions:startExecution",
+      "Parameters": {
+        "StateMachineArn.$": "$.retryPreparation.Payload.originalStateMachine",
+        "Input.$": "$.retryPreparation.Payload.retryInput",
+        "Name.$": "$.retryPreparation.Payload.retryExecutionName"
+      },
+      "ResultPath": "$.retryExecution",
+      "Next": "MonitorRetry",
+      "Retry": [
+        {
+          "ErrorEquals": ["States.TaskFailed"],
+          "IntervalSeconds": 5,
+          "MaxAttempts": 2,
+          "BackoffRate": 2.0
+        }
+      ],
+      "Catch": [
+        {
+          "ErrorEquals": ["States.ALL"],
+          "Next": "RetryExecutionFailed",
+          "ResultPath": "$.error"
+        }
+      ]
+    },
+
+    "RetryExecutionFailed": {
+      "Type": "Pass",
+      "Comment": "Retry execution failed, escalate",
+      "Parameters": {
+        "status": "retry_failed",
+        "error.$": "$.error",
+        "originalFailure.$": "$.failureAnalysis.Payload"
+      },
+      "Next": "EscalateToOperations"
+    },
+
+    "MonitorRetry": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::aws-sdk:stepfunctions:describeExecution",
+      "Parameters": {
+        "ExecutionArn.$": "$.retryExecution.ExecutionArn"
+      },
+      "ResultPath": "$.retryStatus",
+      "Next": "CheckRetryStatus",
+      "Retry": [
+        {
+          "ErrorEquals": ["States.TaskFailed"],
+          "IntervalSeconds": 5,
+          "MaxAttempts": 3,
+          "BackoffRate": 2.0
+        }
+      ],
+      "Catch": [
+        {
+          "ErrorEquals": ["States.ALL"],
+          "Next": "RetryMonitoringFailed",
+          "ResultPath": "$.error"
+        }
+      ]
+    },
+
+    "CheckRetryStatus": {
+      "Type": "Choice",
+      "Choices": [
+        {
+          "Variable": "$.retryStatus.Status",
+          "StringEquals": "SUCCEEDED",
+          "Next": "RetrySuccessful"
+        },
+        {
+          "Variable": "$.retryStatus.Status",
+          "StringEquals": "FAILED",
+          "Next": "RetryFailed"
+        },
+        {
+          "Variable": "$.retryStatus.Status",
+          "StringEquals": "RUNNING",
+          "Next": "WaitForRetryCompletion"
+        }
+      ],
+      "Default": "RetryStatusUnknown"
+    },
+
+    "WaitForRetryCompletion": {
+      "Type": "Wait",
+      "Seconds": 30,
+      "Next": "MonitorRetry"
+    },
+
+    "RetrySuccessful": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "Parameters": {
+        "FunctionName": "${DLQHandlerLambdaArn}",
+        "Payload": {
+          "action": "recordRecoverySuccess",
+          "originalFailure.$": "$.failureAnalysis.Payload",
+          "retryExecution.$": "$.retryExecution",
+          "requestId.$": "$$.Execution.Name"
+        }
+      },
+      "ResultPath": "$.recoveryResult",
+      "Next": "RecoveryComplete",
+      "Retry": [
+        {
+          "ErrorEquals": ["States.TaskFailed"],
+          "IntervalSeconds": 2,
+          "MaxAttempts": 3,
+          "BackoffRate": 2.0
+        }
+      ],
+      "Catch": [
+        {
+          "ErrorEquals": ["States.ALL"],
+          "Next": "RecoveryComplete",
+          "ResultPath": "$.recordingError"
+        }
+      ]
+    },
+
+    "RetryFailed": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "Parameters": {
+        "FunctionName": "${DLQHandlerLambdaArn}",
+        "Payload": {
+          "action": "handleRetryFailure",
+          "originalFailure.$": "$.failureAnalysis.Payload",
+          "retryFailure.$": "$.retryStatus",
+          "requestId.$": "$$.Execution.Name"
+        }
+      },
+      "ResultPath": "$.retryFailureAnalysis",
+      "Next": "CheckRetryLimit",
+      "Retry": [
+        {
+          "ErrorEquals": ["States.TaskFailed"],
+          "IntervalSeconds": 2,
+          "MaxAttempts": 3,
+          "BackoffRate": 2.0
+        }
+      ],
+      "Catch": [
+        {
+          "ErrorEquals": ["States.ALL"],
+          "Next": "EscalateToOperations",
+          "ResultPath": "$.error"
+        }
+      ]
+    },
+
+    "CheckRetryLimit": {
+      "Type": "Choice",
+      "Choices": [
+        {
+          "Variable": "$.retryFailureAnalysis.Payload.shouldRetryAgain",
+          "BooleanEquals": true,
+          "Next": "WaitBeforeRetry"
+        }
+      ],
+      "Default": "EscalateToOperations"
+    },
+
+    "RetryStatusUnknown": {
+      "Type": "Pass",
+      "Comment": "Unknown retry status, escalate",
+      "Parameters": {
+        "status": "unknown_retry_status",
+        "retryStatus.$": "$.retryStatus"
+      },
+      "Next": "EscalateToOperations"
+    },
+
+    "RetryMonitoringFailed": {
+      "Type": "Pass",
+      "Comment": "Failed to monitor retry, escalate",
+      "Parameters": {
+        "status": "monitoring_failed",
+        "error.$": "$.error"
+      },
+      "Next": "EscalateToOperations"
+    },
+
+    "PartialRetry": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "Parameters": {
+        "FunctionName": "${DLQHandlerLambdaArn}",
+        "Payload": {
+          "action": "executePartialRetry",
+          "failedExecution.$": "$",
+          "partialRetryConfig.$": "$.failureAnalysis.Payload.partialRetryConfig",
+          "requestId.$": "$$.Execution.Name"
+        }
+      },
+      "ResultPath": "$.partialRetryResult",
+      "Next": "CheckPartialRetryResult",
+      "Retry": [
+        {
+          "ErrorEquals": ["States.TaskFailed"],
+          "IntervalSeconds": 3,
+          "MaxAttempts": 3,
+          "BackoffRate": 2.0
+        }
+      ],
+      "Catch": [
+        {
+          "ErrorEquals": ["States.ALL"],
+          "Next": "PartialRetryFailed",
+          "ResultPath": "$.error"
+        }
+      ]
+    },
+
+    "CheckPartialRetryResult": {
+      "Type": "Choice",
+      "Choices": [
+        {
+          "Variable": "$.partialRetryResult.Payload.success",
+          "BooleanEquals": true,
+          "Next": "PartialRetrySuccessful"
+        }
+      ],
+      "Default": "PartialRetryFailed"
+    },
+
+    "PartialRetrySuccessful": {
+      "Type": "Pass",
+      "Comment": "Partial retry successful",
+      "Parameters": {
+        "status": "partial_retry_successful",
+        "result.$": "$.partialRetryResult.Payload"
+      },
+      "Next": "RecoveryComplete"
+    },
+
+    "PartialRetryFailed": {
+      "Type": "Pass",
+      "Comment": "Partial retry failed, try fallback",
+      "Parameters": {
+        "status": "partial_retry_failed",
+        "error.$": "$.error"
+      },
+      "Next": "FallbackExecution"
+    },
+
+    "FallbackExecution": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "Parameters": {
+        "FunctionName": "${DLQHandlerLambdaArn}",
+        "Payload": {
+          "action": "executeFallback",
+          "failedExecution.$": "$",
+          "fallbackConfig.$": "$.failureAnalysis.Payload.fallbackConfig",
+          "requestId.$": "$$.Execution.Name"
+        }
+      },
+      "ResultPath": "$.fallbackResult",
+      "Next": "CheckFallbackResult",
+      "Retry": [
+        {
+          "ErrorEquals": ["States.TaskFailed"],
+          "IntervalSeconds": 3,
+          "MaxAttempts": 2,
+          "BackoffRate": 2.0
+        }
+      ],
+      "Catch": [
+        {
+          "ErrorEquals": ["States.ALL"],
+          "Next": "FallbackFailed",
+          "ResultPath": "$.error"
+        }
+      ]
+    },
+
+    "CheckFallbackResult": {
+      "Type": "Choice",
+      "Choices": [
+        {
+          "Variable": "$.fallbackResult.Payload.success",
+          "BooleanEquals": true,
+          "Next": "FallbackSuccessful"
+        }
+      ],
+      "Default": "FallbackFailed"
+    },
+
+    "FallbackSuccessful": {
+      "Type": "Pass",
+      "Comment": "Fallback execution successful",
+      "Parameters": {
+        "status": "fallback_successful",
+        "result.$": "$.fallbackResult.Payload"
+      },
+      "Next": "RecoveryComplete"
+    },
+
+    "FallbackFailed": {
+      "Type": "Pass",
+      "Comment": "Fallback failed, escalate to operations",
+      "Parameters": {
+        "status": "fallback_failed",
+        "error.$": "$.error"
+      },
+      "Next": "EscalateToOperations"
+    },
+
+    "EscalateToOperations": {
+      "Type": "Parallel",
+      "Comment": "Escalate to operations team",
+      "Branches": [
+        {
+          "StartAt": "SendAlert",
+          "States": {
+            "SendAlert": {
+              "Type": "Task",
+              "Resource": "arn:aws:states:::lambda:invoke",
+              "Parameters": {
+                "FunctionName": "${DLQHandlerLambdaArn}",
+                "Payload": {
+                  "action": "sendOperationsAlert",
+                  "failureDetails.$": "$",
+                  "severity": "high",
+                  "requestId.$": "$$.Execution.Name"
+                }
+              },
+              "End": true,
+              "Retry": [
+                {
+                  "ErrorEquals": ["States.TaskFailed"],
+                  "IntervalSeconds": 5,
+                  "MaxAttempts": 3,
+                  "BackoffRate": 2.0
+                }
+              ],
+              "Catch": [
+                {
+                  "ErrorEquals": ["States.ALL"],
+                  "Result": {
+                    "status": "alert_failed"
+                  },
+                  "End": true
+                }
+              ]
+            }
+          }
+        },
+        {
+          "StartAt": "CreateTicket",
+          "States": {
+            "CreateTicket": {
+              "Type": "Task",
+              "Resource": "arn:aws:states:::lambda:invoke",
+              "Parameters": {
+                "FunctionName": "${DLQHandlerLambdaArn}",
+                "Payload": {
+                  "action": "createOperationsTicket",
+                  "failureDetails.$": "$",
+                  "priority": "high",
+                  "requestId.$": "$$.Execution.Name"
+                }
+              },
+              "End": true,
+              "Retry": [
+                {
+                  "ErrorEquals": ["States.TaskFailed"],
+                  "IntervalSeconds": 5,
+                  "MaxAttempts": 3,
+                  "BackoffRate": 2.0
+                }
+              ],
+              "Catch": [
+                {
+                  "ErrorEquals": ["States.ALL"],
+                  "Result": {
+                    "status": "ticket_creation_failed"
+                  },
+                  "End": true
+                }
+              ]
+            }
+          }
+        },
+        {
+          "StartAt": "LogEscalation",
+          "States": {
+            "LogEscalation": {
+              "Type": "Task",
+              "Resource": "arn:aws:states:::lambda:invoke",
+              "Parameters": {
+                "FunctionName": "${DLQHandlerLambdaArn}",
+                "Payload": {
+                  "action": "logEscalation",
+                  "failureDetails.$": "$",
+                  "escalationLevel": "operations",
+                  "requestId.$": "$$.Execution.Name"
+                }
+              },
+              "End": true,
+              "Catch": [
+                {
+                  "ErrorEquals": ["States.ALL"],
+                  "Result": {
+                    "status": "logging_failed"
+                  },
+                  "End": true
+                }
+              ]
+            }
+          }
+        }
+      ],
+      "ResultPath": "$.escalationResult",
+      "Next": "ManualIntervention"
+    },
+
+    "ManualIntervention": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "Parameters": {
+        "FunctionName": "${DLQHandlerLambdaArn}",
+        "Payload": {
+          "action": "requireManualIntervention",
+          "failureDetails.$": "$",
+          "escalationResult.$": "$.escalationResult",
+          "requestId.$": "$$.Execution.Name"
+        }
+      },
+      "ResultPath": "$.manualInterventionResult",
+      "Next": "RecoveryFailed",
+      "Retry": [
+        {
+          "ErrorEquals": ["States.TaskFailed"],
+          "IntervalSeconds": 2,
+          "MaxAttempts": 3,
+          "BackoffRate": 2.0
+        }
+      ],
+      "Catch": [
+        {
+          "ErrorEquals": ["States.ALL"],
+          "Next": "RecoveryFailed",
+          "ResultPath": "$.error"
+        }
+      ]
+    },
+
+    "RecoveryFailed": {
+      "Type": "Pass",
+      "Comment": "Recovery failed, manual intervention required",
+      "Parameters": {
+        "status": "recovery_failed",
+        "requiresManualIntervention": true,
+        "originalFailure.$": "$.failureAnalysis.Payload",
+        "escalationResult.$": "$.escalationResult",
+        "timestamp.$": "$$.State.EnteredTime"
+      },
+      "End": true
+    },
+
+    "RecoveryComplete": {
+      "Type": "Pass",
+      "Comment": "Error recovery completed successfully",
+      "Parameters": {
+        "status": "recovery_successful",
+        "originalFailure.$": "$.failureAnalysis.Payload",
+        "recoveryStrategy.$": "$.failureAnalysis.Payload.recoveryStrategy",
+        "completedAt.$": "$$.State.EnteredTime",
+        "executionArn.$": "$$.Execution.Name"
+      },
+      "End": true
+    }
+  },
+  "TimeoutSeconds": 1800,
+  "Comment": "This workflow handles error recovery for failed agent executions with multiple recovery strategies"
+}

@@ -1,0 +1,665 @@
+{
+  "Comment": "Web Research Workflow - Orchestrates web search and data scraping activities",
+  "StartAt": "ValidateSearchRequest",
+  "States": {
+    "ValidateSearchRequest": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "Parameters": {
+        "FunctionName": "${WebSearchLambdaArn}",
+        "Payload": {
+          "action": "validateSearchRequest",
+          "searchRequest.$": "$",
+          "requestId.$": "$$.Execution.Name"
+        }
+      },
+      "ResultPath": "$.validation",
+      "Next": "CheckSearchValidation",
+      "Retry": [
+        {
+          "ErrorEquals": ["States.TaskFailed"],
+          "IntervalSeconds": 2,
+          "MaxAttempts": 3,
+          "BackoffRate": 2.0
+        }
+      ],
+      "Catch": [
+        {
+          "ErrorEquals": ["States.ALL"],
+          "Next": "SearchValidationFailed",
+          "ResultPath": "$.error"
+        }
+      ]
+    },
+
+    "CheckSearchValidation": {
+      "Type": "Choice",
+      "Choices": [
+        {
+          "Variable": "$.validation.Payload.isValid",
+          "BooleanEquals": true,
+          "Next": "InitializeSearch"
+        }
+      ],
+      "Default": "SearchValidationFailed"
+    },
+
+    "SearchValidationFailed": {
+      "Type": "Fail",
+      "Cause": "Search request validation failed",
+      "Error": "SearchValidationError"
+    },
+
+    "InitializeSearch": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "Parameters": {
+        "FunctionName": "${WebSearchLambdaArn}",
+        "Payload": {
+          "action": "initializeSearch",
+          "searchRequest.$": "$",
+          "requestId.$": "$$.Execution.Name"
+        }
+      },
+      "ResultPath": "$.searchPlan",
+      "Next": "ParallelWebSearch",
+      "Retry": [
+        {
+          "ErrorEquals": ["States.TaskFailed"],
+          "IntervalSeconds": 2,
+          "MaxAttempts": 3,
+          "BackoffRate": 2.0
+        }
+      ],
+      "Catch": [
+        {
+          "ErrorEquals": ["States.ALL"],
+          "Next": "SearchInitializationFailed",
+          "ResultPath": "$.error"
+        }
+      ]
+    },
+
+    "SearchInitializationFailed": {
+      "Type": "Fail",
+      "Cause": "Search initialization failed",
+      "Error": "SearchInitializationError"
+    },
+
+    "ParallelWebSearch": {
+      "Type": "Parallel",
+      "Comment": "Execute multiple search strategies simultaneously",
+      "Branches": [
+        {
+          "StartAt": "GeneralWebSearch",
+          "States": {
+            "GeneralWebSearch": {
+              "Type": "Task",
+              "Resource": "arn:aws:states:::lambda:invoke",
+              "Parameters": {
+                "FunctionName": "${WebSearchLambdaArn}",
+                "Payload": {
+                  "action": "performGeneralWebSearch",
+                  "searchTerms.$": "$.searchPlan.Payload.generalSearchTerms",
+                  "requestId.$": "$$.Execution.Name"
+                }
+              },
+              "End": true,
+              "Retry": [
+                {
+                  "ErrorEquals": ["States.TaskFailed"],
+                  "IntervalSeconds": 5,
+                  "MaxAttempts": 3,
+                  "BackoffRate": 2.0
+                }
+              ],
+              "Catch": [
+                {
+                  "ErrorEquals": ["States.ALL"],
+                  "Result": {
+                    "status": "failed",
+                    "searchType": "general",
+                    "error": "General web search failed"
+                  },
+                  "End": true
+                }
+              ]
+            }
+          }
+        },
+        {
+          "StartAt": "AcademicSearch",
+          "States": {
+            "AcademicSearch": {
+              "Type": "Task",
+              "Resource": "arn:aws:states:::lambda:invoke",
+              "Parameters": {
+                "FunctionName": "${WebSearchLambdaArn}",
+                "Payload": {
+                  "action": "performAcademicSearch",
+                  "searchTerms.$": "$.searchPlan.Payload.academicSearchTerms",
+                  "requestId.$": "$$.Execution.Name"
+                }
+              },
+              "End": true,
+              "Retry": [
+                {
+                  "ErrorEquals": ["States.TaskFailed"],
+                  "IntervalSeconds": 5,
+                  "MaxAttempts": 3,
+                  "BackoffRate": 2.0
+                }
+              ],
+              "Catch": [
+                {
+                  "ErrorEquals": ["States.ALL"],
+                  "Result": {
+                    "status": "failed",
+                    "searchType": "academic",
+                    "error": "Academic search failed"
+                  },
+                  "End": true
+                }
+              ]
+            }
+          }
+        },
+        {
+          "StartAt": "UniversitySearch",
+          "States": {
+            "UniversitySearch": {
+              "Type": "Task",
+              "Resource": "arn:aws:states:::lambda:invoke",
+              "Parameters": {
+                "FunctionName": "${WebSearchLambdaArn}",
+                "Payload": {
+                  "action": "performUniversitySearch",
+                  "searchTerms.$": "$.searchPlan.Payload.universitySearchTerms",
+                  "requestId.$": "$$.Execution.Name"
+                }
+              },
+              "End": true,
+              "Retry": [
+                {
+                  "ErrorEquals": ["States.TaskFailed"],
+                  "IntervalSeconds": 5,
+                  "MaxAttempts": 3,
+                  "BackoffRate": 2.0
+                }
+              ],
+              "Catch": [
+                {
+                  "ErrorEquals": ["States.ALL"],
+                  "Result": {
+                    "status": "failed",
+                    "searchType": "university",
+                    "error": "University search failed"
+                  },
+                  "End": true
+                }
+              ]
+            }
+          }
+        }
+      ],
+      "ResultPath": "$.searchResults",
+      "Next": "AggregateSearchResults",
+      "Catch": [
+        {
+          "ErrorEquals": ["States.ALL"],
+          "Next": "SearchFailed",
+          "ResultPath": "$.error"
+        }
+      ]
+    },
+
+    "SearchFailed": {
+      "Type": "Pass",
+      "Comment": "Handle partial search failures",
+      "Parameters": {
+        "status": "partial_failure",
+        "message": "Some search operations failed but continuing with available results",
+        "error.$": "$.error"
+      },
+      "ResultPath": "$.searchStatus",
+      "Next": "AggregateSearchResults"
+    },
+
+    "AggregateSearchResults": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "Parameters": {
+        "FunctionName": "${WebSearchLambdaArn}",
+        "Payload": {
+          "action": "aggregateSearchResults",
+          "searchResults.$": "$.searchResults",
+          "searchPlan.$": "$.searchPlan.Payload",
+          "requestId.$": "$$.Execution.Name"
+        }
+      },
+      "ResultPath": "$.aggregatedResults",
+      "Next": "FilterAndPrioritize",
+      "Retry": [
+        {
+          "ErrorEquals": ["States.TaskFailed"],
+          "IntervalSeconds": 3,
+          "MaxAttempts": 3,
+          "BackoffRate": 2.0
+        }
+      ],
+      "Catch": [
+        {
+          "ErrorEquals": ["States.ALL"],
+          "Next": "AggregationFailed",
+          "ResultPath": "$.error"
+        }
+      ]
+    },
+
+    "AggregationFailed": {
+      "Type": "Fail",
+      "Cause": "Search result aggregation failed",
+      "Error": "AggregationError"
+    },
+
+    "FilterAndPrioritize": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "Parameters": {
+        "FunctionName": "${WebSearchLambdaArn}",
+        "Payload": {
+          "action": "filterAndPrioritizeResults",
+          "aggregatedResults.$": "$.aggregatedResults.Payload",
+          "searchCriteria.$": "$.searchPlan.Payload",
+          "requestId.$": "$$.Execution.Name"
+        }
+      },
+      "ResultPath": "$.prioritizedResults",
+      "Next": "CheckScrapingNeeded",
+      "Retry": [
+        {
+          "ErrorEquals": ["States.TaskFailed"],
+          "IntervalSeconds": 2,
+          "MaxAttempts": 3,
+          "BackoffRate": 2.0
+        }
+      ],
+      "Catch": [
+        {
+          "ErrorEquals": ["States.ALL"],
+          "Next": "FilteringFailed",
+          "ResultPath": "$.error"
+        }
+      ]
+    },
+
+    "FilteringFailed": {
+      "Type": "Fail",
+      "Cause": "Result filtering and prioritization failed",
+      "Error": "FilteringError"
+    },
+
+    "CheckScrapingNeeded": {
+      "Type": "Choice",
+      "Choices": [
+        {
+          "Variable": "$.prioritizedResults.Payload.requiresScraping",
+          "BooleanEquals": true,
+          "Next": "WebScraping"
+        }
+      ],
+      "Default": "QualityAssurance"
+    },
+
+    "WebScraping": {
+      "Type": "Map",
+      "Comment": "Scrape detailed content from prioritized URLs",
+      "ItemsPath": "$.prioritizedResults.Payload.scrapingTargets",
+      "MaxConcurrency": 3,
+      "Iterator": {
+        "StartAt": "ScrapeWebPage",
+        "States": {
+          "ScrapeWebPage": {
+            "Type": "Task",
+            "Resource": "arn:aws:states:::lambda:invoke",
+            "Parameters": {
+              "FunctionName": "${BrowserLambdaArn}",
+              "Payload": {
+                "action": "scrapeWebPage",
+                "target.$": "$",
+                "requestId.$": "$$.Execution.Name"
+              }
+            },
+            "ResultPath": "$.scrapedContent",
+            "Next": "ValidateScrapedContent",
+            "Retry": [
+              {
+                "ErrorEquals": ["States.TaskFailed"],
+                "IntervalSeconds": 10,
+                "MaxAttempts": 2,
+                "BackoffRate": 2.0
+              }
+            ],
+            "Catch": [
+              {
+                "ErrorEquals": ["States.ALL"],
+                "Next": "ScrapingFailed",
+                "ResultPath": "$.error"
+              }
+            ]
+          },
+
+          "ScrapingFailed": {
+            "Type": "Pass",
+            "Parameters": {
+              "status": "failed",
+              "url.$": "$.url",
+              "error": "Web scraping failed"
+            },
+            "End": true
+          },
+
+          "ValidateScrapedContent": {
+            "Type": "Task",
+            "Resource": "arn:aws:states:::lambda:invoke",
+            "Parameters": {
+              "FunctionName": "${QALambdaArn}",
+              "Payload": {
+                "action": "validateScrapedContent",
+                "content.$": "$.scrapedContent.Payload",
+                "target.$": "$",
+                "requestId.$": "$$.Execution.Name"
+              }
+            },
+            "ResultPath": "$.contentValidation",
+            "Next": "CheckContentQuality",
+            "Retry": [
+              {
+                "ErrorEquals": ["States.TaskFailed"],
+                "IntervalSeconds": 2,
+                "MaxAttempts": 3,
+                "BackoffRate": 2.0
+              }
+            ],
+            "Catch": [
+              {
+                "ErrorEquals": ["States.ALL"],
+                "Next": "ContentValidationFailed",
+                "ResultPath": "$.error"
+              }
+            ]
+          },
+
+          "ContentValidationFailed": {
+            "Type": "Pass",
+            "Parameters": {
+              "status": "failed",
+              "url.$": "$.url",
+              "error": "Content validation failed"
+            },
+            "End": true
+          },
+
+          "CheckContentQuality": {
+            "Type": "Choice",
+            "Choices": [
+              {
+                "Variable": "$.contentValidation.Payload.qualityScore",
+                "NumericGreaterThan": 0.7,
+                "Next": "ScrapingSuccessful"
+              }
+            ],
+            "Default": "LowQualityContent"
+          },
+
+          "LowQualityContent": {
+            "Type": "Pass",
+            "Parameters": {
+              "status": "low_quality",
+              "url.$": "$.url",
+              "qualityScore.$": "$.contentValidation.Payload.qualityScore",
+              "content.$": "$.scrapedContent.Payload"
+            },
+            "End": true
+          },
+
+          "ScrapingSuccessful": {
+            "Type": "Pass",
+            "Parameters": {
+              "status": "completed",
+              "url.$": "$.url",
+              "content.$": "$.scrapedContent.Payload",
+              "qualityScore.$": "$.contentValidation.Payload.qualityScore",
+              "scrapingTime.$": "$$.State.EnteredTime"
+            },
+            "End": true
+          }
+        }
+      },
+      "ResultPath": "$.scrapedData",
+      "Next": "AggregateScrapedContent",
+      "Catch": [
+        {
+          "ErrorEquals": ["States.ALL"],
+          "Next": "QualityAssurance",
+          "ResultPath": "$.scrapingError"
+        }
+      ]
+    },
+
+    "AggregateScrapedContent": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "Parameters": {
+        "FunctionName": "${BrowserLambdaArn}",
+        "Payload": {
+          "action": "aggregateScrapedContent",
+          "scrapedData.$": "$.scrapedData",
+          "searchResults.$": "$.prioritizedResults.Payload",
+          "requestId.$": "$$.Execution.Name"
+        }
+      },
+      "ResultPath": "$.enrichedResults",
+      "Next": "QualityAssurance",
+      "Retry": [
+        {
+          "ErrorEquals": ["States.TaskFailed"],
+          "IntervalSeconds": 3,
+          "MaxAttempts": 3,
+          "BackoffRate": 2.0
+        }
+      ],
+      "Catch": [
+        {
+          "ErrorEquals": ["States.ALL"],
+          "Next": "QualityAssurance",
+          "ResultPath": "$.aggregationError"
+        }
+      ]
+    },
+
+    "QualityAssurance": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "Parameters": {
+        "FunctionName": "${QALambdaArn}",
+        "Payload": {
+          "action": "performResearchQualityCheck",
+          "results.$": "$.enrichedResults.Payload",
+          "searchCriteria.$": "$.searchPlan.Payload",
+          "requestId.$": "$$.Execution.Name"
+        }
+      },
+      "ResultPath": "$.qualityCheck",
+      "Next": "CheckResearchQuality",
+      "Retry": [
+        {
+          "ErrorEquals": ["States.TaskFailed"],
+          "IntervalSeconds": 2,
+          "MaxAttempts": 3,
+          "BackoffRate": 2.0
+        }
+      ],
+      "Catch": [
+        {
+          "ErrorEquals": ["States.ALL"],
+          "Next": "QualityCheckFailed",
+          "ResultPath": "$.error"
+        }
+      ]
+    },
+
+    "CheckResearchQuality": {
+      "Type": "Choice",
+      "Choices": [
+        {
+          "Variable": "$.qualityCheck.Payload.overallQuality",
+          "NumericGreaterThan": 0.8,
+          "Next": "StoreResults"
+        },
+        {
+          "Variable": "$.qualityCheck.Payload.overallQuality",
+          "NumericGreaterThan": 0.6,
+          "Next": "EnhanceResults"
+        }
+      ],
+      "Default": "QualityCheckFailed"
+    },
+
+    "EnhanceResults": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "Parameters": {
+        "FunctionName": "${WebSearchLambdaArn}",
+        "Payload": {
+          "action": "enhanceSearchResults",
+          "results.$": "$.enrichedResults.Payload",
+          "qualityIssues.$": "$.qualityCheck.Payload.issues",
+          "requestId.$": "$$.Execution.Name"
+        }
+      },
+      "ResultPath": "$.enhancedResults",
+      "Next": "StoreResults",
+      "Retry": [
+        {
+          "ErrorEquals": ["States.TaskFailed"],
+          "IntervalSeconds": 5,
+          "MaxAttempts": 2,
+          "BackoffRate": 2.0
+        }
+      ],
+      "Catch": [
+        {
+          "ErrorEquals": ["States.ALL"],
+          "Next": "EnhancementFailed",
+          "ResultPath": "$.error"
+        }
+      ]
+    },
+
+    "EnhancementFailed": {
+      "Type": "Pass",
+      "Comment": "Enhancement failed but continue with original results",
+      "Parameters": {
+        "status": "enhancement_failed",
+        "results.$": "$.enrichedResults.Payload",
+        "enhancementError.$": "$.error"
+      },
+      "ResultPath": "$.finalResults",
+      "Next": "StoreResults"
+    },
+
+    "QualityCheckFailed": {
+      "Type": "Fail",
+      "Cause": "Research quality check failed",
+      "Error": "QualityCheckError"
+    },
+
+    "StoreResults": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "Parameters": {
+        "FunctionName": "${WebSearchLambdaArn}",
+        "Payload": {
+          "action": "storeResearchResults",
+          "results.$": "$.enhancedResults.Payload",
+          "originalRequest.$": "$",
+          "requestId.$": "$$.Execution.Name"
+        }
+      },
+      "ResultPath": "$.storageResult",
+      "Next": "NotifyCompletion",
+      "Retry": [
+        {
+          "ErrorEquals": ["States.TaskFailed"],
+          "IntervalSeconds": 3,
+          "MaxAttempts": 3,
+          "BackoffRate": 2.0
+        }
+      ],
+      "Catch": [
+        {
+          "ErrorEquals": ["States.ALL"],
+          "Next": "StorageFailed",
+          "ResultPath": "$.error"
+        }
+      ]
+    },
+
+    "StorageFailed": {
+      "Type": "Fail",
+      "Cause": "Result storage failed",
+      "Error": "StorageError"
+    },
+
+    "NotifyCompletion": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "Parameters": {
+        "FunctionName": "${CoordinatorLambdaArn}",
+        "Payload": {
+          "action": "notifyResearchCompletion",
+          "results.$": "$.enhancedResults.Payload",
+          "storageResult.$": "$.storageResult.Payload",
+          "requestId.$": "$$.Execution.Name"
+        }
+      },
+      "ResultPath": "$.notification",
+      "Next": "ResearchComplete",
+      "Retry": [
+        {
+          "ErrorEquals": ["States.TaskFailed"],
+          "IntervalSeconds": 2,
+          "MaxAttempts": 2,
+          "BackoffRate": 2.0
+        }
+      ],
+      "Catch": [
+        {
+          "ErrorEquals": ["States.ALL"],
+          "Next": "ResearchComplete",
+          "ResultPath": "$.notificationError"
+        }
+      ]
+    },
+
+    "ResearchComplete": {
+      "Type": "Pass",
+      "Comment": "Web research completed successfully",
+      "Parameters": {
+        "status": "completed",
+        "requestId.$": "$$.Execution.Name",
+        "completedAt.$": "$$.State.EnteredTime",
+        "results.$": "$.enhancedResults.Payload",
+        "summary": {
+          "searchesPerformed.$": "$.searchResults[*].length",
+          "urlsScraped.$": "$.scrapedData[?(@.status=='completed')].length",
+          "qualityScore.$": "$.qualityCheck.Payload.overallQuality"
+        }
+      },
+      "End": true
+    }
+  },
+  "TimeoutSeconds": 2400,
+  "Comment": "This workflow orchestrates web research including search and content scraping with quality assurance"
+}
