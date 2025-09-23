@@ -4,6 +4,7 @@ import { setTheme } from './store/slices/uiSlice'
 import { TopAppBar } from './components/layout/TopAppBar'
 import { BottomStatusBar } from './components/layout/BottomStatusBar'
 import { DashboardView } from './components/views/DashboardView'
+import { ComponentsTestView } from './components/views/ComponentsTestView'
 import { ChatInterface } from './components/chat/ChatInterface'
 import { LLMConfigModal } from './components/modals/LLMConfigModal'
 
@@ -23,6 +24,8 @@ function App() {
         return <DashboardView />
       case 'chat':
         return <ChatInterface />
+      case 'components-test':
+        return <ComponentsTestView />
       default:
         return <DashboardView />
     }

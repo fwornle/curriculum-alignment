@@ -88,6 +88,14 @@ export const DashboardView: React.FC = () => {
           </p>
         </div>
         <div className="flex items-center gap-2">
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={() => dispatch(setCurrentView('components-test'))}
+          >
+            <Target className="h-4 w-4 mr-2" />
+            Test Components
+          </Button>
           <Button variant="outline" size="sm">
             <Clock className="h-4 w-4 mr-2" />
             Last updated: {new Date().toLocaleDateString()}

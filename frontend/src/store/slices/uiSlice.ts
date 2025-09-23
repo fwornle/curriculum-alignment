@@ -4,7 +4,7 @@ import type { PayloadAction } from '@reduxjs/toolkit'
 export interface UIState {
   theme: 'light' | 'dark' | 'system'
   sidebarOpen: boolean
-  currentView: 'dashboard' | 'programs' | 'analysis' | 'reports' | 'chat'
+  currentView: 'dashboard' | 'programs' | 'analysis' | 'reports' | 'chat' | 'components-test'
   currentRoute: string
   modals: {
     uploadDocument: boolean
