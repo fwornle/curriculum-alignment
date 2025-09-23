@@ -21,7 +21,8 @@
       "Bash(git add:*)",
       "Bash(npm create:*)",
       "Bash(npx tailwindcss init:*)",
-      "Bash(npm run build:*)"
+      "Bash(npm run build:*)",
+      "Bash(npm run dev:*)"
     ],
     "additionalDirectories": []
   },

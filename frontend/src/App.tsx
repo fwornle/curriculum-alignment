@@ -4,6 +4,9 @@ import { setTheme } from './store/slices/uiSlice'
 import { TopAppBar } from './components/layout/TopAppBar'
 import { BottomStatusBar } from './components/layout/BottomStatusBar'
 import { DashboardView } from './components/views/DashboardView'
+import { ProgramsView } from './components/views/ProgramsView'
+import { AnalysisView } from './components/views/AnalysisView'
+import { ReportsView } from './components/views/ReportsView'
 import { ComponentsTestView } from './components/views/ComponentsTestView'
 import { ChatInterface } from './components/chat/ChatInterface'
 import { LLMConfigModal } from './components/modals/LLMConfigModal'
@@ -22,6 +25,12 @@ function App() {
     switch (currentView) {
       case 'dashboard':
         return <DashboardView />
+      case 'programs':
+        return <ProgramsView />
+      case 'analysis':
+        return <AnalysisView />
+      case 'reports':
+        return <ReportsView />
       case 'chat':
         return <ChatInterface />
       case 'components-test':
