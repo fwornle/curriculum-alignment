@@ -409,7 +409,7 @@ Tasks are organized by component and phase:
     - Success: Agents communicating reliably through message bus
     - Mark this task as in-progress in tasks.md, then complete when done
 
-- [ ] 30. Implement Agent Status Monitoring
+- [x] 30. Implement Agent Status Monitoring
   - **Files**: `src/agents/monitoring.ts`, `src/agents/health-checks.ts`
   - **Requirements**: Agent monitoring from design document
   - **Description**: Create health checks and status reporting for all agents
