@@ -305,7 +305,7 @@ Tasks are organized by component and phase:
     - Success: Coordinator Agent orchestrating multi-agent workflows
     - Mark this task as in-progress in tasks.md, then complete when done
 
-- [ ] 22. Implement Web Search Agent
+- [x] 22. Implement Web Search Agent
   - **Files**: `lambda/web-search/index.ts`, `lambda/web-search/search-engine.ts`
   - **Requirements**: Web Search Agent specs from design document
   - **Description**: Create agent for discovering peer university curricula
