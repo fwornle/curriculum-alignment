@@ -396,7 +396,7 @@ Tasks are organized by component and phase:
     - Success: Agent answering questions about curriculum analysis
     - Mark this task as in-progress in tasks.md, then complete when done
 
-- [ ] 29. Create Agent Communication Layer
+- [x] 29. Create Agent Communication Layer
   - **Files**: `src/agents/communication.ts`, `src/agents/message-bus.ts`
   - **Requirements**: Inter-agent communication from design document
   - **Description**: Implement message passing between agents
