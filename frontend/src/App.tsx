@@ -1,0 +1,47 @@
+import { useEffect } from 'react'
+import { useAppDispatch, useAppSelector } from './store'
+import { setTheme } from './store/slices/uiSlice'
+import { TopAppBar } from './components/layout/TopAppBar'
+import { BottomStatusBar } from './components/layout/BottomStatusBar'
+import { DashboardView } from './components/views/DashboardView'
+import { ChatInterface } from './components/chat/ChatInterface'
+import { LLMConfigModal } from './components/modals/LLMConfigModal'
+
+function App() {
+  const dispatch = useAppDispatch()
+  const { currentView } = useAppSelector(state => state.ui)
+
+  // Initialize theme
+  useEffect(() => {
+    const savedTheme = localStorage.getItem('theme') as 'light' | 'dark' | 'system' || 'system'
+    dispatch(setTheme(savedTheme))
+  }, [dispatch])
+
+  const renderCurrentView = () => {
+    switch (currentView) {
+      case 'dashboard':
+        return <DashboardView />
+      case 'chat':
+        return <ChatInterface />
+      default:
+        return <DashboardView />
+    }
+  }
+
+  return (
+    <div className="min-h-screen bg-background flex flex-col">
+      <TopAppBar />
+      
+      <main className="flex-1 overflow-hidden">
+        {renderCurrentView()}
+      </main>
+
+      <BottomStatusBar />
+      
+      {/* Modals */}
+      <LLMConfigModal />
+    </div>
+  )
+}
+
+export default App

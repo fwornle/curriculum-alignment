@@ -435,7 +435,7 @@ Tasks are organized by component and phase:
     - Success: Step Functions orchestrating agent workflows
     - Mark this task as in-progress in tasks.md, then complete when done
 
-- [ ] 32. Implement Dead Letter Queue Handler
+- [x] 32. Implement Dead Letter Queue Handler
   - **Files**: `lambda/dlq-handler/index.ts`
   - **Requirements**: Error handling from design document
   - **Description**: Create handler for failed agent processing
@@ -448,7 +448,7 @@ Tasks are organized by component and phase:
     - Success: Failed tasks being recovered or properly escalated
     - Mark this task as in-progress in tasks.md, then complete when done
 
-- [ ] 33. Create Agent Test Framework
+- [x] 33. Create Agent Test Framework
   - **Files**: `tests/agents/*.test.ts`, `tests/agents/mocks/*.ts`
   - **Requirements**: Testing strategy from design document
   - **Description**: Implement comprehensive testing for all agents
@@ -461,7 +461,7 @@ Tasks are organized by component and phase:
     - Success: All agents with 80%+ test coverage
     - Mark this task as in-progress in tasks.md, then complete when done
 
-- [ ] 34. Implement Agent Deployment Scripts
+- [x] 34. Implement Agent Deployment Scripts
   - **Files**: `scripts/deploy-agents.sh`, `scripts/update-agent.sh`
   - **Requirements**: Deployment strategy from design document
   - **Description**: Create scripts for deploying and updating agents
@@ -474,7 +474,7 @@ Tasks are organized by component and phase:
     - Success: Agents deployable with zero downtime
     - Mark this task as in-progress in tasks.md, then complete when done
 
-- [ ] 35. Create Agent Documentation
+- [x] 35. Create Agent Documentation
   - **Files**: `docs/agents/*.md`
   - **Requirements**: Documentation requirements
   - **Description**: Document all agent interfaces and behaviors

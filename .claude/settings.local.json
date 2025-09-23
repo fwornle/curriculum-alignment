@@ -15,7 +15,13 @@
       "Bash(npx tsc:*)",
       "Bash(npm run sam:validate:*)",
       "Bash(npm install:*)",
-      "Read(//Users/q284340/.claude/projects/**)"
+      "Read(//Users/q284340/.claude/projects/**)",
+      "Bash(git commit:*)",
+      "Bash(git tag:*)",
+      "Bash(git add:*)",
+      "Bash(npm create:*)",
+      "Bash(npx tailwindcss init:*)",
+      "Bash(npm run build:*)"
     ],
     "additionalDirectories": []
   },
