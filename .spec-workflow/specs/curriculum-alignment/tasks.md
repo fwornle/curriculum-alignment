@@ -781,7 +781,7 @@ Tasks are organized by component and phase:
     - Success: Automated deployment pipeline working
     - Mark this task as in-progress in tasks.md, then complete when done
 
-- [ ] 58. Implement Blue-Green Deployment
+- [x] 58. Implement Blue-Green Deployment
   - **Files**: `scripts/blue-green-deploy.sh`
   - **Requirements**: Deployment strategy from design document
   - **Description**: Create blue-green deployment scripts
