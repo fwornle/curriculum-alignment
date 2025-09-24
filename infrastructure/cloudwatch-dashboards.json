@@ -1,0 +1,644 @@
+{
+  "dashboards": [
+    {
+      "name": "CurriculumAlignmentSystem-Overview",
+      "description": "High-level overview of the Multi-Agent Curriculum Alignment System",
+      "body": {
+        "widgets": [
+          {
+            "type": "metric",
+            "x": 0,
+            "y": 0,
+            "width": 12,
+            "height": 6,
+            "properties": {
+              "metrics": [
+                ["AWS/Lambda", "Invocations", "FunctionName", "curriculum-alignment-api", {"stat": "Sum"}],
+                [".", "Errors", ".", ".", {"stat": "Sum"}],
+                [".", "Duration", ".", ".", {"stat": "Average"}],
+                [".", "Throttles", ".", ".", {"stat": "Sum"}]
+              ],
+              "period": 300,
+              "stat": "Average",
+              "region": "us-east-1",
+              "title": "API Lambda Performance",
+              "yAxis": {
+                "left": {
+                  "min": 0
+                }
+              }
+            }
+          },
+          {
+            "type": "metric",
+            "x": 12,
+            "y": 0,
+            "width": 12,
+            "height": 6,
+            "properties": {
+              "metrics": [
+                ["AWS/RDS", "CPUUtilization", "DBInstanceIdentifier", "curriculum-alignment-db"],
+                [".", "DatabaseConnections", ".", "."],
+                [".", "ReadLatency", ".", "."],
+                [".", "WriteLatency", ".", "."]
+              ],
+              "period": 300,
+              "stat": "Average",
+              "region": "us-east-1",
+              "title": "Database Performance",
+              "yAxis": {
+                "left": {
+                  "min": 0,
+                  "max": 100
+                }
+              }
+            }
+          },
+          {
+            "type": "metric",
+            "x": 0,
+            "y": 6,
+            "width": 24,
+            "height": 6,
+            "properties": {
+              "metrics": [
+                ["AWS/Lambda", "Invocations", "FunctionName", "curriculum-analysis-agent", {"stat": "Sum"}],
+                [".", ".", ".", "program-matcher-agent", {"stat": "Sum"}],
+                [".", ".", ".", "outcome-alignment-agent", {"stat": "Sum"}],
+                [".", ".", ".", "content-processor-agent", {"stat": "Sum"}],
+                [".", ".", ".", "report-generator-agent", {"stat": "Sum"}],
+                [".", ".", ".", "workflow-coordinator-agent", {"stat": "Sum"}]
+              ],
+              "period": 300,
+              "stat": "Sum",
+              "region": "us-east-1",
+              "title": "Agent Activity - Invocations",
+              "yAxis": {
+                "left": {
+                  "min": 0
+                }
+              }
+            }
+          },
+          {
+            "type": "metric",
+            "x": 0,
+            "y": 12,
+            "width": 12,
+            "height": 6,
+            "properties": {
+              "metrics": [
+                ["AWS/ApiGateway", "4XXError", "ApiName", "curriculum-alignment-api", {"stat": "Sum"}],
+                [".", "5XXError", ".", ".", {"stat": "Sum"}],
+                [".", "Count", ".", ".", {"stat": "Sum"}],
+                [".", "Latency", ".", ".", {"stat": "Average"}]
+              ],
+              "period": 300,
+              "stat": "Average",
+              "region": "us-east-1",
+              "title": "API Gateway Metrics",
+              "yAxis": {
+                "left": {
+                  "min": 0
+                }
+              }
+            }
+          },
+          {
+            "type": "metric",
+            "x": 12,
+            "y": 12,
+            "width": 12,
+            "height": 6,
+            "properties": {
+              "metrics": [
+                ["AWS/S3", "BucketSizeBytes", "BucketName", "curriculum-alignment-documents", "StorageType", "StandardStorage"],
+                [".", "NumberOfObjects", ".", ".", ".", "AllStorageTypes"]
+              ],
+              "period": 86400,
+              "stat": "Average",
+              "region": "us-east-1",
+              "title": "Document Storage Metrics",
+              "yAxis": {
+                "left": {
+                  "min": 0
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "CurriculumAlignmentSystem-AgentPerformance",
+      "description": "Detailed monitoring of individual agent performance and costs",
+      "body": {
+        "widgets": [
+          {
+            "type": "metric",
+            "x": 0,
+            "y": 0,
+            "width": 24,
+            "height": 6,
+            "properties": {
+              "metrics": [
+                ["AWS/Lambda", "Duration", "FunctionName", "curriculum-analysis-agent", {"stat": "Average"}],
+                [".", ".", ".", "program-matcher-agent", {"stat": "Average"}],
+                [".", ".", ".", "outcome-alignment-agent", {"stat": "Average"}],
+                [".", ".", ".", "content-processor-agent", {"stat": "Average"}],
+                [".", ".", ".", "report-generator-agent", {"stat": "Average"}],
+                [".", ".", ".", "workflow-coordinator-agent", {"stat": "Average"}]
+              ],
+              "period": 300,
+              "stat": "Average",
+              "region": "us-east-1",
+              "title": "Agent Execution Duration (ms)",
+              "yAxis": {
+                "left": {
+                  "min": 0
+                }
+              }
+            }
+          },
+          {
+            "type": "metric",
+            "x": 0,
+            "y": 6,
+            "width": 12,
+            "height": 6,
+            "properties": {
+              "metrics": [
+                ["AWS/Lambda", "Errors", "FunctionName", "curriculum-analysis-agent", {"stat": "Sum"}],
+                [".", ".", ".", "program-matcher-agent", {"stat": "Sum"}],
+                [".", ".", ".", "outcome-alignment-agent", {"stat": "Sum"}],
+                [".", ".", ".", "content-processor-agent", {"stat": "Sum"}],
+                [".", ".", ".", "report-generator-agent", {"stat": "Sum"}],
+                [".", ".", ".", "workflow-coordinator-agent", {"stat": "Sum"}]
+              ],
+              "period": 300,
+              "stat": "Sum",
+              "region": "us-east-1",
+              "title": "Agent Errors",
+              "yAxis": {
+                "left": {
+                  "min": 0
+                }
+              }
+            }
+          },
+          {
+            "type": "metric",
+            "x": 12,
+            "y": 6,
+            "width": 12,
+            "height": 6,
+            "properties": {
+              "metrics": [
+                ["AWS/Lambda", "ConcurrentExecutions", "FunctionName", "curriculum-analysis-agent", {"stat": "Maximum"}],
+                [".", ".", ".", "program-matcher-agent", {"stat": "Maximum"}],
+                [".", ".", ".", "outcome-alignment-agent", {"stat": "Maximum"}],
+                [".", ".", ".", "content-processor-agent", {"stat": "Maximum"}],
+                [".", ".", ".", "report-generator-agent", {"stat": "Maximum"}],
+                [".", ".", ".", "workflow-coordinator-agent", {"stat": "Maximum"}]
+              ],
+              "period": 300,
+              "stat": "Maximum",
+              "region": "us-east-1",
+              "title": "Agent Concurrent Executions",
+              "yAxis": {
+                "left": {
+                  "min": 0
+                }
+              }
+            }
+          },
+          {
+            "type": "log",
+            "x": 0,
+            "y": 12,
+            "width": 24,
+            "height": 6,
+            "properties": {
+              "query": "SOURCE '/aws/lambda/curriculum-analysis-agent' | SOURCE '/aws/lambda/program-matcher-agent' | SOURCE '/aws/lambda/outcome-alignment-agent' | SOURCE '/aws/lambda/content-processor-agent' | SOURCE '/aws/lambda/report-generator-agent' | SOURCE '/aws/lambda/workflow-coordinator-agent'\n| fields @timestamp, @message, @logStream\n| filter @message like /ERROR/ or @message like /WARN/\n| sort @timestamp desc\n| limit 100",
+              "region": "us-east-1",
+              "title": "Agent Error Logs",
+              "view": "table"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "CurriculumAlignmentSystem-Costs",
+      "description": "Cost monitoring and optimization tracking",
+      "body": {
+        "widgets": [
+          {
+            "type": "metric",
+            "x": 0,
+            "y": 0,
+            "width": 12,
+            "height": 6,
+            "properties": {
+              "metrics": [
+                ["AWS/Billing", "EstimatedCharges", "Currency", "USD", "ServiceName", "AmazonLambda"],
+                [".", ".", ".", ".", ".", "AmazonRDS"],
+                [".", ".", ".", ".", ".", "AmazonS3"],
+                [".", ".", ".", ".", ".", "AmazonAPIGateway"],
+                [".", ".", ".", ".", ".", "AmazonCloudWatch"]
+              ],
+              "period": 86400,
+              "stat": "Maximum",
+              "region": "us-east-1",
+              "title": "Daily Cost by Service (USD)",
+              "yAxis": {
+                "left": {
+                  "min": 0
+                }
+              }
+            }
+          },
+          {
+            "type": "metric",
+            "x": 12,
+            "y": 0,
+            "width": 12,
+            "height": 6,
+            "properties": {
+              "metrics": [
+                ["AWS/Lambda", "Duration", "FunctionName", "curriculum-analysis-agent", {"stat": "Sum"}],
+                [".", ".", ".", "program-matcher-agent", {"stat": "Sum"}],
+                [".", ".", ".", "outcome-alignment-agent", {"stat": "Sum"}],
+                [".", ".", ".", "content-processor-agent", {"stat": "Sum"}],
+                [".", ".", ".", "report-generator-agent", {"stat": "Sum"}],
+                [".", ".", ".", "workflow-coordinator-agent", {"stat": "Sum"}]
+              ],
+              "period": 86400,
+              "stat": "Sum",
+              "region": "us-east-1",
+              "title": "Agent Compute Time (Total Duration)",
+              "yAxis": {
+                "left": {
+                  "min": 0
+                }
+              }
+            }
+          },
+          {
+            "type": "number",
+            "x": 0,
+            "y": 6,
+            "width": 6,
+            "height": 6,
+            "properties": {
+              "metrics": [
+                ["AWS/Billing", "EstimatedCharges", "Currency", "USD", {"stat": "Maximum"}]
+              ],
+              "period": 86400,
+              "stat": "Maximum",
+              "region": "us-east-1",
+              "title": "Total Daily Cost"
+            }
+          },
+          {
+            "type": "number",
+            "x": 6,
+            "y": 6,
+            "width": 6,
+            "height": 6,
+            "properties": {
+              "metrics": [
+                ["AWS/Lambda", "Invocations", "FunctionName", "curriculum-analysis-agent", {"stat": "Sum"}],
+                [".", ".", ".", "program-matcher-agent", {"stat": "Sum"}],
+                [".", ".", ".", "outcome-alignment-agent", {"stat": "Sum"}],
+                [".", ".", ".", "content-processor-agent", {"stat": "Sum"}],
+                [".", ".", ".", "report-generator-agent", {"stat": "Sum"}],
+                [".", ".", ".", "workflow-coordinator-agent", {"stat": "Sum"}]
+              ],
+              "period": 86400,
+              "stat": "Sum",
+              "region": "us-east-1",
+              "title": "Total Daily Invocations"
+            }
+          },
+          {
+            "type": "metric",
+            "x": 12,
+            "y": 6,
+            "width": 12,
+            "height": 6,
+            "properties": {
+              "metrics": [
+                ["AWS/RDS", "ReadIOPS", "DBInstanceIdentifier", "curriculum-alignment-db"],
+                [".", "WriteIOPS", ".", "."]
+              ],
+              "period": 300,
+              "stat": "Average",
+              "region": "us-east-1",
+              "title": "Database I/O Operations (Cost Driver)",
+              "yAxis": {
+                "left": {
+                  "min": 0
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "CurriculumAlignmentSystem-Errors",
+      "description": "Error tracking and system health monitoring",
+      "body": {
+        "widgets": [
+          {
+            "type": "metric",
+            "x": 0,
+            "y": 0,
+            "width": 24,
+            "height": 6,
+            "properties": {
+              "metrics": [
+                ["AWS/Lambda", "Errors", "FunctionName", "curriculum-analysis-agent", {"stat": "Sum"}],
+                [".", ".", ".", "program-matcher-agent", {"stat": "Sum"}],
+                [".", ".", ".", "outcome-alignment-agent", {"stat": "Sum"}],
+                [".", ".", ".", "content-processor-agent", {"stat": "Sum"}],
+                [".", ".", ".", "report-generator-agent", {"stat": "Sum"}],
+                [".", ".", ".", "workflow-coordinator-agent", {"stat": "Sum"}],
+                [".", ".", ".", "curriculum-alignment-api", {"stat": "Sum"}]
+              ],
+              "period": 300,
+              "stat": "Sum",
+              "region": "us-east-1",
+              "title": "System-Wide Error Count",
+              "yAxis": {
+                "left": {
+                  "min": 0
+                }
+              }
+            }
+          },
+          {
+            "type": "metric",
+            "x": 0,
+            "y": 6,
+            "width": 12,
+            "height": 6,
+            "properties": {
+              "metrics": [
+                ["AWS/ApiGateway", "4XXError", "ApiName", "curriculum-alignment-api", {"stat": "Sum"}],
+                [".", "5XXError", ".", ".", {"stat": "Sum"}]
+              ],
+              "period": 300,
+              "stat": "Sum",
+              "region": "us-east-1",
+              "title": "API Error Responses",
+              "yAxis": {
+                "left": {
+                  "min": 0
+                }
+              }
+            }
+          },
+          {
+            "type": "metric",
+            "x": 12,
+            "y": 6,
+            "width": 12,
+            "height": 6,
+            "properties": {
+              "metrics": [
+                ["AWS/RDS", "DatabaseConnections", "DBInstanceIdentifier", "curriculum-alignment-db"],
+                [".", "DeadlockCount", ".", "."],
+                [".", "LockDeadlockCount", ".", "."]
+              ],
+              "period": 300,
+              "stat": "Average",
+              "region": "us-east-1",
+              "title": "Database Connection Health",
+              "yAxis": {
+                "left": {
+                  "min": 0
+                }
+              }
+            }
+          },
+          {
+            "type": "log",
+            "x": 0,
+            "y": 12,
+            "width": 24,
+            "height": 8,
+            "properties": {
+              "query": "SOURCE '/aws/lambda/curriculum-analysis-agent' | SOURCE '/aws/lambda/program-matcher-agent' | SOURCE '/aws/lambda/outcome-alignment-agent' | SOURCE '/aws/lambda/content-processor-agent' | SOURCE '/aws/lambda/report-generator-agent' | SOURCE '/aws/lambda/workflow-coordinator-agent' | SOURCE '/aws/lambda/curriculum-alignment-api'\n| fields @timestamp, @message, @logStream, @requestId\n| filter @message like /ERROR/ or @message like /FATAL/ or @message like /Exception/\n| stats count() by bin(5m)\n| sort @timestamp desc",
+              "region": "us-east-1",
+              "title": "Error Rate Over Time",
+              "view": "table"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "CurriculumAlignmentSystem-BusinessMetrics",
+      "description": "Business-focused metrics for curriculum alignment operations",
+      "body": {
+        "widgets": [
+          {
+            "type": "log",
+            "x": 0,
+            "y": 0,
+            "width": 12,
+            "height": 6,
+            "properties": {
+              "query": "SOURCE '/aws/lambda/curriculum-analysis-agent'\n| fields @timestamp, @message\n| filter @message like /analysis_completed/\n| stats count() by bin(1h)\n| sort @timestamp desc",
+              "region": "us-east-1",
+              "title": "Completed Analyses per Hour",
+              "view": "table"
+            }
+          },
+          {
+            "type": "log",
+            "x": 12,
+            "y": 0,
+            "width": 12,
+            "height": 6,
+            "properties": {
+              "query": "SOURCE '/aws/lambda/program-matcher-agent'\n| fields @timestamp, @message\n| filter @message like /match_found/\n| stats count() by bin(1h)\n| sort @timestamp desc",
+              "region": "us-east-1",
+              "title": "Program Matches per Hour",
+              "view": "table"
+            }
+          },
+          {
+            "type": "log",
+            "x": 0,
+            "y": 6,
+            "width": 12,
+            "height": 6,
+            "properties": {
+              "query": "SOURCE '/aws/lambda/report-generator-agent'\n| fields @timestamp, @message\n| filter @message like /report_generated/\n| stats count() by bin(1d)\n| sort @timestamp desc",
+              "region": "us-east-1",
+              "title": "Reports Generated per Day",
+              "view": "table"
+            }
+          },
+          {
+            "type": "log",
+            "x": 12,
+            "y": 6,
+            "width": 12,
+            "height": 6,
+            "properties": {
+              "query": "SOURCE '/aws/lambda/content-processor-agent'\n| fields @timestamp, @message\n| filter @message like /document_processed/\n| stats count() by bin(1h)\n| sort @timestamp desc",
+              "region": "us-east-1",
+              "title": "Documents Processed per Hour",
+              "view": "table"
+            }
+          },
+          {
+            "type": "log",
+            "x": 0,
+            "y": 12,
+            "width": 24,
+            "height": 6,
+            "properties": {
+              "query": "SOURCE '/aws/lambda/workflow-coordinator-agent'\n| fields @timestamp, @message\n| filter @message like /workflow_status/\n| parse @message /workflow_status: (?<status>\\w+)/\n| stats count() by status, bin(1h)\n| sort @timestamp desc",
+              "region": "us-east-1",
+              "title": "Workflow Status Distribution",
+              "view": "table"
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "alarms": [
+    {
+      "name": "CurriculumAlignment-HighErrorRate",
+      "description": "Triggers when system error rate exceeds threshold",
+      "metricName": "Errors",
+      "namespace": "AWS/Lambda",
+      "dimensions": [
+        {
+          "name": "FunctionName",
+          "value": "curriculum-alignment-api"
+        }
+      ],
+      "statistic": "Sum",
+      "period": 300,
+      "evaluationPeriods": 2,
+      "threshold": 10,
+      "comparisonOperator": "GreaterThanThreshold",
+      "alarmActions": [
+        "arn:aws:sns:us-east-1:123456789012:curriculum-alignment-alerts"
+      ],
+      "treatMissingData": "breaching"
+    },
+    {
+      "name": "CurriculumAlignment-DatabaseConnections",
+      "description": "Monitors database connection pool health",
+      "metricName": "DatabaseConnections",
+      "namespace": "AWS/RDS",
+      "dimensions": [
+        {
+          "name": "DBInstanceIdentifier",
+          "value": "curriculum-alignment-db"
+        }
+      ],
+      "statistic": "Average",
+      "period": 300,
+      "evaluationPeriods": 2,
+      "threshold": 80,
+      "comparisonOperator": "GreaterThanThreshold",
+      "alarmActions": [
+        "arn:aws:sns:us-east-1:123456789012:curriculum-alignment-alerts"
+      ]
+    },
+    {
+      "name": "CurriculumAlignment-ApiLatency",
+      "description": "Monitors API response time",
+      "metricName": "Duration",
+      "namespace": "AWS/Lambda",
+      "dimensions": [
+        {
+          "name": "FunctionName",
+          "value": "curriculum-alignment-api"
+        }
+      ],
+      "statistic": "Average",
+      "period": 300,
+      "evaluationPeriods": 3,
+      "threshold": 5000,
+      "comparisonOperator": "GreaterThanThreshold",
+      "alarmActions": [
+        "arn:aws:sns:us-east-1:123456789012:curriculum-alignment-alerts"
+      ]
+    },
+    {
+      "name": "CurriculumAlignment-DailyCost",
+      "description": "Monitors daily cost threshold",
+      "metricName": "EstimatedCharges",
+      "namespace": "AWS/Billing",
+      "dimensions": [
+        {
+          "name": "Currency",
+          "value": "USD"
+        }
+      ],
+      "statistic": "Maximum",
+      "period": 86400,
+      "evaluationPeriods": 1,
+      "threshold": 100,
+      "comparisonOperator": "GreaterThanThreshold",
+      "alarmActions": [
+        "arn:aws:sns:us-east-1:123456789012:curriculum-alignment-cost-alerts"
+      ]
+    }
+  ],
+  "deployment": {
+    "commands": [
+      "aws cloudwatch put-dashboard --dashboard-name CurriculumAlignmentSystem-Overview --dashboard-body file://cloudwatch-dashboards.json",
+      "aws cloudwatch put-dashboard --dashboard-name CurriculumAlignmentSystem-AgentPerformance --dashboard-body file://cloudwatch-dashboards.json",
+      "aws cloudwatch put-dashboard --dashboard-name CurriculumAlignmentSystem-Costs --dashboard-body file://cloudwatch-dashboards.json",
+      "aws cloudwatch put-dashboard --dashboard-name CurriculumAlignmentSystem-Errors --dashboard-body file://cloudwatch-dashboards.json",
+      "aws cloudwatch put-dashboard --dashboard-name CurriculumAlignmentSystem-BusinessMetrics --dashboard-body file://cloudwatch-dashboards.json"
+    ],
+    "prerequisites": [
+      "AWS CLI configured with appropriate permissions",
+      "CloudWatch dashboard permissions",
+      "SNS topics created for alerts",
+      "Lambda functions deployed with correct names",
+      "RDS instance named 'curriculum-alignment-db'"
+    ]
+  },
+  "customMetrics": {
+    "description": "Custom metrics to be implemented in Lambda functions",
+    "metrics": [
+      {
+        "name": "AnalysisQuality",
+        "namespace": "CurriculumAlignment/Business",
+        "description": "Quality score of curriculum analyses (0-100)",
+        "unit": "Percent"
+      },
+      {
+        "name": "MatchAccuracy",
+        "namespace": "CurriculumAlignment/Business", 
+        "description": "Accuracy of program matching results",
+        "unit": "Percent"
+      },
+      {
+        "name": "ProcessingTime",
+        "namespace": "CurriculumAlignment/Performance",
+        "description": "Time to process documents",
+        "unit": "Seconds"
+      },
+      {
+        "name": "UserSatisfaction",
+        "namespace": "CurriculumAlignment/Business",
+        "description": "User satisfaction ratings",
+        "unit": "Count"
+      }
+    ]
+  }
+}
