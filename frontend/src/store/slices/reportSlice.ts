@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 import type { PayloadAction } from '@reduxjs/toolkit'
+import { sampleReports, sampleReportTemplates } from '../../lib/sampleData'
 
 export interface ReportTemplate {
   id: string
@@ -84,46 +85,8 @@ export interface ReportState {
 }
 
 const initialState: ReportState = {
-  templates: [
-    {
-      id: 'curriculum-comparison',
-      name: 'Curriculum Comparison Report',
-      description: 'Compare two or more curriculum programs',
-      type: 'comparison',
-      sections: [
-        { id: 'executive-summary', title: 'Executive Summary', type: 'summary', required: true, configurable: false },
-        { id: 'program-overview', title: 'Program Overview', type: 'table', required: true, configurable: true },
-        { id: 'course-mapping', title: 'Course Mapping', type: 'table', required: true, configurable: true },
-        { id: 'similarity-analysis', title: 'Similarity Analysis', type: 'chart', required: true, configurable: true },
-        { id: 'gap-analysis', title: 'Gap Analysis', type: 'list', required: false, configurable: true },
-        { id: 'recommendations', title: 'Recommendations', type: 'list', required: true, configurable: true }
-      ],
-      defaultConfig: {
-        includeCharts: true,
-        detailLevel: 'comprehensive',
-        includeCostAnalysis: false
-      }
-    },
-    {
-      id: 'accreditation-compliance',
-      name: 'Accreditation Compliance Report',
-      description: 'Analyze program compliance with accreditation standards',
-      type: 'accreditation',
-      sections: [
-        { id: 'compliance-summary', title: 'Compliance Summary', type: 'summary', required: true, configurable: false },
-        { id: 'standard-requirements', title: 'Standard Requirements', type: 'table', required: true, configurable: false },
-        { id: 'compliance-matrix', title: 'Compliance Matrix', type: 'table', required: true, configurable: true },
-        { id: 'gap-identification', title: 'Gap Identification', type: 'list', required: true, configurable: true },
-        { id: 'action-plan', title: 'Action Plan', type: 'list', required: true, configurable: true }
-      ],
-      defaultConfig: {
-        includeEvidence: true,
-        detailLevel: 'comprehensive',
-        includeTimeline: true
-      }
-    }
-  ],
-  reports: [],
+  templates: sampleReportTemplates,
+  reports: sampleReports,
   currentReport: null,
   generationQueue: [],
   isGenerating: false,

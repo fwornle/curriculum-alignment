@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 import type { PayloadAction } from '@reduxjs/toolkit'
+import { samplePrograms, sampleUploadedDocuments } from '../../lib/sampleData'
 
 export interface Course {
   id: string
@@ -63,10 +64,10 @@ export interface CurriculumState {
 }
 
 const initialState: CurriculumState = {
-  programs: [],
+  programs: samplePrograms,
   currentProgram: null,
   selectedCourses: [],
-  uploadedDocuments: [],
+  uploadedDocuments: sampleUploadedDocuments,
   searchResults: [],
   isLoading: false,
   error: null,

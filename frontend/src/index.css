@@ -1,114 +1,58 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Crimson+Text:ital,wght@0,400;0,600;1,400;1,600&display=swap');
-
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Crimson+Text:wght@400;600&display=swap');
 @import "tailwindcss";
 
-@layer base {
-  :root {
-    --background: 0 0% 100%;
-    --foreground: 240 10% 3.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 240 10% 3.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 240 10% 3.9%;
-    --primary: 199 89% 48%;
-    --primary-foreground: 0 0% 98%;
-    --secondary: 240 4.8% 95.9%;
-    --secondary-foreground: 240 5.9% 10%;
-    --muted: 240 4.8% 95.9%;
-    --muted-foreground: 240 3.8% 46.1%;
-    --accent: 48 96% 53%;
-    --accent-foreground: 240 5.9% 10%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 240 5.9% 90%;
-    --input: 240 5.9% 90%;
-    --ring: 199 89% 48%;
-    --radius: 0.5rem;
-  }
-
-  .dark {
-    --background: 240 10% 3.9%;
-    --foreground: 0 0% 98%;
-    --card: 240 10% 3.9%;
-    --card-foreground: 0 0% 98%;
-    --popover: 240 10% 3.9%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 199 89% 48%;
-    --primary-foreground: 240 5.9% 10%;
-    --secondary: 240 3.7% 15.9%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 240 3.7% 15.9%;
-    --muted-foreground: 240 5% 64.9%;
-    --accent: 48 96% 53%;
-    --accent-foreground: 0 0% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 240 3.7% 15.9%;
-    --input: 240 3.7% 15.9%;
-    --ring: 199 89% 48%;
-  }
-}
-
-@layer base {
-  * {
-    @apply border-border;
-  }
-  body {
-    @apply bg-background text-foreground font-sans;
-  }
-}
-
-/* Academic styling enhancements */
-@layer components {
-  .academic-container {
-    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
-  }
+@theme {
+  /* CEU Brand Colors */
+  --color-ceu-primary: hsl(348, 100%, 25%);
+  --color-ceu-primary-light: hsl(348, 100%, 33%);
+  --color-ceu-primary-dark: hsl(348, 100%, 18%);
   
-  .academic-header {
-    @apply font-academic text-primary-800 dark:text-primary-200;
-  }
+  --color-ceu-secondary: hsl(45, 73%, 52%);
+  --color-ceu-secondary-light: hsl(45, 73%, 65%);
+  --color-ceu-secondary-dark: hsl(45, 73%, 39%);
   
-  .ceu-gradient {
-    @apply bg-gradient-to-r from-primary-600 to-primary-800;
-  }
+  /* CEU Neutral Grays */
+  --color-ceu-gray-50: hsl(210, 20%, 98%);
+  --color-ceu-gray-100: hsl(210, 15%, 95%);
+  --color-ceu-gray-200: hsl(210, 15%, 89%);
+  --color-ceu-gray-300: hsl(210, 12%, 82%);
+  --color-ceu-gray-400: hsl(210, 10%, 62%);
+  --color-ceu-gray-500: hsl(210, 10%, 38%);
+  --color-ceu-gray-600: hsl(210, 12%, 24%);
+  --color-ceu-gray-700: hsl(210, 15%, 13%);
+  --color-ceu-gray-800: hsl(210, 15%, 9%);
+  --color-ceu-gray-900: hsl(210, 15%, 6%);
   
-  .academic-card {
-    @apply bg-card border border-border rounded-lg shadow-sm hover:shadow-md transition-shadow;
-  }
+  /* CEU Status Colors */
+  --color-ceu-success: hsl(142, 71%, 25%);
+  --color-ceu-warning: hsl(45, 93%, 47%);
+  --color-ceu-error: hsl(4, 90%, 40%);
+  --color-ceu-info: hsl(217, 91%, 60%);
   
-  .curriculum-badge {
-    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-accent-100 text-accent-800 dark:bg-accent-800 dark:text-accent-100;
-  }
-}
-
-/* Animation utilities */
-@layer utilities {
-  .animate-fade-in {
-    animation: fadeIn 0.5s ease-in-out;
-  }
-  
-  .animate-slide-up {
-    animation: slideUp 0.3s ease-out;
-  }
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-@keyframes slideUp {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  /* Design System Colors for UI Components */
+  --color-background: hsl(0, 0%, 100%);
+  --color-foreground: hsl(210, 15%, 13%);
+  --color-card: hsl(0, 0%, 100%);
+  --color-card-foreground: hsl(210, 15%, 13%);
+  --color-popover: hsl(0, 0%, 100%);
+  --color-popover-foreground: hsl(210, 15%, 13%);
+  --color-primary: hsl(348, 100%, 25%);
+  --color-primary-foreground: hsl(0, 0%, 100%);
+  --color-secondary: hsl(210, 15%, 95%);
+  --color-secondary-foreground: hsl(210, 15%, 13%);
+  --color-muted: hsl(210, 15%, 95%);
+  --color-muted-foreground: hsl(210, 10%, 38%);
+  --color-accent: hsl(210, 15%, 95%);
+  --color-accent-foreground: hsl(210, 15%, 13%);
+  --color-destructive: hsl(4, 90%, 40%);
+  --color-destructive-foreground: hsl(0, 0%, 100%);
+  --color-border: hsl(210, 15%, 89%);
+  --color-input: hsl(210, 15%, 89%);
+  --color-ring: hsl(348, 100%, 25%);
+  --color-chart-1: hsl(348, 100%, 25%);
+  --color-chart-2: hsl(45, 73%, 52%);
+  --color-chart-3: hsl(142, 71%, 25%);
+  --color-chart-4: hsl(217, 91%, 60%);
+  --color-chart-5: hsl(4, 90%, 40%);
 }

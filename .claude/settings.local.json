@@ -22,7 +22,16 @@
       "Bash(npm create:*)",
       "Bash(npx tailwindcss init:*)",
       "Bash(npm run build:*)",
-      "Bash(npm run dev:*)"
+      "Bash(npm run dev:*)",
+      "Bash(pkill:*)",
+      "mcp__serena__find_symbol",
+      "Bash(npm uninstall:*)",
+      "WebFetch(domain:tweakcn.com)",
+      "mcp__serena__search_for_pattern",
+      "mcp__serena__activate_project",
+      "mcp__serena__get_symbols_overview",
+      "mcp__serena__replace_symbol_body",
+      "Read(//Users/q284340/.claude/**)"
     ],
     "additionalDirectories": []
   },

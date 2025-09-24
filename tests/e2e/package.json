@@ -1,0 +1,41 @@
+{
+  "name": "e2e-tests",
+  "version": "1.0.0",
+  "description": "End-to-End Tests for Curriculum Alignment System",
+  "private": true,
+  "scripts": {
+    "test": "playwright test",
+    "test:debug": "playwright test --debug",
+    "test:headed": "playwright test --headed",
+    "test:ui": "playwright test --ui",
+    "test:report": "playwright show-report",
+    "test:trace": "playwright test --trace on",
+    "test:chromium": "playwright test --project=chromium",
+    "test:firefox": "playwright test --project=firefox",
+    "test:webkit": "playwright test --project=webkit",
+    "test:mobile": "playwright test --project=mobile-chrome",
+    "test:auth": "playwright test --grep \"Authentication\"",
+    "test:programs": "playwright test --grep \"Program Management\"",
+    "test:analysis": "playwright test --grep \"Analysis Workflow\"",
+    "test:documents": "playwright test --grep \"Document Upload\"",
+    "test:smoke": "playwright test --grep \"@smoke\"",
+    "test:regression": "playwright test --grep \"@regression\"",
+    "install": "playwright install",
+    "install:deps": "playwright install-deps",
+    "codegen": "playwright codegen",
+    "clean": "rm -rf test-results playwright-report",
+    "lint": "eslint . --ext .ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.40.0",
+    "@types/node": "^20.19.17",
+    "@typescript-eslint/eslint-plugin": "^6.17.0",
+    "@typescript-eslint/parser": "^6.17.0",
+    "eslint": "^8.56.0",
+    "typescript": "^5.3.3"
+  },
+  "dependencies": {
+    "dotenv": "^16.3.1"
+  }
+}

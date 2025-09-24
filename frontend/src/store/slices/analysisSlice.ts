@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 import type { PayloadAction } from '@reduxjs/toolkit'
+import { sampleAnalyses, sampleWorkflows } from '../../lib/sampleData'
 
 export interface AnalysisResult {
   id: string
@@ -64,10 +65,10 @@ export interface AnalysisState {
 }
 
 const initialState: AnalysisState = {
-  analyses: [],
-  workflows: [],
-  currentAnalysis: null,
-  currentWorkflow: null,
+  analyses: sampleAnalyses,
+  workflows: sampleWorkflows,
+  currentAnalysis: sampleAnalyses.find(a => a.status === 'in-progress') || null,
+  currentWorkflow: sampleWorkflows.find(w => w.status === 'running') || null,
   comparisonCache: {},
   isRunningAnalysis: false,
   selectedAnalysisType: null,

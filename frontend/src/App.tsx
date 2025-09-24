@@ -10,6 +10,10 @@ import { ReportsView } from './components/views/ReportsView'
 import { ComponentsTestView } from './components/views/ComponentsTestView'
 import { ChatInterface } from './components/chat/ChatInterface'
 import { LLMConfigModal } from './components/modals/LLMConfigModal'
+import { SettingsModal } from './components/modals/SettingsModal'
+import { UploadDocumentModal } from './components/modals/UploadDocumentModal'
+import { CreateProgramModal } from './components/modals/CreateProgramModal'
+import { AnalysisDetailsModal } from './components/modals/AnalysisDetailsModal'
 
 function App() {
   const dispatch = useAppDispatch()
@@ -41,7 +45,7 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="min-h-screen bg-gray-50 flex flex-col font-sans">
       <TopAppBar />
       
       <main className="flex-1 overflow-hidden">
@@ -52,6 +56,10 @@ function App() {
       
       {/* Modals */}
       <LLMConfigModal />
+      <SettingsModal />
+      <UploadDocumentModal />
+      <CreateProgramModal />
+      <AnalysisDetailsModal />
     </div>
   )
 }

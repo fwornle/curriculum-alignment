@@ -1,0 +1,67 @@
+{
+  "name": "api-integration-tests",
+  "version": "1.0.0",
+  "description": "API Integration Tests for Curriculum Alignment System",
+  "private": true,
+  "scripts": {
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "test:ci": "jest --ci --coverage --watchAll=false",
+    "test:health": "jest --testNamePattern=\"Health API\"",
+    "test:auth": "jest --testNamePattern=\"Authentication API\"",
+    "test:programs": "jest --testNamePattern=\"Programs API\"",
+    "test:documents": "jest --testNamePattern=\"Documents API\"",
+    "test:analysis": "jest --testNamePattern=\"Analysis API\"",
+    "test:all-endpoints": "jest --testPathPattern=\"api/.*\\.test\\.ts$\"",
+    "clean": "rm -rf coverage node_modules",
+    "lint": "eslint . --ext .ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.11",
+    "@types/node": "^20.19.17",
+    "@typescript-eslint/eslint-plugin": "^6.17.0",
+    "@typescript-eslint/parser": "^6.17.0",
+    "eslint": "^8.56.0",
+    "jest": "^29.7.0",
+    "jest-junit": "^16.0.0",
+    "ts-jest": "^29.1.1",
+    "typescript": "^5.3.3"
+  },
+  "dependencies": {
+    "@types/aws-lambda": "^8.10.130",
+    "aws-lambda": "^1.0.7",
+    "aws-sdk": "^2.1528.0"
+  },
+  "jest": {
+    "preset": "ts-jest",
+    "testEnvironment": "node",
+    "setupFilesAfterEnv": [
+      "<rootDir>/../../setup.ts"
+    ],
+    "testMatch": [
+      "<rootDir>/**/*.test.ts"
+    ],
+    "collectCoverageFrom": [
+      "<rootDir>/../../../src/**/*.ts",
+      "<rootDir>/../../../lambda/**/*.ts",
+      "!<rootDir>/../../../**/*.d.ts",
+      "!<rootDir>/../../../**/node_modules/**",
+      "!<rootDir>/../../../**/*.config.{js,ts}",
+      "!<rootDir>/../../../**/dist/**"
+    ],
+    "coverageReporters": [
+      "text",
+      "lcov",
+      "html",
+      "json"
+    ],
+    "coverageDirectory": "<rootDir>/coverage",
+    "testTimeout": 30000,
+    "verbose": true,
+    "clearMocks": true,
+    "resetMocks": true,
+    "restoreMocks": true
+  }
+}

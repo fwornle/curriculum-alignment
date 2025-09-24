@@ -1,0 +1,41 @@
+{
+  "name": "load-tests",
+  "version": "1.0.0",
+  "description": "Load Tests for Curriculum Alignment System using k6",
+  "private": true,
+  "scripts": {
+    "test": "k6 run k6-scripts/api-load-test.js",
+    "test:smoke": "k6 run k6-scripts/smoke-test.js",
+    "test:stress": "k6 run k6-scripts/stress-test.js",
+    "test:spike": "k6 run k6-scripts/spike-test.js",
+    "test:volume": "k6 run k6-scripts/volume-test.js",
+    "test:soak": "k6 run k6-scripts/soak-test.js",
+    "test:api": "k6 run k6-scripts/api-load-test.js",
+    "test:auth": "k6 run k6-scripts/auth-load-test.js",
+    "test:programs": "k6 run k6-scripts/programs-load-test.js",
+    "test:documents": "k6 run k6-scripts/documents-load-test.js",
+    "test:analysis": "k6 run k6-scripts/analysis-load-test.js",
+    "test:all": "./run-load-tests.sh --all",
+    "test:ci": "./run-load-tests.sh --ci",
+    "report": "k6 run --out json=results/load-test-results.json k6-scripts/api-load-test.js && node generate-report.js",
+    "clean": "rm -rf results node_modules",
+    "install:k6": "curl https://github.com/grafana/k6/releases/download/v0.47.0/k6-v0.47.0-linux-amd64.tar.gz -L | tar xvz --strip-components 1",
+    "validate": "k6 version && echo 'k6 is installed correctly'"
+  },
+  "devDependencies": {
+    "k6": "^0.47.0"
+  },
+  "dependencies": {
+    "faker": "^6.6.6"
+  },
+  "engines": {
+    "k6": ">=0.44.0"
+  },
+  "keywords": [
+    "load-testing",
+    "performance",
+    "k6",
+    "curriculum-alignment",
+    "stress-testing"
+  ]
+}
