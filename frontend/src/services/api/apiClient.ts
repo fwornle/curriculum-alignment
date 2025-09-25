@@ -1,6 +1,5 @@
-import { 
+import type { 
   APIResponse, 
-  APIError, 
   RequestOptions, 
   AuthTokens,
   APIMethod 
@@ -36,7 +35,7 @@ class APIClient {
   
   constructor(config: Partial<APIClientConfig> = {}) {
     this.config = {
-      baseURL: import.meta.env.VITE_API_URL || 'http://localhost:3000/api',
+      baseURL: (typeof window !== 'undefined' && (window as any).VITE_API_URL) || 'http://localhost:3000/api',
       timeout: 30000,
       retries: 3,
       retryDelay: 1000,
@@ -514,7 +513,7 @@ class APIClient {
         });
       }
 
-      xhr.send(options.body);
+      xhr.send(options.body as XMLHttpRequestBodyInit | Document | null);
     });
   }
 

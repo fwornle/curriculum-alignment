@@ -1,6 +1,6 @@
 import React, { useState, useRef, useCallback } from 'react'
 import { useAppDispatch } from '../../store'
-import { uploadDocument } from '../../store/slices/curriculumSlice'
+import { uploadProgramDocument } from '../../store/slices/curriculumSlice'
 import { Button } from '../ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card'
 import { Alert, AlertDescription } from '../ui/alert'
@@ -124,14 +124,18 @@ export const FileUpload: React.FC<FileUploadProps> = ({
     try {
       // Create a simulated File object for upload
       const file = new window.File([new Blob([''], { type: fileData.type })], fileData.name, { type: fileData.type })
-      const result = await dispatch(uploadDocument(file))
+      const result = await dispatch(uploadProgramDocument({
+        programId: 'temp-program-id',
+        file,
+        metadata: { documentType: file.type, title: file.name }
+      }))
       
       clearInterval(progressInterval)
       
-      if (uploadDocument.fulfilled.match(result)) {
+      if (uploadProgramDocument.fulfilled.match(result)) {
         setFiles(prev => prev.map(f => 
           f.id === fileData.id 
-            ? { ...f, status: 'success', progress: 100, url: result.payload.url } 
+            ? { ...f, status: 'success', progress: 100, url: result.payload?.url } 
             : f
         ))
       } else {

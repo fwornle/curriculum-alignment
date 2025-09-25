@@ -213,6 +213,58 @@ export interface UpdateReportRequest {
   parameters?: ReportParameters;
 }
 
+// Program Request Types  
+export interface CreateProgramRequest {
+  name: string;
+  degree: string;
+  university: string;
+  department: string;
+  description: string;
+  totalCredits: number;
+  duration: string;
+}
+
+export interface UpdateProgramRequest {
+  name?: string;
+  degree?: string;
+  university?: string;
+  department?: string;
+  description?: string;
+  totalCredits?: number;
+  duration?: string;
+}
+
+export interface ProgramDocument {
+  id: string;
+  title: string;
+  type: string;
+  url: string;
+  size: number;
+  uploadedAt: string;
+  status: 'uploading' | 'processing' | 'completed' | 'error';
+}
+
+export interface UploadProgramDocumentRequest {
+  documentType: string;
+  title: string;
+  description?: string;
+}
+
+// Analysis Workflow Types
+export interface AnalysisWorkflow {
+  id: string;
+  status: 'initiated' | 'running' | 'completed' | 'failed' | 'cancelled';
+  progress: number;
+  steps: Array<{
+    name: string;
+    status: 'pending' | 'running' | 'completed' | 'failed';
+    startTime?: string;
+    endTime?: string;
+  }>;
+  createdAt: string;
+  estimatedDuration?: number;
+}
+
 // Document Types
 export interface Document {
   id: string;

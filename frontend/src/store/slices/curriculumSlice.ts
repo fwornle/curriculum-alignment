@@ -2,43 +2,12 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 import type { PayloadAction } from '@reduxjs/toolkit'
 import { samplePrograms, sampleUploadedDocuments } from '../../lib/sampleData'
 import { programService } from '../../services/api/programService'
-import type { Program as APIProgram, CreateProgramRequest, UpdateProgramRequest } from '../../services/api/types'
+import type { CreateProgramRequest, UpdateProgramRequest, Course as APICourse, Program as APIProgram } from '../../services/api/types'
 
-export interface Course {
-  id: string
-  code: string
-  title: string
-  description: string
-  credits: number
-  prerequisites: string[]
-  corequisites: string[]
-  level: 'undergraduate' | 'graduate'
-  department: string
-  semester: string[]
-  status: 'active' | 'inactive' | 'planned'
-}
 
-export interface Program {
-  id: string
-  name: string
-  degree: string
-  university: string
-  totalCredits: number
-  duration: string
-  department: string
-  description: string
-  courses: Course[]
-  requirements: {
-    core: string[]
-    electives: {
-      categories: string[]
-      minimumCredits: number
-    }
-    general: string[]
-  }
-  lastUpdated: string
-  version: string
-}
+// Use API types for consistency
+export type Course = APICourse
+export type Program = APIProgram
 
 export interface CurriculumState {
   programs: Program[]
@@ -86,11 +55,11 @@ const initialState: CurriculumState = {
 // Async thunks for program operations
 export const fetchPrograms = createAsyncThunk(
   'curriculum/fetchPrograms',
-  async (filters: Partial<CurriculumState['filters']> | undefined, { rejectWithValue }) => {
+  async (_, { rejectWithValue }) => {
     try {
       const response = await programService.getPrograms()
       if (!response.success) {
-        return rejectWithValue(response.error?.message || 'Failed to fetch programs')
+        return rejectWithValue(response.error || 'Failed to fetch programs')
       }
       return response.data
     } catch (error) {
@@ -105,7 +74,7 @@ export const createProgram = createAsyncThunk(
     try {
       const response = await programService.createProgram(programData)
       if (!response.success) {
-        return rejectWithValue(response.error?.message || 'Failed to create program')
+        return rejectWithValue(response.error || 'Failed to create program')
       }
       return response.data
     } catch (error) {
@@ -120,7 +89,7 @@ export const updateProgram = createAsyncThunk(
     try {
       const response = await programService.updateProgram(programId, programData)
       if (!response.success) {
-        return rejectWithValue(response.error?.message || 'Failed to update program')
+        return rejectWithValue(response.error || 'Failed to update program')
       }
       return response.data
     } catch (error) {
@@ -135,7 +104,7 @@ export const deleteProgram = createAsyncThunk(
     try {
       const response = await programService.deleteProgram(programId)
       if (!response.success) {
-        return rejectWithValue(response.error?.message || 'Failed to delete program')
+        return rejectWithValue(response.error || 'Failed to delete program')
       }
       return programId
     } catch (error) {
@@ -160,7 +129,7 @@ export const uploadProgramDocument = createAsyncThunk(
     try {
       const response = await programService.uploadDocument(programId, file, metadata, onProgress)
       if (!response.success) {
-        return rejectWithValue(response.error?.message || 'Failed to upload document')
+        return rejectWithValue(response.error || 'Failed to upload document')
       }
       return response.data
     } catch (error) {
@@ -259,7 +228,7 @@ const curriculumSlice = createSlice({
       })
       .addCase(fetchPrograms.fulfilled, (state, action) => {
         state.isLoading = false
-        state.programs = action.payload
+        state.programs = action.payload || []
       })
       .addCase(fetchPrograms.rejected, (state, action) => {
         state.isLoading = false
@@ -274,7 +243,9 @@ const curriculumSlice = createSlice({
       })
       .addCase(createProgram.fulfilled, (state, action) => {
         state.isLoading = false
-        state.programs.push(action.payload)
+        if (action.payload) {
+          state.programs.push(action.payload)
+        }
       })
       .addCase(createProgram.rejected, (state, action) => {
         state.isLoading = false
@@ -289,11 +260,13 @@ const curriculumSlice = createSlice({
       })
       .addCase(updateProgram.fulfilled, (state, action) => {
         state.isLoading = false
-        const index = state.programs.findIndex(p => p.id === action.payload.id)
+        const index = state.programs.findIndex(p => p.id === action.payload?.id)
         if (index !== -1) {
-          state.programs[index] = action.payload
+          if (action.payload) {
+            state.programs[index] = action.payload
+          }
         }
-        if (state.currentProgram?.id === action.payload.id) {
+        if (action.payload && state.currentProgram?.id === action.payload.id) {
           state.currentProgram = action.payload
         }
       })
@@ -336,9 +309,9 @@ const curriculumSlice = createSlice({
           doc.name === action.meta.arg.file.name
         )
         if (document) {
-          document.id = action.payload.id
+          document.id = action.payload?.id || document.id
           document.status = 'completed'
-          document.url = action.payload.url
+          document.url = action.payload?.url || ''
         }
       })
       .addCase(uploadProgramDocument.rejected, (state, action) => {
@@ -395,16 +368,5 @@ export const {
   clearError,
   updateDocumentStatus,
 } = curriculumSlice.actions
-
-// Export async thunks
-export { 
-  fetchPrograms, 
-  createProgram, 
-  updateProgram, 
-  deleteProgram, 
-  uploadProgramDocument,
-  processDocument,
-  searchPrograms
-}
 
 export default curriculumSlice.reducer

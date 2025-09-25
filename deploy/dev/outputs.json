@@ -1,0 +1,68 @@
+[
+  {
+    "OutputKey": "WebSocketApiUrl",
+    "OutputValue": "wss://34mhdsgkxi.execute-api.eu-central-1.amazonaws.com/dev",
+    "Description": "WebSocket API endpoint URL for real-time communication",
+    "ExportName": "curriculum-alignment-dev-websocket-url"
+  },
+  {
+    "OutputKey": "UserPoolClientId",
+    "OutputValue": "1erjsmaobl6re9rmrge5e6quhq",
+    "Description": "Cognito User Pool Client ID",
+    "ExportName": "curriculum-alignment-dev-user-pool-client-id"
+  },
+  {
+    "OutputKey": "UserPoolId",
+    "OutputValue": "eu-central-1_f0vVK7RBy",
+    "Description": "Cognito User Pool ID",
+    "ExportName": "curriculum-alignment-dev-user-pool-id"
+  },
+  {
+    "OutputKey": "CoordinatorFunctionArn",
+    "OutputValue": "arn:aws:lambda:eu-central-1:930500114053:function:curriculum-alignment-dev-coordinator",
+    "Description": "Coordinator function ARN",
+    "ExportName": "curriculum-alignment-dev-coordinator-arn"
+  },
+  {
+    "OutputKey": "DocumentsBucketName",
+    "OutputValue": "curriculum-alignment-documents-dev-930500114053",
+    "Description": "S3 bucket name for document storage",
+    "ExportName": "curriculum-alignment-dev-documents-bucket"
+  },
+  {
+    "OutputKey": "DeadLetterQueueUrl",
+    "OutputValue": "https://sqs.eu-central-1.amazonaws.com/930500114053/curriculum-alignment-dlq-dev",
+    "Description": "SQS dead letter queue URL",
+    "ExportName": "curriculum-alignment-dev-dlq-url"
+  },
+  {
+    "OutputKey": "CurriculumAlignmentApiUrl",
+    "OutputValue": "https://ihqwce6c41.execute-api.eu-central-1.amazonaws.com/dev/",
+    "Description": "API Gateway endpoint URL for Curriculum Alignment System",
+    "ExportName": "curriculum-alignment-dev-api-url"
+  },
+  {
+    "OutputKey": "StaticWebsiteBucketName",
+    "OutputValue": "curriculum-alignment-static-dev-930500114053",
+    "Description": "S3 bucket name for static website hosting",
+    "ExportName": "curriculum-alignment-dev-static-bucket"
+  },
+  {
+    "OutputKey": "MessageQueueUrl",
+    "OutputValue": "https://sqs.eu-central-1.amazonaws.com/930500114053/curriculum-alignment-messages-dev",
+    "Description": "SQS message queue URL",
+    "ExportName": "curriculum-alignment-dev-message-queue-url"
+  },
+  {
+    "OutputKey": "CurriculumAnalysisStateMachineArn",
+    "OutputValue": "arn:aws:states:eu-central-1:930500114053:stateMachine:curriculum-alignment-dev-analysis",
+    "Description": "Curriculum analysis state machine ARN",
+    "ExportName": "curriculum-alignment-dev-analysis-sm-arn"
+  },
+  {
+    "OutputKey": "ConnectionTableName",
+    "OutputValue": "curriculum-alignment-connections-dev",
+    "Description": "DynamoDB table for WebSocket connections",
+    "ExportName": "curriculum-alignment-dev-connection-table"
+  }
+]

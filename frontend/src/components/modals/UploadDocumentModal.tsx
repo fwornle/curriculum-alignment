@@ -65,7 +65,11 @@ export const UploadDocumentModal: React.FC = () => {
   const handleUpload = async () => {
     for (const file of selectedFiles) {
       try {
-        await dispatch(uploadDocument(file)).unwrap()
+        await dispatch(uploadProgramDocument({ 
+          programId: 'temp-program-id', // TODO: Get actual program ID
+          file, 
+          metadata: { documentType: file.type, title: file.name } 
+        })).unwrap()
       } catch (error) {
         console.error('Upload failed:', error)
       }

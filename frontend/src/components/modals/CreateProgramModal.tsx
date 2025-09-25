@@ -13,7 +13,6 @@ import {
   AlertTriangle
 } from 'lucide-react'
 import { cn } from '../../lib/utils'
-import type { Program } from '../../store/slices/curriculumSlice'
 
 export const CreateProgramModal: React.FC = () => {
   const dispatch = useAppDispatch()

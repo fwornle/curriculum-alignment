@@ -9,6 +9,7 @@ export interface UIState {
   modals: {
     uploadDocument: boolean
     createProgram: boolean
+    editProgram: boolean
     settings: boolean
     llmConfig: boolean
     analysisDetails: boolean
@@ -61,6 +62,7 @@ const initialState: UIState = {
   modals: {
     uploadDocument: false,
     createProgram: false,
+    editProgram: false,
     settings: false,
     llmConfig: false,
     analysisDetails: false,

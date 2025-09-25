@@ -2,7 +2,7 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 import type { PayloadAction } from '@reduxjs/toolkit'
 import { sampleAnalyses, sampleWorkflows } from '../../lib/sampleData'
 import { analysisService } from '../../services/api/analysisService'
-import type { Analysis, CreateAnalysisRequest } from '../../services/api/types'
+import type { CreateAnalysisRequest } from '../../services/api/types'
 
 export interface AnalysisResult {
   id: string
@@ -86,7 +86,7 @@ export const fetchAnalyses = createAsyncThunk(
     try {
       const response = await analysisService.getAnalyses()
       if (!response.success) {
-        return rejectWithValue(response.error?.message || 'Failed to fetch analyses')
+        return rejectWithValue(response.error || 'Failed to fetch analyses')
       }
       return response.data
     } catch (error) {
@@ -101,7 +101,7 @@ export const createAnalysis = createAsyncThunk(
     try {
       const response = await analysisService.createAnalysis(analysisData)
       if (!response.success) {
-        return rejectWithValue(response.error?.message || 'Failed to create analysis')
+        return rejectWithValue(response.error || 'Failed to create analysis')
       }
       return response.data
     } catch (error) {
@@ -116,7 +116,7 @@ export const startAnalysis = createAsyncThunk(
     try {
       const response = await analysisService.startAnalysis(analysisId)
       if (!response.success) {
-        return rejectWithValue(response.error?.message || 'Failed to start analysis')
+        return rejectWithValue(response.error || 'Failed to start analysis')
       }
       return response.data
     } catch (error) {
@@ -131,7 +131,7 @@ export const pauseAnalysis = createAsyncThunk(
     try {
       const response = await analysisService.pauseAnalysis(analysisId)
       if (!response.success) {
-        return rejectWithValue(response.error?.message || 'Failed to pause analysis')
+        return rejectWithValue(response.error || 'Failed to pause analysis')
       }
       return response.data
     } catch (error) {
@@ -146,7 +146,7 @@ export const stopAnalysis = createAsyncThunk(
     try {
       const response = await analysisService.stopAnalysis(analysisId)
       if (!response.success) {
-        return rejectWithValue(response.error?.message || 'Failed to stop analysis')
+        return rejectWithValue(response.error || 'Failed to stop analysis')
       }
       return response.data
     } catch (error) {
@@ -161,7 +161,7 @@ export const resumeAnalysis = createAsyncThunk(
     try {
       const response = await analysisService.resumeAnalysis(analysisId)
       if (!response.success) {
-        return rejectWithValue(response.error?.message || 'Failed to resume analysis')
+        return rejectWithValue(response.error || 'Failed to resume analysis')
       }
       return response.data
     } catch (error) {
@@ -334,12 +334,14 @@ const analysisSlice = createSlice({
         state.isRunningAnalysis = false
         const newAnalysis = {
           ...action.payload,
+          type: 'gap-analysis' as const,
+          parameters: {},
           progress: 0,
           status: 'pending' as const,
           createdAt: new Date().toISOString(),
         }
-        state.analyses.unshift(newAnalysis)
-        state.currentAnalysis = newAnalysis
+        state.analyses.unshift(newAnalysis as any)
+        state.currentAnalysis = newAnalysis as any
       })
       .addCase(startAnalysis.rejected, (state, action) => {
         state.isRunningAnalysis = false

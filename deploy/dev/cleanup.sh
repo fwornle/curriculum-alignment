@@ -12,6 +12,9 @@ ENVIRONMENT="dev"
 STACK_NAME="curriculum-alignment-dev"
 REGION="eu-central-1"
 
+# Always use tanfra AWS profile for this project
+export AWS_PROFILE=tanfra
+
 # Colors for output
 RED='\033[0;31m'
 GREEN='\033[0;32m'

@@ -2,7 +2,7 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 import type { PayloadAction } from '@reduxjs/toolkit'
 import { sampleReports, sampleReportTemplates } from '../../lib/sampleData'
 import { reportService } from '../../services/api/reportService'
-import type { Report as APIReport, CreateReportRequest, ReportParameters } from '../../services/api/types'
+import type { CreateReportRequest } from '../../services/api/types'
 
 export interface ReportTemplate {
   id: string
@@ -111,7 +111,7 @@ export const fetchReports = createAsyncThunk(
     try {
       const response = await reportService.getReports()
       if (!response.success) {
-        return rejectWithValue(response.error?.message || 'Failed to fetch reports')
+        return rejectWithValue(response.error || 'Failed to fetch reports')
       }
       return response.data
     } catch (error) {
@@ -126,7 +126,7 @@ export const createReport = createAsyncThunk(
     try {
       const response = await reportService.createReport(reportData)
       if (!response.success) {
-        return rejectWithValue(response.error?.message || 'Failed to create report')
+        return rejectWithValue(response.error || 'Failed to create report')
       }
       return response.data
     } catch (error) {
@@ -141,7 +141,7 @@ export const generateReport = createAsyncThunk(
     try {
       const response = await reportService.generateReport(reportId)
       if (!response.success) {
-        return rejectWithValue(response.error?.message || 'Failed to generate report')
+        return rejectWithValue(response.error || 'Failed to generate report')
       }
       return response.data
     } catch (error) {
@@ -156,7 +156,7 @@ export const downloadReport = createAsyncThunk(
     try {
       const response = await reportService.downloadReport(reportId)
       if (!response.success) {
-        return rejectWithValue(response.error?.message || 'Failed to download report')
+        return rejectWithValue(response.error || 'Failed to download report')
       }
       return response.data
     } catch (error) {
@@ -171,7 +171,7 @@ export const cancelReport = createAsyncThunk(
     try {
       const response = await reportService.cancelReport(reportId)
       if (!response.success) {
-        return rejectWithValue(response.error?.message || 'Failed to cancel report')
+        return rejectWithValue(response.error || 'Failed to cancel report')
       }
       return reportId
     } catch (error) {
@@ -186,7 +186,7 @@ export const fetchReportTemplates = createAsyncThunk(
     try {
       const response = await reportService.getReportTemplates()
       if (!response.success) {
-        return rejectWithValue(response.error?.message || 'Failed to fetch templates')
+        return rejectWithValue(response.error || 'Failed to fetch templates')
       }
       return response.data
     } catch (error) {
@@ -393,14 +393,15 @@ const reportSlice = createSlice({
       })
       .addCase(generateReport.fulfilled, (state, action) => {
         state.isGenerating = false
-        const newReport: Report = {
+        const newReport = {
           ...action.payload,
+          title: action.payload?.name || 'Untitled Report',
           status: 'generating',
           progress: 0,
           createdAt: new Date().toISOString()
         }
-        state.reports.unshift(newReport)
-        state.currentReport = newReport
+        state.reports.unshift(newReport as any)
+        state.currentReport = newReport as any
         state.generationQueue.push(newReport.id)
       })
       .addCase(generateReport.rejected, (state, action) => {

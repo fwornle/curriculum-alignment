@@ -91,22 +91,7 @@ Resources:
           ThrottlingBurstLimit: 200
       AccessLogSetting:
         DestinationArn: !GetAtt ApiGatewayLogGroup.Arn
-        Format: >
-          {
-            "requestId": "$context.requestId",
-            "ip": "$context.identity.sourceIp",
-            "caller": "$context.identity.caller",
-            "user": "$context.identity.user",
-            "requestTime": "$context.requestTime",
-            "httpMethod": "$context.httpMethod",
-            "resourcePath": "$context.resourcePath",
-            "status": "$context.status",
-            "protocol": "$context.protocol",
-            "responseLength": "$context.responseLength",
-            "responseTime": "$context.responseTime",
-            "error": "$context.error.message",
-            "integrationError": "$context.integration.error"
-          }
+        Format: '{"requestId": "$context.requestId", "ip": "$context.identity.sourceIp", "caller": "$context.identity.caller", "user": "$context.identity.user", "requestTime": "$context.requestTime", "httpMethod": "$context.httpMethod", "resourcePath": "$context.resourcePath", "status": "$context.status", "protocol": "$context.protocol", "responseLength": "$context.responseLength", "responseTime": "$context.responseTime", "error": "$context.error.message", "integrationError": "$context.integration.error"}'
 
   # =====================================================
   # Cognito User Pool for Authentication
@@ -174,10 +159,8 @@ Resources:
       Description: Central orchestration agent managing all workflows
       Environment:
         Variables:
-          DATABASE_SECRET_ARN: !ImportValue 
-            Fn::Sub: "curriculum-alignment-${Environment}-database-secret"
-          QDRANT_SECRET_ARN: !ImportValue
-            Fn::Sub: "curriculum-alignment-${Environment}-qdrant-secret"
+          DATABASE_SECRET_ARN: !Sub "arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:curriculum-alignment-${Environment}-database"
+          QDRANT_SECRET_ARN: !Sub "arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:curriculum-alignment-${Environment}-qdrant"
       Policies:
         - Version: "2012-10-17"
           Statement:
@@ -185,10 +168,8 @@ Resources:
               Action:
                 - secretsmanager:GetSecretValue
               Resource:
-                - !ImportValue 
-                  Fn::Sub: "curriculum-alignment-${Environment}-database-secret"
-                - !ImportValue
-                  Fn::Sub: "curriculum-alignment-${Environment}-qdrant-secret"
+                - !Sub "arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:curriculum-alignment-${Environment}-database"
+                - !Sub "arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:curriculum-alignment-${Environment}-qdrant"
             - Effect: Allow
               Action:
                 - states:StartExecution
@@ -218,8 +199,7 @@ Resources:
       Timeout: 600
       Environment:
         Variables:
-          DATABASE_SECRET_ARN: !ImportValue 
-            Fn::Sub: "curriculum-alignment-${Environment}-database-secret"
+          DATABASE_SECRET_ARN: !Sub "arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:curriculum-alignment-${Environment}-database"
       Policies:
         - Version: "2012-10-17"
           Statement:
@@ -227,8 +207,7 @@ Resources:
               Action:
                 - secretsmanager:GetSecretValue
               Resource:
-                - !ImportValue 
-                  Fn::Sub: "curriculum-alignment-${Environment}-database-secret"
+                - !Sub "arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:curriculum-alignment-${Environment}-database"
       Events:
         WebSearchApi:
           Type: Api
@@ -249,8 +228,7 @@ Resources:
       MemorySize: 2048
       Environment:
         Variables:
-          DATABASE_SECRET_ARN: !ImportValue 
-            Fn::Sub: "curriculum-alignment-${Environment}-database-secret"
+          DATABASE_SECRET_ARN: !Sub "arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:curriculum-alignment-${Environment}-database"
       Policies:
         - Version: "2012-10-17"
           Statement:
@@ -258,8 +236,7 @@ Resources:
               Action:
                 - secretsmanager:GetSecretValue
               Resource:
-                - !ImportValue 
-                  Fn::Sub: "curriculum-alignment-${Environment}-database-secret"
+                - !Sub "arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:curriculum-alignment-${Environment}-database"
       Events:
         BrowserApi:
           Type: Api
@@ -280,9 +257,8 @@ Resources:
       MemorySize: 3008
       Environment:
         Variables:
-          DATABASE_SECRET_ARN: !ImportValue 
-            Fn::Sub: "curriculum-alignment-${Environment}-database-secret"
-          S3_DOCUMENTS_BUCKET: !Ref DocumentsBucket
+          DATABASE_SECRET_ARN: !Sub "arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:curriculum-alignment-${Environment}-database"
+          S3_DOCUMENTS_BUCKET: !Sub "curriculum-alignment-documents-${Environment}-${AWS::AccountId}"
       Policies:
         - Version: "2012-10-17"
           Statement:
@@ -290,14 +266,13 @@ Resources:
               Action:
                 - secretsmanager:GetSecretValue
               Resource:
-                - !ImportValue 
-                  Fn::Sub: "curriculum-alignment-${Environment}-database-secret"
+                - !Sub "arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:curriculum-alignment-${Environment}-database"
             - Effect: Allow
               Action:
                 - s3:GetObject
                 - s3:PutObject
                 - s3:DeleteObject
-              Resource: !Sub "${DocumentsBucket}/*"
+              Resource: !Sub "${DocumentsBucket.Arn}/*"
       Events:
         DocumentProcessingApi:
           Type: Api
@@ -305,20 +280,6 @@ Resources:
             RestApiId: !Ref CurriculumAlignmentApi
             Path: /document-processing/{proxy+}
             Method: ANY
-        S3Upload:
-          Type: S3
-          Properties:
-            Bucket: !Ref DocumentsBucket
-            Events: s3:ObjectCreated:*
-            Filter:
-              S3Key:
-                Rules:
-                  - Name: suffix
-                    Value: .pdf
-                  - Name: suffix
-                    Value: .docx
-                  - Name: suffix
-                    Value: .xlsx
 
   # Accreditation Expert Agent
   AccreditationExpertFunction:
@@ -330,10 +291,8 @@ Resources:
       Description: Accreditation expert agent for curriculum analysis and gap identification
       Environment:
         Variables:
-          DATABASE_SECRET_ARN: !ImportValue 
-            Fn::Sub: "curriculum-alignment-${Environment}-database-secret"
-          QDRANT_SECRET_ARN: !ImportValue
-            Fn::Sub: "curriculum-alignment-${Environment}-qdrant-secret"
+          DATABASE_SECRET_ARN: !Sub "arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:curriculum-alignment-${Environment}-database"
+          QDRANT_SECRET_ARN: !Sub "arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:curriculum-alignment-${Environment}-qdrant"
       Policies:
         - Version: "2012-10-17"
           Statement:
@@ -341,10 +300,8 @@ Resources:
               Action:
                 - secretsmanager:GetSecretValue
               Resource:
-                - !ImportValue 
-                  Fn::Sub: "curriculum-alignment-${Environment}-database-secret"
-                - !ImportValue
-                  Fn::Sub: "curriculum-alignment-${Environment}-qdrant-secret"
+                - !Sub "arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:curriculum-alignment-${Environment}-database"
+                - !Sub "arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:curriculum-alignment-${Environment}-qdrant"
       Events:
         AccreditationExpertApi:
           Type: Api
@@ -363,8 +320,7 @@ Resources:
       Description: QA agent for terminology standardization and quality control
       Environment:
         Variables:
-          DATABASE_SECRET_ARN: !ImportValue 
-            Fn::Sub: "curriculum-alignment-${Environment}-database-secret"
+          DATABASE_SECRET_ARN: !Sub "arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:curriculum-alignment-${Environment}-database"
       Policies:
         - Version: "2012-10-17"
           Statement:
@@ -372,8 +328,7 @@ Resources:
               Action:
                 - secretsmanager:GetSecretValue
               Resource:
-                - !ImportValue 
-                  Fn::Sub: "curriculum-alignment-${Environment}-database-secret"
+                - !Sub "arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:curriculum-alignment-${Environment}-database"
       Events:
         QAAgentApi:
           Type: Api
@@ -392,10 +347,8 @@ Resources:
       Description: Semantic search agent for vector similarity searches
       Environment:
         Variables:
-          DATABASE_SECRET_ARN: !ImportValue 
-            Fn::Sub: "curriculum-alignment-${Environment}-database-secret"
-          QDRANT_SECRET_ARN: !ImportValue
-            Fn::Sub: "curriculum-alignment-${Environment}-qdrant-secret"
+          DATABASE_SECRET_ARN: !Sub "arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:curriculum-alignment-${Environment}-database"
+          QDRANT_SECRET_ARN: !Sub "arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:curriculum-alignment-${Environment}-qdrant"
       Policies:
         - Version: "2012-10-17"
           Statement:
@@ -403,10 +356,8 @@ Resources:
               Action:
                 - secretsmanager:GetSecretValue
               Resource:
-                - !ImportValue 
-                  Fn::Sub: "curriculum-alignment-${Environment}-database-secret"
-                - !ImportValue
-                  Fn::Sub: "curriculum-alignment-${Environment}-qdrant-secret"
+                - !Sub "arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:curriculum-alignment-${Environment}-database"
+                - !Sub "arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:curriculum-alignment-${Environment}-qdrant"
       Events:
         SemanticSearchApi:
           Type: Api
@@ -425,10 +376,8 @@ Resources:
       Description: Chat interface agent for natural language Q&A
       Environment:
         Variables:
-          DATABASE_SECRET_ARN: !ImportValue 
-            Fn::Sub: "curriculum-alignment-${Environment}-database-secret"
-          QDRANT_SECRET_ARN: !ImportValue
-            Fn::Sub: "curriculum-alignment-${Environment}-qdrant-secret"
+          DATABASE_SECRET_ARN: !Sub "arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:curriculum-alignment-${Environment}-database"
+          QDRANT_SECRET_ARN: !Sub "arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:curriculum-alignment-${Environment}-qdrant"
           WEBSOCKET_API_ENDPOINT: !Sub "wss://${WebSocketApi}.execute-api.${AWS::Region}.amazonaws.com/${Environment}"
       Policies:
         - Version: "2012-10-17"
@@ -437,10 +386,8 @@ Resources:
               Action:
                 - secretsmanager:GetSecretValue
               Resource:
-                - !ImportValue 
-                  Fn::Sub: "curriculum-alignment-${Environment}-database-secret"
-                - !ImportValue
-                  Fn::Sub: "curriculum-alignment-${Environment}-qdrant-secret"
+                - !Sub "arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:curriculum-alignment-${Environment}-database"
+                - !Sub "arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:curriculum-alignment-${Environment}-qdrant"
             - Effect: Allow
               Action:
                 - execute-api:ManageConnections
@@ -463,8 +410,7 @@ Resources:
       Description: Dead letter queue handler for failed agent tasks
       Environment:
         Variables:
-          DATABASE_SECRET_ARN: !ImportValue 
-            Fn::Sub: "curriculum-alignment-${Environment}-database-secret"
+          DATABASE_SECRET_ARN: !Sub "arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:curriculum-alignment-${Environment}-database"
       Policies:
         - Version: "2012-10-17"
           Statement:
@@ -472,8 +418,7 @@ Resources:
               Action:
                 - secretsmanager:GetSecretValue
               Resource:
-                - !ImportValue 
-                  Fn::Sub: "curriculum-alignment-${Environment}-database-secret"
+                - !Sub "arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:curriculum-alignment-${Environment}-database"
             - Effect: Allow
               Action:
                 - sns:Publish
@@ -629,13 +574,6 @@ Resources:
             FunctionName: !Ref QAAgentFunction
         - LambdaInvokePolicy:
             FunctionName: !Ref SemanticSearchFunction
-      Events:
-        AnalysisApi:
-          Type: Api
-          Properties:
-            RestApiId: !Ref CurriculumAlignmentApi
-            Path: /analysis/start
-            Method: POST
 
   # =====================================================
   # S3 Buckets
@@ -723,6 +661,7 @@ Resources:
     Properties:
       QueueName: !Sub "curriculum-alignment-dlq-${Environment}"
       MessageRetentionPeriod: 1209600  # 14 days
+      VisibilityTimeout: 360  # 6 minutes (greater than Lambda timeout)
 
   DLQAlertTopic:
     Type: AWS::SNS::Topic

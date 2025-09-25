@@ -36,7 +36,11 @@
       "Bash(lsof:*)",
       "Bash(docker-compose:*)",
       "Bash(psql:*)",
-      "mcp__serena__find_file"
+      "mcp__serena__find_file",
+      "Bash(./status.sh)",
+      "Bash(aws cloudformation delete-stack:*)",
+      "Bash(aws cloudformation describe-stacks:*)",
+      "Bash(aws cloudformation describe-stack-events:*)"
     ],
     "additionalDirectories": []
   },
