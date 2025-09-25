@@ -5,10 +5,10 @@
 This document breaks down the implementation of the Multi-Agent Curriculum Alignment System into atomic, executable tasks. Each task is designed to be completed independently while contributing to the overall system development.
 
 ## Progress Tracking
-- **Total Tasks**: 70
+- **Total Tasks**: 85
 - **Completed**: 54
 - **In Progress**: 0  
-- **Pending**: 16
+- **Pending**: 31
 
 ## Task Organization
 
@@ -17,6 +17,7 @@ Tasks are organized by component and phase:
 - **Phase 2**: Database and Core Services (Tasks 11-20)
 - **Phase 3**: Agent Implementation (Tasks 21-35)
 - **Phase 4**: Frontend Development (Tasks 36-50)
+- **Phase 4.5**: Frontend-Backend Integration (Tasks 71-85) [NEW]
 - **Phase 5**: Integration and Testing (Tasks 51-60)
 - **Phase 6**: Deployment and Documentation (Tasks 61-70)
 
@@ -684,6 +685,205 @@ Tasks are organized by component and phase:
     - _Leverage: PWA specifications
     - _Requirements: PWA requirements
     - Success: Application installable with offline capabilities
+    - Mark this task as in-progress in tasks.md, then complete when done
+
+---
+
+## Phase 4.5: Frontend-Backend Integration [NEW]
+
+- [x] 71. Create API Client Infrastructure
+  - **Files**: `frontend/src/services/api/apiClient.ts`, `frontend/src/services/api/types.ts`
+  - **Requirements**: API client patterns from integration architecture
+  - **Description**: Implement base HTTP client with authentication, retry logic, and error handling
+  - **_Prompt**: Implement the task for spec curriculum-alignment, first run spec-workflow-guide to get the workflow guide then implement the task:
+    - Role: Frontend Integration Engineer
+    - Task: Create comprehensive API client with interceptors and token management
+    - Restrictions: Use Fetch API, implement exponential backoff, handle token refresh
+    - _Leverage: API client design from integration architecture
+    - _Requirements: Service layer architecture from design document
+    - Success: API client handling all HTTP operations with proper auth
+    - Mark this task as in-progress in tasks.md, then complete when done
+
+- [x] 72. Implement Program Service Integration
+  - **Files**: `frontend/src/services/api/programService.ts`
+  - **Requirements**: Program CRUD operations from API design
+  - **Description**: Create service layer for program management with full CRUD operations
+  - **_Prompt**: Implement the task for spec curriculum-alignment, first run spec-workflow-guide to get the workflow guide then implement the task:
+    - Role: Service Layer Developer
+    - Task: Implement program service with all CRUD operations
+    - Restrictions: Integrate with Redux store, handle errors, show notifications
+    - _Leverage: Program API endpoints from design document
+    - _Requirements: Program management requirements
+    - Success: All program operations working through service layer
+    - Mark this task as in-progress in tasks.md, then complete when done
+
+- [ ] 73. Connect Analysis Workflow Operations
+  - **Files**: `frontend/src/services/api/analysisService.ts`
+  - **Requirements**: Analysis workflow from coordinator agent
+  - **Description**: Integrate analysis start, stop, and monitoring operations
+  - **_Prompt**: Implement the task for spec curriculum-alignment, first run spec-workflow-guide to get the workflow guide then implement the task:
+    - Role: Workflow Integration Developer
+    - Task: Connect frontend to analysis workflow operations
+    - Restrictions: Handle long-running operations, show progress, manage state
+    - _Leverage: Workflow API from coordinator agent
+    - _Requirements: Analysis workflow requirements
+    - Success: Users can start and monitor analyses from UI
+    - Mark this task as in-progress in tasks.md, then complete when done
+
+- [ ] 74. Integrate Report Generation
+  - **Files**: `frontend/src/services/api/reportService.ts`
+  - **Requirements**: Report generation from design document
+  - **Description**: Connect report generation, download, and export functionality
+  - **_Prompt**: Implement the task for spec curriculum-alignment, first run spec-workflow-guide to get the workflow guide then implement the task:
+    - Role: Report Integration Developer
+    - Task: Implement report service with generation and download
+    - Restrictions: Handle large files, show progress, support multiple formats
+    - _Leverage: Report API endpoints
+    - _Requirements: Report generation requirements
+    - Success: Users can generate and download reports
+    - Mark this task as in-progress in tasks.md, then complete when done
+
+- [ ] 75. Add File Upload/Processing
+  - **Files**: `frontend/src/services/api/documentService.ts`
+  - **Requirements**: S3 integration from design document
+  - **Description**: Implement file upload with S3 presigned URLs and processing status
+  - **_Prompt**: Implement the task for spec curriculum-alignment, first run spec-workflow-guide to get the workflow guide then implement the task:
+    - Role: File Upload Developer
+    - Task: Create document service with S3 multipart upload
+    - Restrictions: Show upload progress, handle large files, validate types
+    - _Leverage: S3 upload patterns from integration architecture
+    - _Requirements: Document processing requirements
+    - Success: File upload working with progress tracking
+    - Mark this task as in-progress in tasks.md, then complete when done
+
+- [ ] 76. Implement Authentication Flows
+  - **Files**: `frontend/src/services/api/authService.ts`
+  - **Requirements**: Cognito authentication from design document
+  - **Description**: Complete authentication with login, logout, refresh, and MFA
+  - **_Prompt**: Implement the task for spec curriculum-alignment, first run spec-workflow-guide to get the workflow guide then implement the task:
+    - Role: Authentication Developer
+    - Task: Implement full authentication flow with Cognito
+    - Restrictions: Secure token storage, handle MFA, implement refresh
+    - _Leverage: Authentication flow from integration architecture
+    - _Requirements: Security requirements
+    - Success: Complete authentication working with protected routes
+    - Mark this task as in-progress in tasks.md, then complete when done
+
+- [ ] 77. Add WebSocket Real-time Features
+  - **Files**: `frontend/src/services/websocket/wsService.ts`
+  - **Requirements**: WebSocket integration from design document
+  - **Description**: Implement real-time updates for chat, status, and notifications
+  - **_Prompt**: Implement the task for spec curriculum-alignment, first run spec-workflow-guide to get the workflow guide then implement the task:
+    - Role: Real-time Systems Developer
+    - Task: Create WebSocket service with auto-reconnect
+    - Restrictions: Handle disconnections, implement heartbeat, manage subscriptions
+    - _Leverage: WebSocket patterns from integration architecture
+    - _Requirements: Real-time communication requirements
+    - Success: Real-time updates working for all features
+    - Mark this task as in-progress in tasks.md, then complete when done
+
+- [ ] 78. Connect LLM Configuration
+  - **Files**: `frontend/src/services/api/llmConfigService.ts`
+  - **Requirements**: LLM configuration from design document
+  - **Description**: Integrate LLM model selection, testing, and cost tracking
+  - **_Prompt**: Implement the task for spec curriculum-alignment, first run spec-workflow-guide to get the workflow guide then implement the task:
+    - Role: LLM Integration Developer
+    - Task: Implement LLM configuration service
+    - Restrictions: Show costs, validate models, test connections
+    - _Leverage: LLM configuration API
+    - _Requirements: Model configuration requirements
+    - Success: Users can configure and test LLM models
+    - Mark this task as in-progress in tasks.md, then complete when done
+
+- [ ] 79. Implement Search Integration
+  - **Files**: `frontend/src/services/api/searchService.ts`
+  - **Requirements**: Search functionality from design document
+  - **Description**: Connect search across programs, courses, and documents
+  - **_Prompt**: Implement the task for spec curriculum-alignment, first run spec-workflow-guide to get the workflow guide then implement the task:
+    - Role: Search Integration Developer
+    - Task: Implement search service with filters and pagination
+    - Restrictions: Handle fuzzy search, support filters, paginate results
+    - _Leverage: Semantic search agent
+    - _Requirements: Search requirements
+    - Success: Full-text search working across all entities
+    - Mark this task as in-progress in tasks.md, then complete when done
+
+- [ ] 80. Add Settings Persistence
+  - **Files**: `frontend/src/services/api/settingsService.ts`
+  - **Requirements**: User preferences from design document
+  - **Description**: Save and sync user preferences across sessions
+  - **_Prompt**: Implement the task for spec curriculum-alignment, first run spec-workflow-guide to get the workflow guide then implement the task:
+    - Role: Settings Developer
+    - Task: Create settings service with backend sync
+    - Restrictions: Cache locally, sync with backend, handle conflicts
+    - _Leverage: User preferences API
+    - _Requirements: Settings requirements
+    - Success: User settings persist across sessions
+    - Mark this task as in-progress in tasks.md, then complete when done
+
+- [ ] 81. Implement Error Handling & Loading States
+  - **Files**: `frontend/src/services/errorHandler.ts`, `frontend/src/hooks/useAsync.ts`
+  - **Requirements**: Error handling from integration architecture
+  - **Description**: Global error handler with toast notifications and loading states
+  - **_Prompt**: Implement the task for spec curriculum-alignment, first run spec-workflow-guide to get the workflow guide then implement the task:
+    - Role: Error Handling Developer
+    - Task: Create comprehensive error handling system
+    - Restrictions: User-friendly messages, log errors, show appropriate UI
+    - _Leverage: Error handling strategy from integration architecture
+    - _Requirements: UX requirements
+    - Success: All errors handled gracefully with good UX
+    - Mark this task as in-progress in tasks.md, then complete when done
+
+- [ ] 82. Add Retry Logic & Offline Handling
+  - **Files**: `frontend/src/services/offlineManager.ts`, `frontend/src/services/retryQueue.ts`
+  - **Requirements**: Offline support from design document
+  - **Description**: Queue operations when offline, retry failed requests
+  - **_Prompt**: Implement the task for spec curriculum-alignment, first run spec-workflow-guide to get the workflow guide then implement the task:
+    - Role: Offline Systems Developer
+    - Task: Implement offline queue and retry mechanism
+    - Restrictions: Detect offline state, queue operations, sync when online
+    - _Leverage: PWA capabilities
+    - _Requirements: Offline requirements
+    - Success: App works offline and syncs when reconnected
+    - Mark this task as in-progress in tasks.md, then complete when done
+
+- [ ] 83. Optimize Performance
+  - **Files**: `frontend/src/services/cache.ts`, `frontend/src/hooks/useOptimistic.ts`
+  - **Requirements**: Performance requirements from design document
+  - **Description**: Add caching, request deduplication, and optimistic updates
+  - **_Prompt**: Implement the task for spec curriculum-alignment, first run spec-workflow-guide to get the workflow guide then implement the task:
+    - Role: Performance Engineer
+    - Task: Implement performance optimizations
+    - Restrictions: Cache GET requests, deduplicate requests, optimize renders
+    - _Leverage: Performance patterns from integration architecture
+    - _Requirements: Performance requirements
+    - Success: App responds instantly to user actions
+    - Mark this task as in-progress in tasks.md, then complete when done
+
+- [ ] 84. Create Integration Tests
+  - **Files**: `frontend/src/services/__tests__/*.test.ts`
+  - **Requirements**: Testing requirements
+  - **Description**: Comprehensive tests for all service layer integrations
+  - **_Prompt**: Implement the task for spec curriculum-alignment, first run spec-workflow-guide to get the workflow guide then implement the task:
+    - Role: Test Engineer
+    - Task: Write integration tests for service layer
+    - Restrictions: Mock API responses, test error cases, validate state updates
+    - _Leverage: Testing patterns from integration architecture
+    - _Requirements: Testing requirements
+    - Success: 90%+ test coverage for service layer
+    - Mark this task as in-progress in tasks.md, then complete when done
+
+- [ ] 85. End-to-End Workflow Validation
+  - **Files**: `e2e/workflows/*.spec.ts`
+  - **Requirements**: E2E testing requirements
+  - **Description**: Validate complete user workflows from login to report generation
+  - **_Prompt**: Implement the task for spec curriculum-alignment, first run spec-workflow-guide to get the workflow guide then implement the task:
+    - Role: E2E Test Engineer
+    - Task: Create end-to-end tests for critical workflows
+    - Restrictions: Test real user journeys, validate all integrations
+    - _Leverage: User stories from requirements
+    - _Requirements: E2E testing requirements
+    - Success: All critical user workflows tested E2E
     - Mark this task as in-progress in tasks.md, then complete when done
 
 ---

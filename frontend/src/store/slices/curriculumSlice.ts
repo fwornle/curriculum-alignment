@@ -1,6 +1,8 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 import type { PayloadAction } from '@reduxjs/toolkit'
 import { samplePrograms, sampleUploadedDocuments } from '../../lib/sampleData'
+import { programService } from '../../services/api/programService'
+import type { Program as APIProgram, CreateProgramRequest, UpdateProgramRequest } from '../../services/api/types'
 
 export interface Course {
   id: string
@@ -81,49 +83,86 @@ const initialState: CurriculumState = {
   sortOrder: 'asc',
 }
 
-// Async thunks
+// Async thunks for program operations
 export const fetchPrograms = createAsyncThunk(
   'curriculum/fetchPrograms',
   async (filters: Partial<CurriculumState['filters']> | undefined, { rejectWithValue }) => {
     try {
-      const params = new URLSearchParams()
-      if (filters) {
-        Object.entries(filters).forEach(([key, values]) => {
-          if (Array.isArray(values) && values.length > 0) {
-            params.append(key, values.join(','))
-          }
-        })
+      const response = await programService.getPrograms()
+      if (!response.success) {
+        return rejectWithValue(response.error?.message || 'Failed to fetch programs')
       }
-      
-      const response = await fetch(`/api/curricula?${params}`)
-      if (!response.ok) {
-        return rejectWithValue('Failed to fetch programs')
-      }
-      
-      return await response.json()
+      return response.data
     } catch (error) {
       return rejectWithValue('Network error occurred')
     }
   }
 )
 
-export const uploadDocument = createAsyncThunk(
-  'curriculum/uploadDocument',
-  async (file: File, { rejectWithValue }) => {
+export const createProgram = createAsyncThunk(
+  'curriculum/createProgram',
+  async (programData: CreateProgramRequest, { rejectWithValue }) => {
     try {
-      const formData = new FormData()
-      formData.append('document', file)
-      
-      const response = await fetch('/api/documents/upload', {
-        method: 'POST',
-        body: formData,
-      })
-      
-      if (!response.ok) {
-        return rejectWithValue('Failed to upload document')
+      const response = await programService.createProgram(programData)
+      if (!response.success) {
+        return rejectWithValue(response.error?.message || 'Failed to create program')
       }
-      
-      return await response.json()
+      return response.data
+    } catch (error) {
+      return rejectWithValue('Failed to create program')
+    }
+  }
+)
+
+export const updateProgram = createAsyncThunk(
+  'curriculum/updateProgram',
+  async ({ programId, programData }: { programId: string; programData: UpdateProgramRequest }, { rejectWithValue }) => {
+    try {
+      const response = await programService.updateProgram(programId, programData)
+      if (!response.success) {
+        return rejectWithValue(response.error?.message || 'Failed to update program')
+      }
+      return response.data
+    } catch (error) {
+      return rejectWithValue('Failed to update program')
+    }
+  }
+)
+
+export const deleteProgram = createAsyncThunk(
+  'curriculum/deleteProgram',
+  async (programId: string, { rejectWithValue }) => {
+    try {
+      const response = await programService.deleteProgram(programId)
+      if (!response.success) {
+        return rejectWithValue(response.error?.message || 'Failed to delete program')
+      }
+      return programId
+    } catch (error) {
+      return rejectWithValue('Failed to delete program')
+    }
+  }
+)
+
+export const uploadProgramDocument = createAsyncThunk(
+  'curriculum/uploadProgramDocument',
+  async ({ 
+    programId, 
+    file, 
+    metadata, 
+    onProgress 
+  }: { 
+    programId: string; 
+    file: File; 
+    metadata: { documentType: string; title: string; description?: string }; 
+    onProgress?: (progress: number) => void 
+  }, { rejectWithValue }) => {
+    try {
+      const response = await programService.uploadDocument(programId, file, metadata, onProgress)
+      if (!response.success) {
+        return rejectWithValue(response.error?.message || 'Failed to upload document')
+      }
+      return response.data
     } catch (error) {
       return rejectWithValue('Upload failed')
     }
@@ -227,30 +266,84 @@ const curriculumSlice = createSlice({
         state.error = action.payload as string
       })
     
-    // Upload document
+    // Create program
     builder
-      .addCase(uploadDocument.pending, (state, action) => {
+      .addCase(createProgram.pending, (state) => {
+        state.isLoading = true
+        state.error = null
+      })
+      .addCase(createProgram.fulfilled, (state, action) => {
+        state.isLoading = false
+        state.programs.push(action.payload)
+      })
+      .addCase(createProgram.rejected, (state, action) => {
+        state.isLoading = false
+        state.error = action.payload as string
+      })
+    
+    // Update program
+    builder
+      .addCase(updateProgram.pending, (state) => {
+        state.isLoading = true
+        state.error = null
+      })
+      .addCase(updateProgram.fulfilled, (state, action) => {
+        state.isLoading = false
+        const index = state.programs.findIndex(p => p.id === action.payload.id)
+        if (index !== -1) {
+          state.programs[index] = action.payload
+        }
+        if (state.currentProgram?.id === action.payload.id) {
+          state.currentProgram = action.payload
+        }
+      })
+      .addCase(updateProgram.rejected, (state, action) => {
+        state.isLoading = false
+        state.error = action.payload as string
+      })
+    
+    // Delete program
+    builder
+      .addCase(deleteProgram.pending, (state) => {
+        state.isLoading = true
+        state.error = null
+      })
+      .addCase(deleteProgram.fulfilled, (state, action) => {
+        state.isLoading = false
+        state.programs = state.programs.filter(p => p.id !== action.payload)
+        if (state.currentProgram?.id === action.payload) {
+          state.currentProgram = null
+        }
+      })
+      .addCase(deleteProgram.rejected, (state, action) => {
+        state.isLoading = false
+        state.error = action.payload as string
+      })
+    
+    // Upload program document
+    builder
+      .addCase(uploadProgramDocument.pending, (state, action) => {
         const uploadId = Date.now().toString()
         state.uploadedDocuments.push({
           id: uploadId,
-          name: action.meta.arg.name,
-          type: action.meta.arg.type,
+          name: action.meta.arg.file.name,
+          type: action.meta.arg.file.type,
           status: 'uploading',
         })
       })
-      .addCase(uploadDocument.fulfilled, (state, action) => {
+      .addCase(uploadProgramDocument.fulfilled, (state, action) => {
         const document = state.uploadedDocuments.find(doc => 
-          doc.name === action.meta.arg.name
+          doc.name === action.meta.arg.file.name
         )
         if (document) {
           document.id = action.payload.id
-          document.status = 'processing'
+          document.status = 'completed'
           document.url = action.payload.url
         }
       })
-      .addCase(uploadDocument.rejected, (state, action) => {
+      .addCase(uploadProgramDocument.rejected, (state, action) => {
         const document = state.uploadedDocuments.find(doc => 
-          doc.name === action.meta.arg.name
+          doc.name === action.meta.arg.file.name
         )
         if (document) {
           document.status = 'error'
@@ -302,5 +395,16 @@ export const {
   clearError,
   updateDocumentStatus,
 } = curriculumSlice.actions
+
+// Export async thunks
+export { 
+  fetchPrograms, 
+  createProgram, 
+  updateProgram, 
+  deleteProgram, 
+  uploadProgramDocument,
+  processDocument,
+  searchPrograms
+}
 
 export default curriculumSlice.reducer

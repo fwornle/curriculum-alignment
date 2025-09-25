@@ -1,6 +1,7 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useAppSelector, useAppDispatch } from '../../store'
 import { openModal } from '../../store/slices/uiSlice'
+import { fetchPrograms, setCurrentProgram } from '../../store/slices/curriculumSlice'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card'
 import { Button } from '../ui/button'
 import { Input } from '../ui/input'
@@ -29,10 +30,15 @@ import { cn } from '../../lib/utils'
 
 export const ProgramsView: React.FC = () => {
   const dispatch = useAppDispatch()
-  const { programs, uploadedDocuments } = useAppSelector(state => state.curriculum)
+  const { programs, uploadedDocuments, isLoading, error } = useAppSelector(state => state.curriculum)
   const [searchQuery, setSearchQuery] = useState('')
   const [filterUniversity, setFilterUniversity] = useState('')
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
+
+  // Fetch programs on component mount
+  useEffect(() => {
+    dispatch(fetchPrograms())
+  }, [dispatch])
 
   const filteredPrograms = programs.filter(program => {
     const matchesSearch = program.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -53,8 +59,27 @@ export const ProgramsView: React.FC = () => {
     dispatch(openModal('uploadDocument'))
   }
 
+  const handleViewProgram = (program: typeof programs[0]) => {
+    dispatch(setCurrentProgram(program))
+    // Navigate to program detail view (future implementation)
+    console.log('Viewing program:', program.name)
+  }
+
+  const handleEditProgram = (program: typeof programs[0]) => {
+    dispatch(setCurrentProgram(program))
+    dispatch(openModal('editProgram'))
+  }
+
   return (
     <div className="p-6 space-y-6">
+      {/* Error Alert */}
+      {error && (
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
+
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -66,11 +91,11 @@ export const ProgramsView: React.FC = () => {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="outline" onClick={handleUploadDocument}>
+          <Button variant="outline" onClick={handleUploadDocument} disabled={isLoading}>
             <Upload className="h-4 w-4 mr-2" />
             Upload Documents
           </Button>
-          <Button onClick={handleCreateProgram}>
+          <Button onClick={handleCreateProgram} disabled={isLoading}>
             <Plus className="h-4 w-4 mr-2" />
             Add Program
           </Button>
@@ -256,11 +281,21 @@ export const ProgramsView: React.FC = () => {
                     </p>
 
                     <div className="flex gap-2">
-                      <Button variant="outline" size="sm" className="flex-1">
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="flex-1"
+                        onClick={() => handleViewProgram(program)}
+                      >
                         <Eye className="h-3 w-3 mr-1" />
                         View
                       </Button>
-                      <Button variant="outline" size="sm" className="flex-1">
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="flex-1"
+                        onClick={() => handleEditProgram(program)}
+                      >
                         <Edit className="h-3 w-3 mr-1" />
                         Edit
                       </Button>

@@ -350,6 +350,742 @@ paths:
                 - programId
 ```
 
+## Frontend-Backend Integration Architecture
+
+### Overview
+
+The integration layer bridges the React frontend with the AWS Lambda backend through a comprehensive service architecture that handles authentication, API communication, real-time updates, and error management.
+
+### Service Layer Architecture
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                     Frontend Application                     │
+│  ┌────────────────────────────────────────────────────────┐ │
+│  │                    React Components                     │ │
+│  └────────────────────────────────────────────────────────┘ │
+│                             ▼                                │
+│  ┌────────────────────────────────────────────────────────┐ │
+│  │                   Redux Store & Actions                 │ │
+│  └────────────────────────────────────────────────────────┘ │
+│                             ▼                                │
+│  ┌────────────────────────────────────────────────────────┐ │
+│  │                  Service Layer (NEW)                    │ │
+│  │  ┌──────────────────────────────────────────────────┐  │ │
+│  │  │               API Client Core                     │  │ │
+│  │  │  • HTTP client with interceptors                  │  │ │
+│  │  │  • Token management & refresh                     │  │ │
+│  │  │  • Request/response transformation                │  │ │
+│  │  │  • Retry logic & circuit breaker                  │  │ │
+│  │  └──────────────────────────────────────────────────┘  │ │
+│  │                                                          │ │
+│  │  ┌──────────────────────────────────────────────────┐  │ │
+│  │  │              Domain Services                      │  │ │
+│  │  │  ┌────────────┐  ┌────────────┐  ┌────────────┐ │  │ │
+│  │  │  │  Program    │  │  Analysis  │  │   Report   │ │  │ │
+│  │  │  │  Service    │  │  Service   │  │  Service   │ │  │ │
+│  │  │  └────────────┘  └────────────┘  └────────────┘ │  │ │
+│  │  │  ┌────────────┐  ┌────────────┐  ┌────────────┐ │  │ │
+│  │  │  │  Document   │  │    Auth    │  │  LLMConfig │ │  │ │
+│  │  │  │  Service    │  │  Service   │  │  Service   │ │  │ │
+│  │  │  └────────────┘  └────────────┘  └────────────┘ │  │ │
+│  │  └──────────────────────────────────────────────────┘  │ │
+│  │                                                          │ │
+│  │  ┌──────────────────────────────────────────────────┐  │ │
+│  │  │            Real-time Services                     │  │ │
+│  │  │  ┌────────────┐  ┌────────────┐                  │  │ │
+│  │  │  │ WebSocket   │  │   Server   │                  │  │ │
+│  │  │  │  Service    │  │   Events   │                  │  │ │
+│  │  │  └────────────┘  └────────────┘                  │  │ │
+│  │  └──────────────────────────────────────────────────┘  │ │
+│  └────────────────────────────────────────────────────────┐ │
+└─────────────────────────────────────────────────────────────┘
+                               ▼
+                    ┌──────────────────┐
+                    │   API Gateway    │
+                    └──────────────────┘
+```
+
+### API Client Implementation
+
+#### Core Features
+
+1. **Request Management**
+   - Centralized HTTP client using Fetch API
+   - Request/response interceptors for common operations
+   - Request queuing and deduplication
+   - Automatic request retries with exponential backoff
+
+2. **Authentication Integration**
+   - Automatic token attachment to requests
+   - Token refresh on 401 responses
+   - Secure token storage (memory + secure storage)
+   - Session management and persistence
+
+3. **Error Handling**
+   - Standardized error response format
+   - Global error handler with toast notifications
+   - Retry strategies for transient failures
+   - Circuit breaker for failing endpoints
+
+4. **Performance Optimization**
+   - Response caching with TTL
+   - Request batching for bulk operations
+   - Lazy loading and pagination support
+   - Bandwidth-aware request strategies
+
+#### Implementation Example
+
+```typescript
+// Base API Client
+class APIClient {
+  private baseURL: string;
+  private authTokens: AuthTokens | null = null;
+  private requestQueue: Map<string, Promise<any>> = new Map();
+  
+  constructor(config: APIClientConfig) {
+    this.baseURL = config.baseURL;
+    this.setupInterceptors();
+    this.loadAuthTokens();
+  }
+  
+  async request<T>(options: RequestOptions): Promise<APIResponse<T>> {
+    // Check for duplicate requests
+    const requestKey = this.generateRequestKey(options);
+    if (this.requestQueue.has(requestKey)) {
+      return this.requestQueue.get(requestKey);
+    }
+    
+    // Add auth headers
+    const headers = await this.getAuthHeaders();
+    
+    // Execute request with retry logic
+    const promise = this.executeWithRetry({
+      ...options,
+      headers: { ...options.headers, ...headers }
+    });
+    
+    this.requestQueue.set(requestKey, promise);
+    
+    try {
+      const response = await promise;
+      return this.transformResponse(response);
+    } finally {
+      this.requestQueue.delete(requestKey);
+    }
+  }
+  
+  private async executeWithRetry(
+    options: RequestOptions,
+    retries = 3
+  ): Promise<Response> {
+    try {
+      const response = await fetch(options.url, options);
+      
+      if (response.status === 401) {
+        await this.refreshTokens();
+        return this.executeWithRetry(options, retries);
+      }
+      
+      if (!response.ok && retries > 0) {
+        await this.delay(Math.pow(2, 3 - retries) * 1000);
+        return this.executeWithRetry(options, retries - 1);
+      }
+      
+      return response;
+    } catch (error) {
+      if (retries > 0) {
+        await this.delay(Math.pow(2, 3 - retries) * 1000);
+        return this.executeWithRetry(options, retries - 1);
+      }
+      throw error;
+    }
+  }
+}
+```
+
+### Service Layer Implementation
+
+#### Domain Services
+
+Each domain service encapsulates business logic and API interactions for a specific domain:
+
+```typescript
+// Program Service Example
+class ProgramService {
+  constructor(private apiClient: APIClient) {}
+  
+  async getPrograms(params?: ListParams): Promise<Program[]> {
+    const response = await this.apiClient.get<Program[]>(
+      '/programs',
+      params
+    );
+    return response.data;
+  }
+  
+  async createProgram(program: CreateProgramDTO): Promise<Program> {
+    const response = await this.apiClient.post<Program>(
+      '/programs',
+      program
+    );
+    
+    // Update Redux store
+    store.dispatch(addProgram(response.data));
+    
+    // Show success notification
+    toast.success('Program created successfully');
+    
+    return response.data;
+  }
+  
+  async updateProgram(
+    id: string,
+    updates: UpdateProgramDTO
+  ): Promise<Program> {
+    const response = await this.apiClient.patch<Program>(
+      `/programs/${id}`,
+      updates
+    );
+    
+    // Update Redux store
+    store.dispatch(updateProgram({ id, changes: response.data }));
+    
+    return response.data;
+  }
+  
+  async deleteProgram(id: string): Promise<void> {
+    await this.apiClient.delete(`/programs/${id}`);
+    
+    // Update Redux store
+    store.dispatch(removeProgram(id));
+    
+    // Show success notification
+    toast.success('Program deleted successfully');
+  }
+}
+```
+
+### Authentication Flow
+
+```
+┌──────────┐     ┌──────────┐     ┌──────────┐     ┌──────────┐
+│   User   │────▶│  Login   │────▶│ Cognito  │────▶│  Lambda  │
+└──────────┘     │   Form   │     │   Auth   │     │   Auth   │
+                 └──────────┘     └──────────┘     └──────────┘
+                       │                 │                │
+                       ▼                 ▼                ▼
+                ┌──────────┐     ┌──────────┐     ┌──────────┐
+                │  Redux   │◀────│  Tokens  │◀────│ Response │
+                │  Store   │     │  Storage │     │  Tokens  │
+                └──────────┘     └──────────┘     └──────────┘
+                       │
+                       ▼
+                ┌──────────┐
+                │Protected │
+                │  Routes  │
+                └──────────┘
+```
+
+#### Authentication Service
+
+```typescript
+class AuthService {
+  constructor(
+    private apiClient: APIClient,
+    private cognitoClient: CognitoClient
+  ) {}
+  
+  async login(credentials: LoginCredentials): Promise<User> {
+    // Authenticate with Cognito
+    const cognitoTokens = await this.cognitoClient.authenticate(
+      credentials.email,
+      credentials.password
+    );
+    
+    // Exchange for API tokens
+    const response = await this.apiClient.post<AuthResponse>(
+      '/auth/login',
+      { cognitoTokens }
+    );
+    
+    // Store tokens
+    this.apiClient.setAuthTokens(response.data.tokens);
+    
+    // Update Redux store
+    store.dispatch(setUser(response.data.user));
+    store.dispatch(setAuthenticated(true));
+    
+    return response.data.user;
+  }
+  
+  async logout(): Promise<void> {
+    try {
+      await this.apiClient.post('/auth/logout');
+    } finally {
+      // Clear local state regardless of API response
+      this.apiClient.clearAuthTokens();
+      store.dispatch(clearAuth());
+      
+      // Redirect to login
+      window.location.href = '/login';
+    }
+  }
+  
+  async refreshSession(): Promise<boolean> {
+    try {
+      const tokens = await this.apiClient.refreshTokens();
+      this.apiClient.setAuthTokens(tokens);
+      return true;
+    } catch (error) {
+      await this.logout();
+      return false;
+    }
+  }
+}
+```
+
+### WebSocket Integration
+
+#### Real-time Connection Management
+
+```typescript
+class WebSocketService {
+  private ws: WebSocket | null = null;
+  private reconnectAttempts = 0;
+  private maxReconnectAttempts = 5;
+  private reconnectDelay = 1000;
+  private heartbeatInterval: NodeJS.Timeout | null = null;
+  private messageHandlers = new Map<string, Set<Function>>();
+  
+  async connect(): Promise<void> {
+    const tokens = apiClient.getAuthTokens();
+    if (!tokens) {
+      throw new Error('Authentication required');
+    }
+    
+    const wsUrl = `${import.meta.env.VITE_WS_URL}?token=${tokens.accessToken}`;
+    
+    this.ws = new WebSocket(wsUrl);
+    
+    this.ws.onopen = () => {
+      console.log('WebSocket connected');
+      this.reconnectAttempts = 0;
+      this.startHeartbeat();
+      
+      // Subscribe to relevant channels
+      this.subscribe('agent-status');
+      this.subscribe('workflow-updates');
+      this.subscribe('notifications');
+    };
+    
+    this.ws.onmessage = (event) => {
+      const message = JSON.parse(event.data);
+      this.handleMessage(message);
+    };
+    
+    this.ws.onerror = (error) => {
+      console.error('WebSocket error:', error);
+    };
+    
+    this.ws.onclose = () => {
+      console.log('WebSocket disconnected');
+      this.stopHeartbeat();
+      this.attemptReconnect();
+    };
+  }
+  
+  private handleMessage(message: WSMessage): void {
+    const { type, channel, data } = message;
+    
+    // Update Redux store based on message type
+    switch (type) {
+      case 'agent-status':
+        store.dispatch(updateAgentStatus(data));
+        break;
+        
+      case 'workflow-progress':
+        store.dispatch(updateWorkflowProgress(data));
+        break;
+        
+      case 'analysis-complete':
+        store.dispatch(setAnalysisComplete(data));
+        toast.success('Analysis completed!');
+        break;
+        
+      case 'notification':
+        store.dispatch(addNotification(data));
+        break;
+        
+      case 'chat-message':
+        store.dispatch(addChatMessage(data));
+        break;
+    }
+    
+    // Call registered handlers
+    const handlers = this.messageHandlers.get(channel) || new Set();
+    handlers.forEach(handler => handler(data));
+  }
+  
+  private attemptReconnect(): void {
+    if (this.reconnectAttempts >= this.maxReconnectAttempts) {
+      console.error('Max reconnection attempts reached');
+      store.dispatch(setWebSocketStatus('disconnected'));
+      return;
+    }
+    
+    this.reconnectAttempts++;
+    const delay = this.reconnectDelay * Math.pow(2, this.reconnectAttempts - 1);
+    
+    setTimeout(() => {
+      console.log(`Attempting reconnection ${this.reconnectAttempts}`);
+      this.connect();
+    }, delay);
+  }
+  
+  subscribe(channel: string, handler?: Function): void {
+    if (!this.messageHandlers.has(channel)) {
+      this.messageHandlers.set(channel, new Set());
+    }
+    
+    if (handler) {
+      this.messageHandlers.get(channel)!.add(handler);
+    }
+    
+    // Send subscription message to server
+    this.send({
+      type: 'subscribe',
+      channel
+    });
+  }
+  
+  send(message: any): void {
+    if (this.ws?.readyState === WebSocket.OPEN) {
+      this.ws.send(JSON.stringify(message));
+    } else {
+      console.warn('WebSocket not connected, queuing message');
+      // Queue message for sending when reconnected
+    }
+  }
+}
+```
+
+### Error Handling Strategy
+
+#### Global Error Handler
+
+```typescript
+class ErrorHandler {
+  private errorQueue: Error[] = [];
+  private maxQueueSize = 10;
+  
+  handle(error: Error, context?: ErrorContext): void {
+    // Log error
+    console.error('Application error:', error, context);
+    
+    // Add to error queue
+    this.errorQueue.push(error);
+    if (this.errorQueue.length > this.maxQueueSize) {
+      this.errorQueue.shift();
+    }
+    
+    // Handle different error types
+    if (error instanceof APIClientError) {
+      this.handleAPIError(error);
+    } else if (error instanceof ValidationError) {
+      this.handleValidationError(error);
+    } else if (error instanceof NetworkError) {
+      this.handleNetworkError(error);
+    } else {
+      this.handleGenericError(error);
+    }
+    
+    // Report to monitoring service
+    this.reportError(error, context);
+  }
+  
+  private handleAPIError(error: APIClientError): void {
+    switch (error.statusCode) {
+      case 401:
+        // Unauthorized - redirect to login
+        authService.logout();
+        toast.error('Session expired, please login again');
+        break;
+        
+      case 403:
+        // Forbidden - show permission error
+        toast.error('You do not have permission to perform this action');
+        break;
+        
+      case 404:
+        // Not found
+        toast.error('Requested resource not found');
+        break;
+        
+      case 429:
+        // Rate limited
+        toast.warning('Too many requests, please slow down');
+        break;
+        
+      case 500:
+      case 502:
+      case 503:
+        // Server error
+        toast.error('Server error, please try again later');
+        break;
+        
+      default:
+        toast.error(error.message || 'An error occurred');
+    }
+  }
+  
+  private handleNetworkError(error: NetworkError): void {
+    // Check if offline
+    if (!navigator.onLine) {
+      toast.error('No internet connection');
+      store.dispatch(setOfflineMode(true));
+    } else {
+      toast.error('Network error, please check your connection');
+    }
+  }
+  
+  private async reportError(
+    error: Error,
+    context?: ErrorContext
+  ): Promise<void> {
+    try {
+      await apiClient.post('/errors/report', {
+        error: {
+          message: error.message,
+          stack: error.stack,
+          name: error.name
+        },
+        context,
+        userAgent: navigator.userAgent,
+        timestamp: new Date().toISOString()
+      });
+    } catch (reportError) {
+      console.error('Failed to report error:', reportError);
+    }
+  }
+}
+```
+
+### Redux Integration
+
+#### Async Thunks with Service Layer
+
+```typescript
+// Redux Thunk Actions
+export const fetchPrograms = createAsyncThunk(
+  'programs/fetch',
+  async (params: ListParams, { rejectWithValue }) => {
+    try {
+      const programs = await programService.getPrograms(params);
+      return programs;
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+export const createProgram = createAsyncThunk(
+  'programs/create',
+  async (program: CreateProgramDTO, { rejectWithValue }) => {
+    try {
+      const newProgram = await programService.createProgram(program);
+      return newProgram;
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+export const startAnalysis = createAsyncThunk(
+  'analysis/start',
+  async (params: AnalysisParams, { dispatch }) => {
+    try {
+      // Start analysis
+      const workflow = await analysisService.startAnalysis(params);
+      
+      // Subscribe to workflow updates via WebSocket
+      wsService.subscribe(`workflow-${workflow.id}`, (update: any) => {
+        dispatch(updateWorkflowProgress(update));
+      });
+      
+      return workflow;
+    } catch (error) {
+      throw error;
+    }
+  }
+);
+
+// Redux Slice
+const programSlice = createSlice({
+  name: 'programs',
+  initialState,
+  reducers: {
+    // Synchronous actions
+    setPrograms: (state, action) => {
+      state.programs = action.payload;
+    },
+    updateProgram: (state, action) => {
+      const index = state.programs.findIndex(
+        p => p.id === action.payload.id
+      );
+      if (index !== -1) {
+        state.programs[index] = action.payload;
+      }
+    }
+  },
+  extraReducers: (builder) => {
+    builder
+      // Fetch programs
+      .addCase(fetchPrograms.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchPrograms.fulfilled, (state, action) => {
+        state.loading = false;
+        state.programs = action.payload;
+      })
+      .addCase(fetchPrograms.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      })
+      
+      // Create program
+      .addCase(createProgram.fulfilled, (state, action) => {
+        state.programs.push(action.payload);
+      });
+  }
+});
+```
+
+### File Upload Integration
+
+```typescript
+class DocumentService {
+  async uploadDocument(
+    file: File,
+    onProgress?: (progress: UploadProgress) => void
+  ): Promise<Document> {
+    // Get presigned URL from backend
+    const { uploadUrl, documentId } = await this.getUploadUrl({
+      fileName: file.name,
+      fileSize: file.size,
+      contentType: file.type
+    });
+    
+    // Upload to S3 directly
+    await this.uploadToS3(uploadUrl, file, onProgress);
+    
+    // Notify backend of completion
+    const document = await this.confirmUpload(documentId);
+    
+    // Start processing
+    await this.startProcessing(documentId);
+    
+    // Subscribe to processing updates
+    wsService.subscribe(`document-${documentId}`, (update: any) => {
+      store.dispatch(updateDocumentStatus(update));
+    });
+    
+    return document;
+  }
+  
+  private async uploadToS3(
+    url: string,
+    file: File,
+    onProgress?: (progress: UploadProgress) => void
+  ): Promise<void> {
+    return new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      
+      xhr.upload.addEventListener('progress', (e) => {
+        if (e.lengthComputable && onProgress) {
+          onProgress({
+            loaded: e.loaded,
+            total: e.total,
+            percentage: Math.round((e.loaded / e.total) * 100)
+          });
+        }
+      });
+      
+      xhr.addEventListener('load', () => {
+        if (xhr.status === 200) {
+          resolve();
+        } else {
+          reject(new Error(`Upload failed: ${xhr.status}`));
+        }
+      });
+      
+      xhr.addEventListener('error', () => {
+        reject(new Error('Upload failed'));
+      });
+      
+      xhr.open('PUT', url);
+      xhr.setRequestHeader('Content-Type', file.type);
+      xhr.send(file);
+    });
+  }
+}
+```
+
+### Performance Optimizations
+
+1. **Request Deduplication**: Prevent duplicate API calls for same data
+2. **Response Caching**: Cache GET requests with TTL
+3. **Request Batching**: Combine multiple requests when possible
+4. **Lazy Loading**: Load data only when needed
+5. **Optimistic Updates**: Update UI before server confirms
+6. **Pagination**: Load large datasets in chunks
+7. **Virtual Scrolling**: Render only visible items in long lists
+8. **Code Splitting**: Load services only when needed
+
+### Testing Strategy
+
+```typescript
+// Service Layer Tests
+describe('ProgramService', () => {
+  let service: ProgramService;
+  let mockClient: jest.Mocked<APIClient>;
+  
+  beforeEach(() => {
+    mockClient = createMockAPIClient();
+    service = new ProgramService(mockClient);
+  });
+  
+  describe('createProgram', () => {
+    it('should create program and update store', async () => {
+      const program = mockProgram();
+      mockClient.post.mockResolvedValue({
+        success: true,
+        data: program
+      });
+      
+      const result = await service.createProgram(program);
+      
+      expect(mockClient.post).toHaveBeenCalledWith(
+        '/programs',
+        program
+      );
+      expect(store.getState().programs.programs).toContain(program);
+      expect(result).toEqual(program);
+    });
+    
+    it('should handle errors gracefully', async () => {
+      mockClient.post.mockRejectedValue(
+        new APIClientError('Server error', 500, 'SERVER_ERROR')
+      );
+      
+      await expect(
+        service.createProgram(mockProgram())
+      ).rejects.toThrow('Server error');
+    });
+  });
+});
+```
+
 ## Frontend Design
 
 ### Component Architecture

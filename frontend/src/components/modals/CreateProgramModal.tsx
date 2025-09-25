@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { useAppDispatch, useAppSelector } from '../../store'
 import { closeModal } from '../../store/slices/uiSlice'
+import { createProgram } from '../../store/slices/curriculumSlice'
 import { Button } from '../ui/button'
 import { 
   X,
@@ -17,6 +18,7 @@ import type { Program } from '../../store/slices/curriculumSlice'
 export const CreateProgramModal: React.FC = () => {
   const dispatch = useAppDispatch()
   const { modals } = useAppSelector(state => state.ui)
+  const { isLoading } = useAppSelector(state => state.curriculum)
   
   const [formData, setFormData] = useState({
     name: '',
@@ -73,10 +75,10 @@ export const CreateProgramModal: React.FC = () => {
     return Object.keys(newErrors).length === 0
   }
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!validateForm()) return
 
-    const newProgram: Omit<Program, 'id' | 'courses' | 'requirements' | 'lastUpdated' | 'version'> = {
+    const programData = {
       name: formData.name,
       degree: formData.degree,
       university: formData.university,
@@ -86,11 +88,13 @@ export const CreateProgramModal: React.FC = () => {
       duration: formData.duration,
     }
 
-    // In a real app, this would dispatch an action to create the program
-    console.log('Creating program:', newProgram)
-    
-    // For demo purposes, just close the modal
-    handleClose()
+    try {
+      await dispatch(createProgram(programData)).unwrap()
+      handleClose()
+    } catch (error) {
+      console.error('Failed to create program:', error)
+      // Handle error - could set a form error state
+    }
   }
 
   const degreeOptions = [
@@ -337,12 +341,12 @@ export const CreateProgramModal: React.FC = () => {
 
         {/* Footer */}
         <div className="flex items-center justify-end space-x-2 p-6 border-t">
-          <Button variant="outline" onClick={handleClose}>
+          <Button variant="outline" onClick={handleClose} disabled={isLoading}>
             Cancel
           </Button>
-          <Button onClick={handleSubmit}>
+          <Button onClick={handleSubmit} disabled={isLoading}>
             <Save className="h-4 w-4 mr-2" />
-            Create Program
+            {isLoading ? 'Creating...' : 'Create Program'}
           </Button>
         </div>
       </div>

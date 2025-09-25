@@ -22,7 +22,7 @@ Globals:
   Function:
     Timeout: 300
     MemorySize: 1024
-    Runtime: nodejs18.x
+    Runtime: nodejs22.x
     Architectures:
       - x86_64
     Environment:
@@ -37,17 +37,7 @@ Globals:
       Environment: !Ref Environment
 
   Api:
-    TracingConfig:
-      TracingEnabled: true
-    Cors:
-      AllowMethods: "'DELETE,GET,HEAD,OPTIONS,PATCH,POST,PUT'"
-      AllowHeaders: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
-      AllowOrigin: "'*'"
-    Auth:
-      DefaultAuthorizer: CognitoAuthorizer
-      Authorizers:
-        CognitoAuthorizer:
-          UserPoolArn: !GetAtt UserPool.Arn
+    TracingEnabled: true
 
 Parameters:
   Environment:
@@ -722,7 +712,7 @@ Resources:
     Type: AWS::SQS::Queue
     Properties:
       QueueName: !Sub "curriculum-alignment-messages-${Environment}"
-      VisibilityTimeoutSeconds: 300
+      VisibilityTimeout: 300
       MessageRetentionPeriod: 1209600  # 14 days
       RedrivePolicy:
         deadLetterTargetArn: !GetAtt DeadLetterQueue.Arn

@@ -31,7 +31,12 @@
       "mcp__serena__activate_project",
       "mcp__serena__get_symbols_overview",
       "mcp__serena__replace_symbol_body",
-      "Read(//Users/q284340/.claude/**)"
+      "Read(//Users/q284340/.claude/**)",
+      "Bash(npm run install:all:*)",
+      "Bash(lsof:*)",
+      "Bash(docker-compose:*)",
+      "Bash(psql:*)",
+      "mcp__serena__find_file"
     ],
     "additionalDirectories": []
   },

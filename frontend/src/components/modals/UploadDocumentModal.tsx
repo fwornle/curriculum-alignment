@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react'
 import { useAppDispatch, useAppSelector } from '../../store'
 import { closeModal } from '../../store/slices/uiSlice'
-import { uploadDocument } from '../../store/slices/curriculumSlice'
+import { uploadProgramDocument } from '../../store/slices/curriculumSlice'
 import { Button } from '../ui/button'
 import { 
   X,

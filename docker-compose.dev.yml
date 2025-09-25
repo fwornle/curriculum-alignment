@@ -1,0 +1,29 @@
+version: '3.8'
+services:
+  postgres:
+    image: postgres:13
+    environment:
+      POSTGRES_DB: macas_dev
+      POSTGRES_USER: macas
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:alpine
+    ports:
+      - "6380:6379"
+
+  rabbitmq:
+    image: rabbitmq:3.8-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: macas
+      RABBITMQ_DEFAULT_PASS: password
+
+volumes:
+  postgres_data:

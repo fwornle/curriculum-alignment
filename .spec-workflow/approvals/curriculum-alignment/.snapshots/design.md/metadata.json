@@ -1,0 +1,14 @@
+{
+  "filePath": ".spec-workflow/specs/curriculum-alignment/design.md",
+  "currentVersion": 1,
+  "snapshots": [
+    {
+      "version": 1,
+      "filename": "snapshot-001.json",
+      "timestamp": "2025-09-25T04:47:03.030Z",
+      "trigger": "initial",
+      "approvalId": "approval_1758775623019_3u5nmhdrs",
+      "approvalTitle": "Frontend-Backend Integration Architecture - Design Document Update"
+    }
+  ]
+}
