@@ -32,6 +32,7 @@ class APIClient {
   private config: APIClientConfig;
   private authTokens: AuthTokens | null = null;
   private refreshPromise: Promise<AuthTokens> | null = null;
+  private store: any = null; // Will be set by setStore method
   
   constructor(config: Partial<APIClientConfig> = {}) {
     this.config = {
@@ -47,6 +48,11 @@ class APIClient {
     this.loadTokensFromStorage();
   }
 
+  // Method to inject Redux store for accessing auth state
+  public setStore(store: any): void {
+    this.store = store;
+  }
+
   // Authentication methods
   public setAuthTokens(tokens: AuthTokens): void {
     this.authTokens = tokens;
@@ -59,16 +65,25 @@ class APIClient {
   }
 
   public getAuthTokens(): AuthTokens | null {
+    // First try to get from Redux store if available
+    if (this.store) {
+      const state = this.store.getState();
+      if (state.auth?.tokens) {
+        return state.auth.tokens;
+      }
+    }
+    // Fallback to instance tokens
     return this.authTokens;
   }
 
   public isAuthenticated(): boolean {
-    return this.authTokens !== null && !this.isTokenExpired();
+    const tokens = this.getAuthTokens();
+    return tokens !== null && !this.isTokenExpired(tokens);
   }
 
-  private isTokenExpired(): boolean {
-    if (!this.authTokens) return true;
-    return Date.now() >= this.authTokens.expiresAt;
+  private isTokenExpired(tokens: AuthTokens = this.getAuthTokens()): boolean {
+    if (!tokens) return true;
+    return Date.now() >= tokens.expiresAt;
   }
 
   private loadTokensFromStorage(): void {
@@ -101,6 +116,19 @@ class APIClient {
 
   // Token refresh logic
   private async refreshTokens(): Promise<AuthTokens> {
+    // If we have a store, dispatch refresh action
+    if (this.store) {
+      try {
+        const refreshAction = await this.store.dispatch({ type: 'auth/refreshToken' });
+        if (refreshAction.payload) {
+          return refreshAction.payload;
+        }
+      } catch (error) {
+        console.error('Redux token refresh failed:', error);
+      }
+    }
+
+    // Fallback to legacy refresh logic
     if (!this.authTokens) {
       throw new APIClientError('No refresh token available', 401, 'NO_REFRESH_TOKEN');
     }
@@ -122,13 +150,14 @@ class APIClient {
   }
 
   private async performTokenRefresh(): Promise<AuthTokens> {
+    const tokens = this.getAuthTokens();
     const response = await fetch(`${this.config.baseURL}/auth/refresh`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        refreshToken: this.authTokens?.refreshToken,
+        refreshToken: tokens?.refreshToken,
       }),
     });
 
@@ -335,22 +364,23 @@ class APIClient {
 
     // Add authentication header
     if (!options.skipAuth) {
-      const token = await this.getValidToken();
-      if (token) {
-        headers['Authorization'] = `${token.tokenType} ${token.accessToken}`;
+      const tokens = await this.getValidTokens();
+      if (tokens) {
+        headers['Authorization'] = `${tokens.tokenType} ${tokens.accessToken}`;
       }
     }
 
     return headers;
   }
 
-  private async getValidToken(): Promise<AuthTokens | null> {
-    if (!this.authTokens) {
+  private async getValidTokens(): Promise<AuthTokens | null> {
+    const tokens = this.getAuthTokens();
+    if (!tokens) {
       return null;
     }
 
-    if (!this.isTokenExpired()) {
-      return this.authTokens;
+    if (!this.isTokenExpired(tokens)) {
+      return tokens;
     }
 
     try {
@@ -358,6 +388,12 @@ class APIClient {
     } catch (error) {
       console.error('Token refresh failed:', error);
       this.clearAuthTokens();
+      
+      // If we have a store, dispatch logout action
+      if (this.store) {
+        this.store.dispatch({ type: 'auth/logout' });
+      }
+      
       return null;
     }
   }

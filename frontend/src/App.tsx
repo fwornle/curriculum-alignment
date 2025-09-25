@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { useAppDispatch, useAppSelector } from './store'
 import { setTheme } from './store/slices/uiSlice'
+import { useAuth } from './hooks/useAuth'
 import { TopAppBar } from './components/layout/TopAppBar'
 import { BottomStatusBar } from './components/layout/BottomStatusBar'
 import { DashboardView } from './components/views/DashboardView'
@@ -18,6 +19,9 @@ import { AnalysisDetailsModal } from './components/modals/AnalysisDetailsModal'
 function App() {
   const dispatch = useAppDispatch()
   const { currentView } = useAppSelector(state => state.ui)
+  
+  // Initialize authentication and connect API client to Redux store
+  const auth = useAuth()
 
   // Initialize theme
   useEffect(() => {
