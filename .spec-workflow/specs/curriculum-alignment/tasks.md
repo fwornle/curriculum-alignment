@@ -717,7 +717,7 @@ Tasks are organized by component and phase:
     - Success: All program operations working through service layer
     - Mark this task as in-progress in tasks.md, then complete when done
 
-- [ ] 73. Connect Analysis Workflow Operations
+- [x] 73. Connect Analysis Workflow Operations
   - **Files**: `frontend/src/services/api/analysisService.ts`
   - **Requirements**: Analysis workflow from coordinator agent
   - **Description**: Integrate analysis start, stop, and monitoring operations

@@ -131,6 +131,22 @@ export interface AnalysisResults {
   metrics?: Record<string, number>;
 }
 
+// Analysis Request Types
+export interface CreateAnalysisRequest {
+  type: 'gap-analysis' | 'comparison' | 'alignment' | 'benchmark';
+  name: string;
+  description?: string;
+  parameters: AnalysisParameters;
+}
+
+export interface UpdateAnalysisRequest {
+  name?: string;
+  description?: string;
+  parameters?: AnalysisParameters;
+}
+
+export type AnalysisResult = AnalysisResults;
+
 // Workflow Types
 export interface Workflow {
   id: string;

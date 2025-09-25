@@ -1,6 +1,8 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 import type { PayloadAction } from '@reduxjs/toolkit'
 import { sampleAnalyses, sampleWorkflows } from '../../lib/sampleData'
+import { analysisService } from '../../services/api/analysisService'
+import type { Analysis, CreateAnalysisRequest } from '../../services/api/types'
 
 export interface AnalysisResult {
   id: string
@@ -77,27 +79,93 @@ const initialState: AnalysisState = {
   notifications: [],
 }
 
-// Async thunks
-export const startAnalysis = createAsyncThunk(
-  'analysis/startAnalysis',
-  async (params: {
-    type: AnalysisResult['type']
-    parameters: AnalysisResult['parameters']
-  }, { rejectWithValue }) => {
+// Async thunks for analysis operations
+export const fetchAnalyses = createAsyncThunk(
+  'analysis/fetchAnalyses',
+  async (_, { rejectWithValue }) => {
     try {
-      const response = await fetch('/api/analysis/start', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(params),
-      })
-      
-      if (!response.ok) {
-        return rejectWithValue('Failed to start analysis')
+      const response = await analysisService.getAnalyses()
+      if (!response.success) {
+        return rejectWithValue(response.error?.message || 'Failed to fetch analyses')
       }
-      
-      return await response.json()
+      return response.data
     } catch (error) {
       return rejectWithValue('Network error occurred')
+    }
+  }
+)
+
+export const createAnalysis = createAsyncThunk(
+  'analysis/createAnalysis',
+  async (analysisData: CreateAnalysisRequest, { rejectWithValue }) => {
+    try {
+      const response = await analysisService.createAnalysis(analysisData)
+      if (!response.success) {
+        return rejectWithValue(response.error?.message || 'Failed to create analysis')
+      }
+      return response.data
+    } catch (error) {
+      return rejectWithValue('Failed to create analysis')
+    }
+  }
+)
+
+export const startAnalysis = createAsyncThunk(
+  'analysis/startAnalysis',
+  async (analysisId: string, { rejectWithValue }) => {
+    try {
+      const response = await analysisService.startAnalysis(analysisId)
+      if (!response.success) {
+        return rejectWithValue(response.error?.message || 'Failed to start analysis')
+      }
+      return response.data
+    } catch (error) {
+      return rejectWithValue('Network error occurred')
+    }
+  }
+)
+
+export const pauseAnalysis = createAsyncThunk(
+  'analysis/pauseAnalysis',
+  async (analysisId: string, { rejectWithValue }) => {
+    try {
+      const response = await analysisService.pauseAnalysis(analysisId)
+      if (!response.success) {
+        return rejectWithValue(response.error?.message || 'Failed to pause analysis')
+      }
+      return response.data
+    } catch (error) {
+      return rejectWithValue('Failed to pause analysis')
+    }
+  }
+)
+
+export const stopAnalysis = createAsyncThunk(
+  'analysis/stopAnalysis',
+  async (analysisId: string, { rejectWithValue }) => {
+    try {
+      const response = await analysisService.stopAnalysis(analysisId)
+      if (!response.success) {
+        return rejectWithValue(response.error?.message || 'Failed to stop analysis')
+      }
+      return response.data
+    } catch (error) {
+      return rejectWithValue('Failed to stop analysis')
+    }
+  }
+)
+
+export const resumeAnalysis = createAsyncThunk(
+  'analysis/resumeAnalysis',
+  async (analysisId: string, { rejectWithValue }) => {
+    try {
+      const response = await analysisService.resumeAnalysis(analysisId)
+      if (!response.success) {
+        return rejectWithValue(response.error?.message || 'Failed to resume analysis')
+      }
+      return response.data
+    } catch (error) {
+      return rejectWithValue('Failed to resume analysis')
     }
   }
 )
