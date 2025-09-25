@@ -52,7 +52,7 @@ export class ProgramService {
   }
 
   /**
-   * Upload a document to a program
+   * Upload a document to a program using S3 presigned URLs
    */
   async uploadDocument(
     programId: string, 
@@ -60,19 +60,96 @@ export class ProgramService {
     metadata: UploadProgramDocumentRequest,
     onProgress?: (progress: number) => void
   ): Promise<APIResponse<ProgramDocument>> {
-    const formData = new FormData();
-    formData.append('file', file);
-    formData.append('documentType', metadata.documentType);
-    formData.append('title', metadata.title);
-    if (metadata.description) {
-      formData.append('description', metadata.description);
-    }
+    try {
+      // Step 1: Request presigned URL from backend
+      const presignedResponse = await apiClient.post<{
+        uploadUrl: string;
+        fileKey: string;
+        documentId: string;
+      }>(`/programs/${programId}/documents/presigned-url`, {
+        fileName: file.name,
+        fileType: file.type,
+        fileSize: file.size,
+        documentType: metadata.documentType,
+        title: metadata.title,
+        description: metadata.description
+      });
 
-    return apiClient.upload<ProgramDocument>(
-      `/programs/${programId}/documents`, 
-      file, 
-      onProgress
-    );
+      if (!presignedResponse.success) {
+        return {
+          success: false,
+          error: presignedResponse.error || 'Failed to get presigned URL',
+          timestamp: new Date().toISOString()
+        };
+      }
+
+      const { uploadUrl, fileKey, documentId } = presignedResponse.data;
+
+      // Step 2: Upload file directly to S3
+      await this.uploadToS3(file, uploadUrl, onProgress);
+
+      // Step 3: Notify backend that upload is complete
+      const completeResponse = await apiClient.post<ProgramDocument>(`/programs/${programId}/documents/upload-complete`, {
+        documentId,
+        fileKey,
+        fileName: file.name,
+        fileType: file.type,
+        fileSize: file.size
+      });
+
+      return completeResponse;
+    } catch (error) {
+      console.error('Upload failed:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Upload failed',
+        timestamp: new Date().toISOString()
+      };
+    }
+  }
+
+  /**
+   * Upload file directly to S3 using presigned URL
+   */
+  private async uploadToS3(
+    file: File,
+    presignedUrl: string,
+    onProgress?: (progress: number) => void
+  ): Promise<void> {
+    return new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+
+      // Track upload progress
+      if (onProgress) {
+        xhr.upload.addEventListener('progress', (event) => {
+          if (event.lengthComputable) {
+            const progress = (event.loaded / event.total) * 100;
+            onProgress(progress);
+          }
+        });
+      }
+
+      xhr.onload = () => {
+        if (xhr.status >= 200 && xhr.status < 300) {
+          resolve();
+        } else {
+          reject(new Error(`S3 upload failed with status ${xhr.status}`));
+        }
+      };
+
+      xhr.onerror = () => {
+        reject(new Error('S3 upload failed'));
+      };
+
+      xhr.ontimeout = () => {
+        reject(new Error('S3 upload timeout'));
+      };
+
+      xhr.open('PUT', presignedUrl);
+      xhr.setRequestHeader('Content-Type', file.type);
+      xhr.timeout = 300000; // 5 minute timeout for large files
+      xhr.send(file);
+    });
   }
 
   /**

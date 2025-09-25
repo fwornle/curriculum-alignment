@@ -17,7 +17,7 @@ import { cn } from '../../lib/utils'
 export const UploadDocumentModal: React.FC = () => {
   const dispatch = useAppDispatch()
   const { modals } = useAppSelector(state => state.ui)
-  const { uploadedDocuments } = useAppSelector(state => state.curriculum)
+  const { uploadedDocuments, currentProgram } = useAppSelector(state => state.curriculum)
   
   const [dragActive, setDragActive] = useState(false)
   const [selectedFiles, setSelectedFiles] = useState<File[]>([])
@@ -62,16 +62,33 @@ export const UploadDocumentModal: React.FC = () => {
     setSelectedFiles(prev => prev.filter((_, i) => i !== index))
   }
 
+  const [uploadProgress, setUploadProgress] = useState<Record<string, number>>({})
+
   const handleUpload = async () => {
+    if (!currentProgram?.id) {
+      console.error('No current program selected for upload')
+      return
+    }
+
     for (const file of selectedFiles) {
       try {
+        const fileId = `${file.name}-${file.size}`
+        setUploadProgress(prev => ({ ...prev, [fileId]: 0 }))
+
         await dispatch(uploadProgramDocument({ 
-          programId: 'temp-program-id', // TODO: Get actual program ID
+          programId: currentProgram.id,
           file, 
-          metadata: { documentType: file.type, title: file.name } 
+          metadata: { documentType: file.type, title: file.name },
+          onProgress: (progress) => {
+            setUploadProgress(prev => ({ ...prev, [fileId]: progress }))
+          }
         })).unwrap()
+        
+        setUploadProgress(prev => ({ ...prev, [fileId]: 100 }))
       } catch (error) {
         console.error('Upload failed:', error)
+        const fileId = `${file.name}-${file.size}`
+        setUploadProgress(prev => ({ ...prev, [fileId]: -1 })) // -1 indicates error
       }
     }
     handleClose()
@@ -166,29 +183,65 @@ export const UploadDocumentModal: React.FC = () => {
             <div className="space-y-3">
               <h3 className="font-medium">Selected Files ({selectedFiles.length})</h3>
               <div className="space-y-2 max-h-48 overflow-y-auto">
-                {selectedFiles.map((file, index) => (
-                  <div
-                    key={index}
-                    className="flex items-center justify-between p-3 border rounded-lg"
-                  >
-                    <div className="flex items-center space-x-3">
-                      {getFileIcon(file.name)}
-                      <div>
-                        <p className="text-sm font-medium">{file.name}</p>
-                        <p className="text-xs text-muted-foreground">
-                          {formatFileSize(file.size)}
-                        </p>
-                      </div>
-                    </div>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleRemoveFile(index)}
+                {selectedFiles.map((file, index) => {
+                  const fileId = `${file.name}-${file.size}`
+                  const progress = uploadProgress[fileId]
+                  
+                  return (
+                    <div
+                      key={index}
+                      className="flex items-center justify-between p-3 border rounded-lg"
                     >
-                      <X className="h-4 w-4" />
-                    </Button>
-                  </div>
-                ))}
+                      <div className="flex items-center space-x-3">
+                        {getFileIcon(file.name)}
+                        <div className="flex-1">
+                          <p className="text-sm font-medium">{file.name}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {formatFileSize(file.size)}
+                          </p>
+                          {progress !== undefined && (
+                            <div className="mt-1">
+                              {progress === -1 ? (
+                                <div className="flex items-center space-x-1 text-red-500">
+                                  <AlertCircle className="h-3 w-3" />
+                                  <span className="text-xs">Upload failed</span>
+                                </div>
+                              ) : progress === 100 ? (
+                                <div className="flex items-center space-x-1 text-green-500">
+                                  <CheckCircle className="h-3 w-3" />
+                                  <span className="text-xs">Upload complete</span>
+                                </div>
+                              ) : progress > 0 ? (
+                                <div className="flex items-center space-x-2">
+                                  <div className="flex-1 bg-muted rounded-full h-2">
+                                    <div 
+                                      className="bg-primary h-2 rounded-full transition-all duration-300"
+                                      style={{ width: `${progress}%` }}
+                                    />
+                                  </div>
+                                  <span className="text-xs text-muted-foreground">{Math.round(progress)}%</span>
+                                </div>
+                              ) : (
+                                <div className="flex items-center space-x-1">
+                                  <Loader2 className="h-3 w-3 animate-spin" />
+                                  <span className="text-xs text-muted-foreground">Uploading...</span>
+                                </div>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleRemoveFile(index)}
+                        disabled={progress !== undefined && progress >= 0}
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  )
+                })}
               </div>
             </div>
           )}
@@ -250,7 +303,7 @@ export const UploadDocumentModal: React.FC = () => {
             </Button>
             <Button 
               onClick={handleUpload}
-              disabled={selectedFiles.length === 0}
+              disabled={selectedFiles.length === 0 || !currentProgram?.id}
             >
               <Upload className="h-4 w-4 mr-2" />
               Upload {selectedFiles.length > 0 ? `${selectedFiles.length} file${selectedFiles.length > 1 ? 's' : ''}` : ''}
