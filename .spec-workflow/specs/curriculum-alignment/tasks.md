@@ -730,7 +730,7 @@ Tasks are organized by component and phase:
     - Success: Users can start and monitor analyses from UI
     - Mark this task as in-progress in tasks.md, then complete when done
 
-- [ ] 74. Integrate Report Generation
+- [x] 74. Integrate Report Generation
   - **Files**: `frontend/src/services/api/reportService.ts`
   - **Requirements**: Report generation from design document
   - **Description**: Connect report generation, download, and export functionality

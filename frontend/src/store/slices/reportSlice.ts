@@ -1,6 +1,8 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 import type { PayloadAction } from '@reduxjs/toolkit'
 import { sampleReports, sampleReportTemplates } from '../../lib/sampleData'
+import { reportService } from '../../services/api/reportService'
+import type { Report as APIReport, CreateReportRequest, ReportParameters } from '../../services/api/types'
 
 export interface ReportTemplate {
   id: string
@@ -102,27 +104,91 @@ const initialState: ReportState = {
   error: null
 }
 
-// Async thunks
-export const generateReport = createAsyncThunk(
-  'reports/generate',
-  async (params: {
-    templateId: string
-    title: string
-    analysisId?: string
-    customConfig?: Record<string, any>
-  }, { rejectWithValue }) => {
+// Async thunks for report operations
+export const fetchReports = createAsyncThunk(
+  'reports/fetchReports',
+  async (_, { rejectWithValue }) => {
     try {
-      const response = await fetch('/api/reports/generate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(params)
-      })
-      
-      if (!response.ok) {
-        return rejectWithValue('Failed to start report generation')
+      const response = await reportService.getReports()
+      if (!response.success) {
+        return rejectWithValue(response.error?.message || 'Failed to fetch reports')
       }
-      
-      return await response.json()
+      return response.data
+    } catch (error) {
+      return rejectWithValue('Network error occurred')
+    }
+  }
+)
+
+export const createReport = createAsyncThunk(
+  'reports/createReport',
+  async (reportData: CreateReportRequest, { rejectWithValue }) => {
+    try {
+      const response = await reportService.createReport(reportData)
+      if (!response.success) {
+        return rejectWithValue(response.error?.message || 'Failed to create report')
+      }
+      return response.data
+    } catch (error) {
+      return rejectWithValue('Failed to create report')
+    }
+  }
+)
+
+export const generateReport = createAsyncThunk(
+  'reports/generateReport',
+  async (reportId: string, { rejectWithValue }) => {
+    try {
+      const response = await reportService.generateReport(reportId)
+      if (!response.success) {
+        return rejectWithValue(response.error?.message || 'Failed to generate report')
+      }
+      return response.data
+    } catch (error) {
+      return rejectWithValue('Network error occurred')
+    }
+  }
+)
+
+export const downloadReport = createAsyncThunk(
+  'reports/downloadReport',
+  async (reportId: string, { rejectWithValue }) => {
+    try {
+      const response = await reportService.downloadReport(reportId)
+      if (!response.success) {
+        return rejectWithValue(response.error?.message || 'Failed to download report')
+      }
+      return response.data
+    } catch (error) {
+      return rejectWithValue('Failed to download report')
+    }
+  }
+)
+
+export const cancelReport = createAsyncThunk(
+  'reports/cancelReport',
+  async (reportId: string, { rejectWithValue }) => {
+    try {
+      const response = await reportService.cancelReport(reportId)
+      if (!response.success) {
+        return rejectWithValue(response.error?.message || 'Failed to cancel report')
+      }
+      return reportId
+    } catch (error) {
+      return rejectWithValue('Failed to cancel report')
+    }
+  }
+)
+
+export const fetchReportTemplates = createAsyncThunk(
+  'reports/fetchTemplates',
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await reportService.getReportTemplates()
+      if (!response.success) {
+        return rejectWithValue(response.error?.message || 'Failed to fetch templates')
+      }
+      return response.data
     } catch (error) {
       return rejectWithValue('Network error occurred')
     }

@@ -200,6 +200,19 @@ export interface ReportParameters {
   customOptions?: Record<string, any>;
 }
 
+// Report Request Types
+export interface CreateReportRequest {
+  name: string;
+  type: 'gap-analysis' | 'comparison' | 'benchmark' | 'custom';
+  format: 'pdf' | 'excel' | 'word' | 'html';
+  parameters: ReportParameters;
+}
+
+export interface UpdateReportRequest {
+  name?: string;
+  parameters?: ReportParameters;
+}
+
 // Document Types
 export interface Document {
   id: string;
