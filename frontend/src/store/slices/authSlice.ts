@@ -49,14 +49,20 @@ const loadAuthFromStorage = (): Partial<AuthState> => {
     const storedAuth = localStorage.getItem('auth_state')
     if (storedAuth) {
       const parsed = JSON.parse(storedAuth)
-      // Validate the stored auth state
-      if (parsed.user && parsed.isAuthenticated) {
+      
+      // Only load auth state if it has Cognito tokens (real authentication)
+      // This prevents loading old mock authentication data
+      if (parsed.user && parsed.isAuthenticated && parsed.tokens?.accessToken) {
         return {
           user: parsed.user,
           tokens: parsed.tokens,
           isAuthenticated: true,
           lastLoginTime: parsed.lastLoginTime
         }
+      } else {
+        // Clear invalid/mock auth data
+        console.info('Clearing invalid auth state from localStorage')
+        localStorage.removeItem('auth_state')
       }
     }
   } catch (error) {

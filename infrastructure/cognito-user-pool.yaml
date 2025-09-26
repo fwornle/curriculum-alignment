@@ -206,8 +206,8 @@ Resources:
       #   PreSignUp: !GetAtt PreSignUpLambda.Arn
       #   PostConfirmation: !GetAtt PostConfirmationLambda.Arn
       
-      # Deletion Protection
-      DeletionProtection: !If [IsProd, 'ACTIVE', 'INACTIVE']
+      # Deletion Protection - Always protect user data
+      DeletionProtection: 'ACTIVE'
       
       UserPoolTags:
         Name: !Sub '${AWS::StackName}-user-pool'

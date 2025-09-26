@@ -12,6 +12,7 @@ import { ComponentsTestView } from './components/views/ComponentsTestView'
 import { ChatInterface } from './components/chat/ChatInterface'
 import { LLMConfigModal } from './components/modals/LLMConfigModal'
 import { SettingsModal } from './components/modals/SettingsModal'
+import { ProfileModal } from './components/modals/ProfileModal'
 import { UploadDocumentModal } from './components/modals/UploadDocumentModal'
 import { CreateProgramModal } from './components/modals/CreateProgramModal'
 import { AnalysisDetailsModal } from './components/modals/AnalysisDetailsModal'
@@ -31,6 +32,24 @@ function App() {
     const savedTheme = localStorage.getItem('theme') as 'light' | 'dark' | 'system' || 'system'
     dispatch(setTheme(savedTheme))
   }, [dispatch])
+
+  // Clear any old mock authentication data on app start
+  useEffect(() => {
+    const authState = localStorage.getItem('auth_state')
+    if (authState) {
+      try {
+        const parsed = JSON.parse(authState)
+        // If auth state exists but has no tokens, it's old mock data - clear it
+        if (parsed.user && !parsed.tokens?.accessToken) {
+          console.info('Clearing old mock authentication data')
+          localStorage.removeItem('auth_state')
+          window.location.reload()
+        }
+      } catch (e) {
+        localStorage.removeItem('auth_state')
+      }
+    }
+  }, [])
 
   const renderCurrentView = () => {
     switch (currentView) {
@@ -73,6 +92,7 @@ function App() {
           <LoginModal />
           <LLMConfigModal />
           <SettingsModal />
+          <ProfileModal />
           <UploadDocumentModal />
           <CreateProgramModal />
           <AnalysisDetailsModal />
