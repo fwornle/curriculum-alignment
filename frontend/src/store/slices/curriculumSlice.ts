@@ -36,7 +36,7 @@ export interface CurriculumState {
 
 const initialState: CurriculumState = {
   programs: samplePrograms,
-  currentProgram: null,
+  currentProgram: samplePrograms.length > 0 ? samplePrograms[0] : null,
   selectedCourses: [],
   uploadedDocuments: sampleUploadedDocuments,
   searchResults: [],

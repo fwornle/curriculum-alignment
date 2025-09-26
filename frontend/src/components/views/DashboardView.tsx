@@ -74,36 +74,36 @@ export const DashboardView: React.FC = () => {
   const metrics = [
     {
       title: 'Total Analyses',
-      value: totalAnalyses,
-      change: '+12%',
-      trend: 'up',
+      value: totalAnalyses || 0,
+      change: totalAnalyses > 0 ? '+12%' : 'N/A',
+      trend: totalAnalyses > 0 ? 'up' : 'neutral',
       icon: BarChart3,
       gradient: 'from-blue-500 to-blue-600',
       bg: 'bg-gradient-to-br from-blue-50 to-cyan-50'
     },
     {
       title: 'Active Projects',
-      value: activeAnalyses,
-      change: '+8%',
-      trend: 'up',
+      value: activeAnalyses || 0,
+      change: activeAnalyses > 0 ? '+8%' : 'N/A',
+      trend: activeAnalyses > 0 ? 'up' : 'neutral',
       icon: Activity,
       gradient: 'from-green-500 to-green-600',
       bg: 'bg-gradient-to-br from-green-50 to-emerald-50'
     },
     {
       title: 'Programs',
-      value: totalPrograms,
-      change: '+5%',
-      trend: 'up',
+      value: totalPrograms || 0,
+      change: totalPrograms > 0 ? '+5%' : 'N/A',
+      trend: totalPrograms > 0 ? 'up' : 'neutral',
       icon: GraduationCap,
       gradient: 'from-purple-500 to-purple-600',
       bg: 'bg-gradient-to-br from-purple-50 to-pink-50'
     },
     {
       title: 'Reports',
-      value: totalReports,
-      change: '+15%',
-      trend: 'up',
+      value: totalReports || 0,
+      change: totalReports > 0 ? '+15%' : 'N/A',
+      trend: totalReports > 0 ? 'up' : 'neutral',
       icon: FileText,
       gradient: 'from-orange-500 to-orange-600',
       bg: 'bg-gradient-to-br from-orange-50 to-red-50'
@@ -130,23 +130,13 @@ export const DashboardView: React.FC = () => {
               </p>
               <div className="flex items-center gap-6">
                 <div className="flex items-center gap-3 bg-white/10 rounded-full px-5 py-3">
-                  <div className="w-3 h-3 bg-green-400 rounded-full"></div>
+                  <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
                   <span className="text-white font-medium">System Online</span>
                 </div>
                 <div className="flex items-center gap-3 bg-white/10 rounded-full px-5 py-3">
-                  <Users className="h-5 w-5" />
-                  <span className="text-white font-medium">23 Active Users</span>
-                </div>
-                <div className="flex items-center gap-3 bg-white/10 rounded-full px-5 py-3">
                   <Globe className="h-5 w-5" />
-                  <span className="text-white font-medium">Last updated: 9/23/2025</span>
+                  <span className="text-white font-medium">Version 1.1.0</span>
                 </div>
-              </div>
-            </div>
-            <div className="hidden lg:block">
-              <div className="text-right">
-                <p className="text-blue-100 text-sm">Last updated</p>
-                <p className="text-white font-semibold">{new Date().toLocaleDateString()}</p>
               </div>
             </div>
           </div>
@@ -164,13 +154,15 @@ export const DashboardView: React.FC = () => {
                   <p className="text-3xl font-bold text-blue-600">
                     {metric.value}
                   </p>
-                  <div className="flex items-center gap-2 mt-3">
-                    <TrendingUp className="h-4 w-4 text-green-500" />
-                    <span className="text-sm font-semibold text-green-600">
-                      {metric.change}
-                    </span>
-                    <span className="text-xs text-gray-500">vs last month</span>
-                  </div>
+                  {metric.trend !== 'neutral' && (
+                    <div className="flex items-center gap-2 mt-3">
+                      <TrendingUp className="h-4 w-4 text-green-500" />
+                      <span className="text-sm font-semibold text-green-600">
+                        {metric.change}
+                      </span>
+                      <span className="text-xs text-gray-500">vs last month</span>
+                    </div>
+                  )}
                 </div>
                 <div className={cn(
                   "p-4 rounded-xl bg-gradient-to-br shadow-sm",

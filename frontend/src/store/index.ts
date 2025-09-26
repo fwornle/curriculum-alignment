@@ -1,6 +1,5 @@
 import { configureStore } from '@reduxjs/toolkit'
-import { useDispatch, useSelector } from 'react-redux'
-import type { TypedUseSelectorHook } from 'react-redux'
+import { useDispatch, useSelector, type TypedUseSelectorHook } from 'react-redux'
 
 // Import all slices
 import authSlice from './slices/authSlice'
@@ -10,6 +9,7 @@ import uiSlice from './slices/uiSlice'
 import llmConfigSlice from './slices/llmConfigSlice'
 import reportSlice from './slices/reportSlice'
 import chatSlice from './slices/chatSlice'
+import websocketSlice from './slices/websocketSlice'
 
 export const store = configureStore({
   reducer: {
@@ -20,6 +20,7 @@ export const store = configureStore({
     llmConfig: llmConfigSlice,
     report: reportSlice,
     chat: chatSlice,
+    websocket: websocketSlice,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
@@ -33,6 +34,5 @@ export const store = configureStore({
 export type RootState = ReturnType<typeof store.getState>
 export type AppDispatch = typeof store.dispatch
 
-// Typed hooks
 export const useAppDispatch = () => useDispatch<AppDispatch>()
 export const useAppSelector: TypedUseSelectorHook<RootState> = useSelector

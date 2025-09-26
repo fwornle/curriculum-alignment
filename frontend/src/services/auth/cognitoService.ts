@@ -259,17 +259,32 @@ class CognitoService {
   }
 
   private mapUserAttributes(user: any): CognitoUser {
-    const attributes = user.signInDetails?.loginId || user.username
+    // Extract attributes from the user object
+    // In AWS Amplify v6, attributes can be in different locations
+    const userAttributes = user.UserAttributes || user.attributes || {}
     
+    // Helper function to get attribute value
+    const getAttributeValue = (attributeName: string): string => {
+      if (Array.isArray(userAttributes)) {
+        // If UserAttributes is an array (from AdminGetUser)
+        const attr = userAttributes.find((attr: any) => attr.Name === attributeName)
+        return attr?.Value || ''
+      } else if (typeof userAttributes === 'object') {
+        // If attributes is an object
+        return userAttributes[attributeName] || ''
+      }
+      return ''
+    }
+
     return {
-      userId: user.userId || user.username,
-      username: user.username,
-      email: user.signInDetails?.loginId || '',
-      firstName: attributes?.given_name || '',
-      lastName: attributes?.family_name || '',
-      emailVerified: attributes?.email_verified === 'true',
-      phoneVerified: attributes?.phone_number_verified === 'true',
-      attributes: attributes || {}
+      userId: user.userId || user.username || user.sub,
+      username: user.username || user.sub,
+      email: user.signInDetails?.loginId || getAttributeValue('email') || user.email || '',
+      firstName: getAttributeValue('given_name') || '',
+      lastName: getAttributeValue('family_name') || '',
+      emailVerified: getAttributeValue('email_verified') === 'true',
+      phoneVerified: getAttributeValue('phone_number_verified') === 'true',
+      attributes: userAttributes || {}
     }
   }
 

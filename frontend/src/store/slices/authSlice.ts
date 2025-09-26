@@ -43,6 +43,29 @@ export interface AuthState {
   } | null
 }
 
+// Helper function to load auth state from localStorage
+const loadAuthFromStorage = (): Partial<AuthState> => {
+  try {
+    const storedAuth = localStorage.getItem('auth_state')
+    if (storedAuth) {
+      const parsed = JSON.parse(storedAuth)
+      // Validate the stored auth state
+      if (parsed.user && parsed.isAuthenticated) {
+        return {
+          user: parsed.user,
+          tokens: parsed.tokens,
+          isAuthenticated: true,
+          lastLoginTime: parsed.lastLoginTime
+        }
+      }
+    }
+  } catch (error) {
+    console.warn('Failed to load auth state from localStorage:', error)
+    localStorage.removeItem('auth_state')
+  }
+  return {}
+}
+
 const initialState: AuthState = {
   user: null,
   tokens: null,
@@ -51,7 +74,8 @@ const initialState: AuthState = {
   error: null,
   loginAttempts: 0,
   lastLoginTime: null,
-  pendingVerification: null
+  pendingVerification: null,
+  ...loadAuthFromStorage()
 }
 
 // Helper function to map Cognito user to application user
@@ -224,6 +248,50 @@ const authSlice = createSlice({
     },
     clearPendingVerification: (state) => {
       state.pendingVerification = null
+    },
+    // Simple login for demo purposes without Cognito
+    login: (state, action: PayloadAction<Omit<User, 'preferences'> & { preferences?: Partial<User['preferences']> }>) => {
+      state.user = {
+        ...action.payload,
+        preferences: {
+          theme: 'system',
+          language: 'en',
+          notifications: true,
+          ...action.payload.preferences
+        }
+      }
+      state.isAuthenticated = true
+      state.lastLoginTime = new Date().toISOString()
+      state.error = null
+      
+      // Persist auth state to localStorage
+      try {
+        localStorage.setItem('auth_state', JSON.stringify({
+          user: state.user,
+          tokens: state.tokens,
+          isAuthenticated: state.isAuthenticated,
+          lastLoginTime: state.lastLoginTime
+        }))
+      } catch (error) {
+        console.warn('Failed to persist auth state to localStorage:', error)
+      }
+    },
+    // Local logout action for immediate state clearing
+    logoutLocal: (state) => {
+      state.user = null
+      state.tokens = null
+      state.isAuthenticated = false
+      state.error = null
+      state.loginAttempts = 0
+      state.lastLoginTime = null
+      state.pendingVerification = null
+      
+      // Clear auth state from localStorage
+      try {
+        localStorage.removeItem('auth_state')
+      } catch (error) {
+        console.warn('Failed to clear auth state from localStorage:', error)
+      }
     }
   },
   extraReducers: (builder) => {
@@ -241,6 +309,18 @@ const authSlice = createSlice({
         state.loginAttempts = 0
         state.lastLoginTime = new Date().toISOString()
         state.pendingVerification = null
+        
+        // Persist auth state to localStorage
+        try {
+          localStorage.setItem('auth_state', JSON.stringify({
+            user: state.user,
+            tokens: state.tokens,
+            isAuthenticated: state.isAuthenticated,
+            lastLoginTime: state.lastLoginTime
+          }))
+        } catch (error) {
+          console.warn('Failed to persist auth state to localStorage:', error)
+        }
       })
       .addCase(loginUser.rejected, (state, action) => {
         state.isLoading = false
@@ -365,6 +445,13 @@ const authSlice = createSlice({
         state.loginAttempts = 0
         state.lastLoginTime = null
         state.pendingVerification = null
+        
+        // Clear auth state from localStorage
+        try {
+          localStorage.removeItem('auth_state')
+        } catch (error) {
+          console.warn('Failed to clear auth state from localStorage:', error)
+        }
       })
   }
 })
@@ -374,7 +461,9 @@ export const {
   incrementLoginAttempts,
   resetLoginAttempts,
   updateUserPreferences,
-  clearPendingVerification
+  clearPendingVerification,
+  login,
+  logoutLocal
 } = authSlice.actions
 
 export default authSlice.reducer

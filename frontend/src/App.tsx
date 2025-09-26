@@ -15,6 +15,9 @@ import { SettingsModal } from './components/modals/SettingsModal'
 import { UploadDocumentModal } from './components/modals/UploadDocumentModal'
 import { CreateProgramModal } from './components/modals/CreateProgramModal'
 import { AnalysisDetailsModal } from './components/modals/AnalysisDetailsModal'
+import { ErrorBoundary } from './components/ErrorBoundary'
+import { ToastContainer } from './components/ui/toast'
+import { LoginModal } from './components/auth/LoginModal'
 
 function App() {
   const dispatch = useAppDispatch()
@@ -49,22 +52,36 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col font-sans">
-      <TopAppBar />
-      
-      <main className="flex-1 overflow-hidden">
-        {renderCurrentView()}
-      </main>
+    <ErrorBoundary level="critical">
+      <div className="min-h-screen bg-gray-50 flex flex-col font-sans">
+        <ErrorBoundary level="component">
+          <TopAppBar />
+        </ErrorBoundary>
+        
+        <main className="flex-1 overflow-hidden">
+          <ErrorBoundary level="page">
+            {renderCurrentView()}
+          </ErrorBoundary>
+        </main>
 
-      <BottomStatusBar />
-      
-      {/* Modals */}
-      <LLMConfigModal />
-      <SettingsModal />
-      <UploadDocumentModal />
-      <CreateProgramModal />
-      <AnalysisDetailsModal />
-    </div>
+        <ErrorBoundary level="component">
+          <BottomStatusBar />
+        </ErrorBoundary>
+        
+        {/* Modals */}
+        <ErrorBoundary level="component">
+          <LoginModal />
+          <LLMConfigModal />
+          <SettingsModal />
+          <UploadDocumentModal />
+          <CreateProgramModal />
+          <AnalysisDetailsModal />
+        </ErrorBoundary>
+
+        {/* Global toast notifications */}
+        <ToastContainer />
+      </div>
+    </ErrorBoundary>
   )
 }
 
