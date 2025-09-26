@@ -1,7 +1,7 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useAppDispatch, useAppSelector } from '../../store'
-import { updateConfiguration, testLLMConnection } from '../../store/slices/llmConfigSlice'
 import { closeModal } from '../../store/slices/uiSlice'
+import { useLLM, useLLMCostTracking } from '../../hooks/useLLM'
 import { Button } from '../ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card'
 import { Input } from '../ui/input'
@@ -39,34 +39,76 @@ export const LLMConfigModal: React.FC = () => {
   const dispatch = useAppDispatch()
   const { modals } = useAppSelector(state => state.ui)
   const isOpen = modals?.llmConfig || false
-  const { 
-    providers, 
-    currentConfiguration, 
-    testResults
-  } = useAppSelector(state => state.llmConfig)
+  
+  // Use LLM hooks for better integration
+  const llm = useLLM()
+  const costTracking = useLLMCostTracking()
 
-  const [selectedProvider, setSelectedProvider] = useState(currentConfiguration?.provider || '')
+  const [selectedProvider, setSelectedProvider] = useState(llm.currentConfiguration?.provider || '')
   const [apiKey, setApiKey] = useState('')
-  const [modelName, setModelName] = useState(currentConfiguration?.model || '')
-  const [maxTokens, setMaxTokens] = useState('4000')
-  const [temperature, setTemperature] = useState('0.7')
+  const [modelName, setModelName] = useState(llm.currentConfiguration?.model || '')
+  const [maxTokens, setMaxTokens] = useState(llm.currentConfiguration?.maxTokens?.toString() || '4000')
+  const [temperature, setTemperature] = useState(llm.currentConfiguration?.temperature?.toString() || '0.7')
+  const [topP, setTopP] = useState(llm.currentConfiguration?.topP?.toString() || '1.0')
+  const [systemPrompt, setSystemPrompt] = useState(llm.currentConfiguration?.systemPrompt || '')
+
+  // Update form when current configuration changes
+  useEffect(() => {
+    if (llm.currentConfiguration) {
+      setSelectedProvider(llm.currentConfiguration.provider)
+      setModelName(llm.currentConfiguration.model)
+      setMaxTokens(llm.currentConfiguration.maxTokens?.toString() || '4000')
+      setTemperature(llm.currentConfiguration.temperature?.toString() || '0.7')
+      setTopP(llm.currentConfiguration.topP?.toString() || '1.0')
+      setSystemPrompt(llm.currentConfiguration.systemPrompt || '')
+    }
+  }, [llm.currentConfiguration])
 
   const handleSaveConfiguration = () => {
-    const provider = providers.find(p => p.id === selectedProvider)
+    const provider = llm.providers.find(p => p.id === selectedProvider)
     if (!provider) return
 
-    dispatch(updateConfiguration({
-      id: 'default',
-      updates: {
+    if (llm.currentConfiguration) {
+      // Update existing configuration
+      llm.editConfiguration(llm.currentConfiguration.id, {
         provider: selectedProvider,
-        model: modelName
+        model: modelName,
+        temperature: parseFloat(temperature),
+        maxTokens: parseInt(maxTokens),
+        topP: parseFloat(topP),
+        systemPrompt: systemPrompt.trim() || undefined,
+        presencePenalty: llm.currentConfiguration.presencePenalty,
+        frequencyPenalty: llm.currentConfiguration.frequencyPenalty
+      })
+    } else {
+      // Create new configuration
+      const newConfig = {
+        id: `config-${Date.now()}`,
+        name: `${provider.name} - ${modelName}`,
+        provider: selectedProvider,
+        model: modelName,
+        temperature: parseFloat(temperature),
+        maxTokens: parseInt(maxTokens),
+        topP: parseFloat(topP),
+        presencePenalty: 0,
+        frequencyPenalty: 0,
+        systemPrompt: systemPrompt.trim() || undefined,
+        isDefault: !llm.hasConfigurations,
+        usageStats: {
+          totalRequests: 0,
+          totalTokens: 0,
+          totalCost: 0
+        }
       }
-    }))
+      llm.createConfiguration(newConfig)
+    }
+
+    dispatch(closeModal('llmConfig'))
   }
 
   const handleTestConnection = () => {
-    if (selectedProvider && apiKey) {
-      dispatch(testLLMConnection(selectedProvider))
+    if (llm.currentConfiguration && selectedProvider) {
+      llm.testConnection(llm.currentConfiguration.id)
     }
   }
 
@@ -74,8 +116,8 @@ export const LLMConfigModal: React.FC = () => {
     dispatch(closeModal('llmConfig'))
   }
 
-  const selectedProviderData = providers.find(p => p.id === selectedProvider)
-  const testResult = testResults[selectedProvider]
+  const selectedProviderData = llm.providers.find(p => p.id === selectedProvider)
+  const testResult = llm.testResults[selectedProvider]
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
@@ -117,7 +159,7 @@ export const LLMConfigModal: React.FC = () => {
                       <SelectValue placeholder="Select a provider" />
                     </SelectTrigger>
                     <SelectContent>
-                      {providers.map((provider) => (
+                      {llm.providers.map((provider) => (
                         <SelectItem key={provider.id} value={provider.id}>
                           <div className="flex items-center gap-2">
                             <span>{provider.name}</span>
@@ -208,22 +250,50 @@ export const LLMConfigModal: React.FC = () => {
               <CardContent>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   <div className="text-center p-4 border rounded-lg">
-                    <div className="text-2xl font-bold text-primary">1,234</div>
+                    <div className="text-2xl font-bold text-primary">
+                      {llm.configurations.reduce((sum, config) => sum + config.usageStats.totalRequests, 0).toLocaleString()}
+                    </div>
                     <div className="text-sm text-muted-foreground">Total Requests</div>
                   </div>
                   <div className="text-center p-4 border rounded-lg">
-                    <div className="text-2xl font-bold text-ceu-warning">$45.67</div>
+                    <div className={cn(
+                      "text-2xl font-bold",
+                      costTracking.isNearMonthlyLimit ? "text-ceu-error" : "text-ceu-warning"
+                    )}>
+                      ${costTracking.totalMonthlyCost.toFixed(2)}
+                    </div>
                     <div className="text-sm text-muted-foreground">This Month</div>
                   </div>
                   <div className="text-center p-4 border rounded-lg">
-                    <div className="text-2xl font-bold text-ceu-info">2.3M</div>
+                    <div className="text-2xl font-bold text-ceu-info">
+                      {(llm.configurations.reduce((sum, config) => sum + config.usageStats.totalTokens, 0) / 1000).toFixed(1)}K
+                    </div>
                     <div className="text-sm text-muted-foreground">Tokens Used</div>
                   </div>
                   <div className="text-center p-4 border rounded-lg">
-                    <div className="text-2xl font-bold text-ceu-success">98.5%</div>
-                    <div className="text-sm text-muted-foreground">Success Rate</div>
+                    <div className="text-2xl font-bold text-ceu-success">
+                      {costTracking.monthlyBudgetPercentage.toFixed(1)}%
+                    </div>
+                    <div className="text-sm text-muted-foreground">Budget Used</div>
                   </div>
                 </div>
+
+                {/* Budget alerts */}
+                {(costTracking.isNearMonthlyLimit || costTracking.isMonthlyBudgetExceeded) && (
+                  <div className={cn(
+                    "mt-4 p-4 rounded-lg",
+                    costTracking.isMonthlyBudgetExceeded 
+                      ? "bg-ceu-error/10 text-ceu-error" 
+                      : "bg-ceu-warning/10 text-ceu-warning"
+                  )}>
+                    <div className="font-semibold">
+                      {costTracking.isMonthlyBudgetExceeded ? '⚠️ Budget Exceeded' : '⚠️ Approaching Budget Limit'}
+                    </div>
+                    <div className="text-sm mt-1">
+                      You've used ${costTracking.totalMonthlyCost.toFixed(2)} of your ${costTracking.monthlyBudget} monthly budget.
+                    </div>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
@@ -243,9 +313,14 @@ export const LLMConfigModal: React.FC = () => {
                     <Input
                       id="maxTokens"
                       type="number"
+                      min="1"
+                      max="200000"
                       value={maxTokens}
                       onChange={(e) => setMaxTokens(e.target.value)}
                     />
+                    <div className="text-xs text-muted-foreground">
+                      Maximum number of tokens to generate
+                    </div>
                   </div>
                   
                   <div className="space-y-2">
@@ -259,8 +334,59 @@ export const LLMConfigModal: React.FC = () => {
                       value={temperature}
                       onChange={(e) => setTemperature(e.target.value)}
                     />
+                    <div className="text-xs text-muted-foreground">
+                      Controls randomness (0 = focused, 2 = creative)
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="topP">Top P</Label>
+                    <Input
+                      id="topP"
+                      type="number"
+                      step="0.1"
+                      min="0"
+                      max="1"
+                      value={topP}
+                      onChange={(e) => setTopP(e.target.value)}
+                    />
+                    <div className="text-xs text-muted-foreground">
+                      Nucleus sampling parameter
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="systemPrompt">System Prompt</Label>
+                    <Input
+                      id="systemPrompt"
+                      placeholder="Custom system prompt for this configuration"
+                      value={systemPrompt}
+                      onChange={(e) => setSystemPrompt(e.target.value)}
+                    />
+                    <div className="text-xs text-muted-foreground">
+                      Custom instructions for the model
+                    </div>
                   </div>
                 </div>
+
+                {selectedProviderData && (
+                  <div className="mt-6 p-4 bg-muted/50 rounded-lg">
+                    <h4 className="font-medium mb-2">Available Models</h4>
+                    <div className="grid gap-2">
+                      {selectedProviderData.models.map((model) => (
+                        <div key={model.id} className="flex justify-between items-center text-sm">
+                          <div>
+                            <span className="font-medium">{model.name}</span>
+                            <span className="text-muted-foreground ml-2">{model.description}</span>
+                          </div>
+                          <div className="text-xs text-muted-foreground">
+                            ${model.costPer1kTokens.input}/${model.costPer1kTokens.output} per 1K tokens
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>

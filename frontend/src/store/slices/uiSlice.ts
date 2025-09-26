@@ -13,6 +13,7 @@ export interface UIState {
     settings: boolean
     llmConfig: boolean
     analysisDetails: boolean
+    login: boolean
   }
   loading: {
     global: boolean
@@ -66,6 +67,7 @@ const initialState: UIState = {
     settings: false,
     llmConfig: false,
     analysisDetails: false,
+    login: false,
   },
   loading: {
     global: false,

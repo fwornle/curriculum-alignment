@@ -40,7 +40,13 @@
       "Bash(./status.sh)",
       "Bash(aws cloudformation delete-stack:*)",
       "Bash(aws cloudformation describe-stacks:*)",
-      "Bash(aws cloudformation describe-stack-events:*)"
+      "Bash(aws cloudformation describe-stack-events:*)",
+      "Bash(./deploy.sh)",
+      "Bash(export AWS_PROFILE=tanfra)",
+      "Bash(aws sts get-caller-identity)",
+      "Bash(./deploy/deploy-frontend.sh:*)",
+      "Bash(aws cloudformation:*)",
+      "WebFetch(domain:curriculum.tanfra.com)"
     ],
     "additionalDirectories": []
   },

@@ -35,8 +35,12 @@ class APIClient {
   private store: any = null; // Will be set by setStore method
   
   constructor(config: Partial<APIClientConfig> = {}) {
+    const defaultBaseURL = typeof window !== 'undefined' && window.location.hostname === 'localhost' 
+      ? 'http://localhost:3000/api'
+      : 'https://ihqwce6c41.execute-api.eu-central-1.amazonaws.com/dev';
+      
     this.config = {
-      baseURL: (typeof window !== 'undefined' && (window as any).VITE_API_URL) || 'http://localhost:3000/api',
+      baseURL: (typeof window !== 'undefined' && (window as any).VITE_API_URL) || defaultBaseURL,
       timeout: 30000,
       retries: 3,
       retryDelay: 1000,
@@ -348,6 +352,18 @@ class APIClient {
     } finally {
       clearTimeout(timeoutId);
     }
+  }
+
+  // Public method for getting auth headers for external services
+  public async getAuthHeaders(): Promise<Record<string, string>> {
+    const headers: Record<string, string> = {};
+    
+    const tokens = await this.getValidTokens();
+    if (tokens) {
+      headers['Authorization'] = `${tokens.tokenType} ${tokens.accessToken}`;
+    }
+    
+    return headers;
   }
 
   private async getHeaders(
