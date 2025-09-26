@@ -1,7 +1,7 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useAppDispatch, useAppSelector } from '../../store'
 import { closeModal } from '../../store/slices/uiSlice'
-import { login } from '../../store/slices/authSlice'
+import { loginUser, signUpUser } from '../../store/slices/authSlice'
 import { Button } from '../ui/button'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../ui/card'
 import { User, Mail, Lock, AlertCircle, LogIn, UserPlus } from 'lucide-react'
@@ -17,9 +17,19 @@ export const LoginModal: React.FC = () => {
     name: '',
     confirmPassword: ''
   })
+  const [rememberMe, setRememberMe] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
   
   const isOpen = modals.login
+
+  // Load remembered email on component mount
+  useEffect(() => {
+    const rememberedEmail = localStorage.getItem('rememberedEmail')
+    if (rememberedEmail) {
+      setFormData(prev => ({ ...prev, email: rememberedEmail }))
+      setRememberMe(true)
+    }
+  }, [])
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {}
@@ -50,43 +60,71 @@ export const LoginModal: React.FC = () => {
     return Object.keys(newErrors).length === 0
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
     if (!validateForm()) {
       return
     }
     
-    // For demo purposes, create a mock user
-    const mockUser = {
-      id: '1',
-      email: formData.email,
-      name: formData.name || formData.email.split('@')[0],
-      role: 'user' as const,
-      permissions: ['read', 'write'] as const[]
+    try {
+      if (isRegister) {
+        // Sign up with Cognito
+        await dispatch(signUpUser({
+          username: formData.email,
+          email: formData.email,
+          password: formData.password,
+          given_name: formData.name?.split(' ')[0] || '',
+          family_name: formData.name?.split(' ').slice(1).join(' ') || ''
+        })).unwrap()
+        
+        // Don't close modal yet - user needs to verify email
+        setErrors({})
+      } else {
+        // Sign in with Cognito
+        await dispatch(loginUser({
+          username: formData.email,
+          password: formData.password
+        })).unwrap()
+        
+        // Handle "Remember me" functionality
+        if (rememberMe) {
+          localStorage.setItem('rememberedEmail', formData.email)
+        } else {
+          localStorage.removeItem('rememberedEmail')
+        }
+        
+        dispatch(closeModal('login'))
+        
+        // Reset form
+        setFormData({
+          email: '',
+          password: '',
+          name: '',
+          confirmPassword: ''
+        })
+        setRememberMe(false)
+        setErrors({})
+      }
+    } catch (error: any) {
+      setErrors({ 
+        form: error || 'Authentication failed. Please try again.' 
+      })
     }
-    
-    dispatch(login(mockUser))
-    dispatch(closeModal('login'))
-    
-    // Reset form
-    setFormData({
-      email: '',
-      password: '',
-      name: '',
-      confirmPassword: ''
-    })
-    setErrors({})
   }
 
   const handleClose = () => {
     dispatch(closeModal('login'))
+    
+    // Keep remembered email if "Remember me" was previously enabled
+    const shouldKeepEmail = localStorage.getItem('rememberedEmail')
     setFormData({
-      email: '',
+      email: shouldKeepEmail || '',
       password: '',
       name: '',
       confirmPassword: ''
     })
+    setRememberMe(!!shouldKeepEmail)
     setErrors({})
     setIsRegister(false)
   }
@@ -112,6 +150,14 @@ export const LoginModal: React.FC = () => {
         
         <form onSubmit={handleSubmit}>
           <CardContent className="space-y-4">
+            {errors.form && (
+              <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
+                <p className="text-sm text-red-600 flex items-center gap-2">
+                  <AlertCircle className="h-4 w-4" />
+                  {errors.form}
+                </p>
+              </div>
+            )}
             {isRegister && (
               <div>
                 <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
@@ -225,6 +271,8 @@ export const LoginModal: React.FC = () => {
                 <label className="flex items-center gap-2">
                   <input
                     type="checkbox"
+                    checked={rememberMe}
+                    onChange={(e) => setRememberMe(e.target.checked)}
                     className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                   />
                   <span className="text-sm text-gray-600">Remember me</span>

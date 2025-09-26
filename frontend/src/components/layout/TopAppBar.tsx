@@ -18,6 +18,7 @@ import {
   MessageSquare
 } from 'lucide-react'
 import { cn } from '../../lib/utils'
+import { Avatar } from '../ui/Avatar'
 
 interface TopAppBarProps {
   className?: string
@@ -29,6 +30,7 @@ export const TopAppBar: React.FC<TopAppBarProps> = ({ className }) => {
   const { searchState, currentView } = useAppSelector(state => state.ui)
   const { notifications } = useAppSelector(state => state.analysis)
   const [showNotifications, setShowNotifications] = useState(false)
+  const [showUserMenu, setShowUserMenu] = useState(false)
 
   const unreadNotifications = notifications.filter(n => !n.read).length
 
@@ -218,30 +220,53 @@ export const TopAppBar: React.FC<TopAppBarProps> = ({ className }) => {
           {/* User menu */}
           <div className="flex items-center ml-3 pl-3 border-l border-gray-200">
             {user ? (
-              <div className="relative group">
-                <button className="flex items-center gap-2 px-3 py-2 hover:bg-gray-100 rounded-md">
-                  <div className="h-7 w-7 rounded-full bg-blue-600 flex items-center justify-center">
-                    <User className="h-4 w-4 text-white" />
-                  </div>
+              <div className="relative">
+                <button 
+                  onClick={() => setShowUserMenu(!showUserMenu)}
+                  className="flex items-center gap-2 px-3 py-2 hover:bg-gray-100 rounded-md"
+                >
+                  <Avatar 
+                    email={user.email} 
+                    name={user.name} 
+                    size={28}
+                  />
                   <span className="hidden md:inline text-sm font-medium text-gray-700">
                     {user.name}
                   </span>
                 </button>
-                <div className="absolute right-0 mt-1 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all">
-                  <button className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                    Profile
-                  </button>
-                  <button className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                    Settings
-                  </button>
-                  <div className="border-t border-gray-200 my-1"></div>
-                  <button 
-                    onClick={() => dispatch(logout())}
-                    className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50"
-                  >
-                    Sign Out
-                  </button>
-                </div>
+                
+                {showUserMenu && (
+                  <div className="absolute right-0 mt-1 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50">
+                    <button 
+                      onClick={() => {
+                        setShowUserMenu(false)
+                        dispatch(openModal('profile'))
+                      }}
+                      className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    >
+                      Profile
+                    </button>
+                    <button 
+                      onClick={() => {
+                        setShowUserMenu(false)
+                        dispatch(openModal('settings'))
+                      }}
+                      className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    >
+                      Settings
+                    </button>
+                    <div className="border-t border-gray-200 my-1"></div>
+                    <button 
+                      onClick={() => {
+                        setShowUserMenu(false)
+                        dispatch(logout())
+                      }}
+                      className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50"
+                    >
+                      Sign Out
+                    </button>
+                  </div>
+                )}
               </div>
             ) : (
               <button 

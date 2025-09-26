@@ -46,7 +46,9 @@
       "Bash(aws sts get-caller-identity)",
       "Bash(./deploy/deploy-frontend.sh:*)",
       "Bash(aws cloudformation:*)",
-      "WebFetch(domain:curriculum.tanfra.com)"
+      "WebFetch(domain:curriculum.tanfra.com)",
+      "mcp__semantic-analysis__determine_insights",
+      "mcp__serena__insert_after_symbol"
     ],
     "additionalDirectories": []
   },

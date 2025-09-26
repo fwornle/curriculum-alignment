@@ -18,8 +18,16 @@ export function useWebSocket() {
   const authState = useAppSelector(state => state.auth)
   const isInitialized = useRef(false)
 
-  // Auto-connect when user is authenticated
+  // Skip WebSocket in development mode - no backend WebSocket server running
+  const isDevelopment = import.meta.env.DEV || window.location.hostname === 'localhost'
+
+  // Auto-connect when user is authenticated (skip in development)
   useEffect(() => {
+    if (isDevelopment) {
+      console.info('WebSocket disabled in development mode')
+      return
+    }
+    
     if (authState.isAuthenticated && authState.tokens?.accessToken && !isInitialized.current) {
       isInitialized.current = true
       dispatch(connectWebSocket(authState.tokens.accessToken))
@@ -27,10 +35,12 @@ export function useWebSocket() {
       dispatch(disconnectWebSocket())
       isInitialized.current = false
     }
-  }, [authState.isAuthenticated, authState.tokens?.accessToken, dispatch, websocketState.isConnected])
+  }, [authState.isAuthenticated, authState.tokens?.accessToken, dispatch, websocketState.isConnected, isDevelopment])
 
-  // Set up message listeners
+  // Set up message listeners (skip in development)
   useEffect(() => {
+    if (isDevelopment) return
+
     const globalListener: WebSocketListener = (message) => {
       dispatch(messageReceived(message))
     }
@@ -56,22 +66,32 @@ export function useWebSocket() {
       unsubscribeGlobal()
       clearInterval(statusInterval)
     }
-  }, [dispatch, websocketState.isConnected, websocketState.reconnectAttempts])
+  }, [dispatch, websocketState.isConnected, websocketState.reconnectAttempts, isDevelopment])
 
   // Cleanup on unmount
   useEffect(() => {
     return () => {
-      dispatch(disconnectWebSocket())
+      if (!isDevelopment) {
+        dispatch(disconnectWebSocket())
+      }
     }
-  }, [dispatch])
+  }, [dispatch, isDevelopment])
 
   const sendMessage = useCallback((type: WebSocketEventType, payload: any) => {
+    if (isDevelopment) {
+      console.info('WebSocket message ignored in development:', type, payload)
+      return
+    }
     dispatch(sendWebSocketMessage({ type, payload }))
-  }, [dispatch])
+  }, [dispatch, isDevelopment])
 
   const subscribe = useCallback((eventType: WebSocketEventType, listener: WebSocketListener) => {
+    if (isDevelopment) {
+      console.info('WebSocket subscription ignored in development:', eventType)
+      return () => {} // Return empty unsubscribe function
+    }
     return websocketService.subscribe(eventType, listener)
-  }, [])
+  }, [isDevelopment])
 
   const markAsRead = useCallback((notificationId: string) => {
     dispatch(markNotificationRead(notificationId))
@@ -83,10 +103,10 @@ export function useWebSocket() {
 
   return {
     // Connection state
-    isConnected: websocketState.isConnected,
-    reconnectAttempts: websocketState.reconnectAttempts,
-    error: websocketState.error,
-    connectionUrl: websocketState.connectionUrl,
+    isConnected: isDevelopment ? false : websocketState.isConnected,
+    reconnectAttempts: isDevelopment ? 0 : websocketState.reconnectAttempts,
+    error: isDevelopment ? null : websocketState.error,
+    connectionUrl: isDevelopment ? null : websocketState.connectionUrl,
 
     // Real-time data
     notifications: websocketState.notifications,
@@ -103,8 +123,8 @@ export function useWebSocket() {
     clearAllNotifications,
     
     // Manual connection controls (usually not needed due to auto-connect)
-    connect: (token?: string) => dispatch(connectWebSocket(token)),
-    disconnect: () => dispatch(disconnectWebSocket())
+    connect: (token?: string) => isDevelopment ? Promise.resolve() : dispatch(connectWebSocket(token)),
+    disconnect: () => isDevelopment ? Promise.resolve() : dispatch(disconnectWebSocket())
   }
 }
 
