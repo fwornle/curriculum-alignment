@@ -181,8 +181,11 @@ credentials.json
 
 # Build artifacts
 build/
-lib/
+/lib/
 dist/
+
+# Allow frontend source lib directory
+!frontend/src/lib/
 
 # Test outputs
 test-results/
