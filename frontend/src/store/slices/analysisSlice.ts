@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 import type { PayloadAction } from '@reduxjs/toolkit'
-import { sampleAnalyses, sampleWorkflows } from '@/lib/sampleData'
+import { sampleAnalyses, sampleWorkflows } from '@/lib/sampleData.js'
 import { analysisService } from '../../services/api/analysisService'
 import type { CreateAnalysisRequest } from '../../services/api/types'
 
