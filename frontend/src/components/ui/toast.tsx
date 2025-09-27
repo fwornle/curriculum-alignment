@@ -9,7 +9,7 @@ import {
   Info, 
   AlertTriangle
 } from 'lucide-react'
-import { cn } from '../../lib/utils.js'
+import { cn } from '@/lib/utils'
 
 // Individual toast component
 interface ToastProps {
