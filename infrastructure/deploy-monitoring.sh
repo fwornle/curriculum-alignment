@@ -198,45 +198,56 @@ deploy_alarms() {
 create_custom_metrics() {
     log_info "Creating custom metric filters..."
     
-    # Analysis completion metric
-    aws logs put-metric-filter \
-        --log-group-name "/aws/lambda/curriculum-analysis-agent" \
-        --filter-name "AnalysisCompleted" \
-        --filter-pattern '[timestamp, requestId, level="INFO", message="analysis_completed"]' \
-        --metric-transformations \
-            metricName=AnalysisCompleted,metricNamespace=CurriculumAlignment/Business,metricValue=1 \
-        --region "$AWS_REGION" && \
-    log_success "Created metric filter: AnalysisCompleted"
+    # Helper function to create metric filter if log group exists
+    create_metric_filter_if_exists() {
+        local log_group_name="$1"
+        local filter_name="$2"
+        local filter_pattern="$3"
+        local metric_name="$4"
+        
+        # Check if log group exists
+        if aws logs describe-log-groups --log-group-name-prefix "$log_group_name" --region "$AWS_REGION" --query 'logGroups[0].logGroupName' --output text 2>/dev/null | grep -q "$log_group_name"; then
+            aws logs put-metric-filter \
+                --log-group-name "$log_group_name" \
+                --filter-name "$filter_name" \
+                --filter-pattern "$filter_pattern" \
+                --metric-transformations \
+                    metricName="$metric_name",metricNamespace=CurriculumAlignment/Business,metricValue=1 \
+                --region "$AWS_REGION" && \
+            log_success "Created metric filter: $filter_name for $log_group_name"
+        else
+            log_warning "Log group $log_group_name does not exist yet - skipping metric filter creation"
+            log_info "Log groups are created when Lambda functions first execute"
+        fi
+    }
     
-    # Program matches metric
-    aws logs put-metric-filter \
-        --log-group-name "/aws/lambda/program-matcher-agent" \
-        --filter-name "ProgramMatches" \
-        --filter-pattern '[timestamp, requestId, level="INFO", message="match_found"]' \
-        --metric-transformations \
-            metricName=ProgramMatches,metricNamespace=CurriculumAlignment/Business,metricValue=1 \
-        --region "$AWS_REGION" && \
-    log_success "Created metric filter: ProgramMatches"
+    # Analysis completion metric (Coordinator function)
+    create_metric_filter_if_exists \
+        "/aws/lambda/curriculum-alignment-dev-coordinator" \
+        "AnalysisCompleted" \
+        '[timestamp, requestId, level="INFO", message="analysis_completed"]' \
+        "AnalysisCompleted"
     
     # Document processing metric
-    aws logs put-metric-filter \
-        --log-group-name "/aws/lambda/content-processor-agent" \
-        --filter-name "DocumentsProcessed" \
-        --filter-pattern '[timestamp, requestId, level="INFO", message="document_processed"]' \
-        --metric-transformations \
-            metricName=DocumentsProcessed,metricNamespace=CurriculumAlignment/Business,metricValue=1 \
-        --region "$AWS_REGION" && \
-    log_success "Created metric filter: DocumentsProcessed"
+    create_metric_filter_if_exists \
+        "/aws/lambda/curriculum-alignment-dev-document-processing" \
+        "DocumentsProcessed" \
+        '[timestamp, requestId, level="INFO", message="document_processed"]' \
+        "DocumentsProcessed"
     
-    # Report generation metric
-    aws logs put-metric-filter \
-        --log-group-name "/aws/lambda/report-generator-agent" \
-        --filter-name "ReportsGenerated" \
-        --filter-pattern '[timestamp, requestId, level="INFO", message="report_generated"]' \
-        --metric-transformations \
-            metricName=ReportsGenerated,metricNamespace=CurriculumAlignment/Business,metricValue=1 \
-        --region "$AWS_REGION" && \
-    log_success "Created metric filter: ReportsGenerated"
+    # Semantic search metric
+    create_metric_filter_if_exists \
+        "/aws/lambda/curriculum-alignment-dev-semantic-search" \
+        "SearchQueries" \
+        '[timestamp, requestId, level="INFO", message="search_completed"]' \
+        "SearchQueries"
+    
+    # Chat interface metric
+    create_metric_filter_if_exists \
+        "/aws/lambda/curriculum-alignment-dev-chat-interface" \
+        "ChatInteractions" \
+        '[timestamp, requestId, level="INFO", message="chat_response"]' \
+        "ChatInteractions"
 }
 
 # Verify deployment
