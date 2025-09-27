@@ -262,4 +262,4 @@ This project is proprietary software developed for Central European University (
 **Version**: 1.0.0  
 **Last Updated**: September 2025  
 **Maintainer**: CEU IT Services  
-**Contact**: curriculum-alignment@ceu.edu
+**Contact**: curriculum-alignment@ceu.edu# Build trigger Sat Sep 27 17:07:19 CEST 2025
