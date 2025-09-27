@@ -54,6 +54,7 @@ export interface CognitoUser {
   lastName: string
   emailVerified: boolean
   phoneVerified?: boolean
+  picture?: string
   attributes: Record<string, any>
 }
 
@@ -84,6 +85,9 @@ class CognitoService {
       return
     }
 
+    // Get optional domain configuration for federated providers
+    const domain = import.meta.env.VITE_COGNITO_DOMAIN
+
     Amplify.configure({
       Auth: {
         Cognito: {
@@ -93,7 +97,20 @@ class CognitoService {
           loginWith: {
             email: true,
             username: false,
-            phone: false
+            phone: false,
+            oauth: domain ? {
+              domain: domain,
+              scopes: ['email', 'openid', 'profile'],
+              redirectSignIn: [
+                'http://localhost:3000/auth/callback',
+                window.location.origin + '/auth/callback'
+              ],
+              redirectSignOut: [
+                'http://localhost:3000/auth/logout',
+                window.location.origin + '/auth/logout'
+              ],
+              responseType: 'code'
+            } : undefined
           }
         }
       }
@@ -204,6 +221,60 @@ class CognitoService {
       }
     } catch (error: any) {
       throw new Error(error.message || 'Sign up failed')
+    }
+  }
+
+  async signInWithProvider(provider: 'Google' | 'GitHub' | 'Facebook'): Promise<void> {
+    this.ensureConfigured()
+
+    try {
+      const { signInWithRedirect } = await import('@aws-amplify/auth')
+      await signInWithRedirect({
+        provider: provider as any
+      })
+    } catch (error: any) {
+      throw new Error(`Failed to sign in with ${provider}: ${error.message}`)
+    }
+  }
+
+  async handleAuthCallback(): Promise<{
+    user: CognitoUser
+    tokens: AuthTokens
+  } | null> {
+    this.ensureConfigured()
+
+    try {
+      const { getCurrentUser, fetchAuthSession, fetchUserAttributes } = await import('@aws-amplify/auth')
+      
+      // Wait a moment for the redirect to complete
+      await new Promise(resolve => setTimeout(resolve, 100))
+      
+      const [currentUser, session, userAttributes] = await Promise.all([
+        getCurrentUser(),
+        fetchAuthSession(),
+        fetchUserAttributes()
+      ])
+
+      if (!currentUser || !session.tokens) {
+        return null
+      }
+
+      console.log('OAuth callback - Raw user object:', currentUser)
+      console.log('OAuth callback - User attributes:', userAttributes)
+
+      // Create user object with fetched attributes
+      const userWithAttributes = {
+        ...currentUser,
+        attributes: userAttributes
+      }
+
+      const user = this.mapUserAttributes(userWithAttributes)
+      const tokens = this.extractTokens(session)
+
+      return { user, tokens }
+    } catch (error: any) {
+      console.error('OAuth callback error:', error)
+      return null
     }
   }
 
@@ -337,6 +408,7 @@ class CognitoService {
       lastName: getAttributeValue('family_name') || '',
       emailVerified: getAttributeValue('email_verified') === 'true',
       phoneVerified: getAttributeValue('phone_number_verified') === 'true',
+      picture: getAttributeValue('picture') || '',
       attributes: userAttributes || {}
     }
     

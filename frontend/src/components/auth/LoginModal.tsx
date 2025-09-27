@@ -4,8 +4,9 @@ import { closeModal } from '../../store/slices/uiSlice'
 import { loginUser, signUpUser, confirmSignUp, resendConfirmationCode, setPendingVerification, clearPendingVerification } from '../../store/slices/authSlice'
 import { Button } from '../ui/button'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../ui/card'
-import { User, Mail, Lock, AlertCircle, LogIn, UserPlus } from 'lucide-react'
+import { User, Mail, Lock, AlertCircle, LogIn, UserPlus, Github } from 'lucide-react'
 import { cn } from '../../lib/utils'
+import { cognitoService } from '../../services/auth/cognitoService'
 
 export const LoginModal: React.FC = () => {
   const dispatch = useAppDispatch()
@@ -267,6 +268,47 @@ export const LoginModal: React.FC = () => {
     setErrors({})
     setIsRegister(true)
   }
+
+  const handleFederatedLogin = async (provider: 'Google' | 'GitHub' | 'Facebook') => {
+    try {
+      setErrors({})
+      await cognitoService.signInWithProvider(provider)
+      // The redirect will happen automatically
+    } catch (error: any) {
+      setErrors({
+        form: `Failed to sign in with ${provider}: ${error.message}`
+      })
+    }
+  }
+
+  // Check for OAuth callback on component mount
+  useEffect(() => {
+    const handleOAuthCallback = async () => {
+      // Check if we're returning from OAuth redirect
+      const urlParams = new URLSearchParams(window.location.search)
+      if (urlParams.get('code') || window.location.hash.includes('access_token')) {
+        try {
+          const result = await cognitoService.handleAuthCallback()
+          if (result) {
+            // Successfully authenticated via OAuth
+            dispatch(closeModal('login'))
+            handleClose()
+            // Clear URL parameters
+            window.history.replaceState({}, document.title, window.location.pathname)
+          }
+        } catch (error: any) {
+          console.error('OAuth callback error:', error)
+          setErrors({
+            form: 'Authentication failed. Please try again.'
+          })
+        }
+      }
+    }
+
+    if (isOpen) {
+      handleOAuthCallback()
+    }
+  }, [isOpen, dispatch])
 
   if (!isOpen) return null
 
@@ -557,6 +599,58 @@ export const LoginModal: React.FC = () => {
             >
               {isLoading ? (isRegister ? 'Creating Account...' : 'Signing In...') : (isRegister ? 'Create Account' : 'Sign In')}
             </Button>
+            
+            <div className="relative w-full">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t border-gray-300" />
+              </div>
+              <div className="relative flex justify-center text-xs">
+                <span className="bg-white px-2 text-gray-500">OR</span>
+              </div>
+            </div>
+            
+            {/* Federated Login Buttons */}
+            <div className="space-y-2">
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full flex items-center justify-center gap-2 border-red-200 hover:border-red-300 hover:bg-red-50"
+                onClick={() => handleFederatedLogin('Google')}
+                disabled={isLoading}
+              >
+                <svg className="w-4 h-4" viewBox="0 0 24 24">
+                  <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                  <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                  <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                  <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                </svg>
+                Continue with Google
+              </Button>
+              
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full flex items-center justify-center gap-2 border-gray-300 hover:border-gray-400 hover:bg-gray-50"
+                onClick={() => handleFederatedLogin('GitHub')}
+                disabled={isLoading}
+              >
+                <Github className="w-4 h-4" />
+                Continue with GitHub
+              </Button>
+              
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full flex items-center justify-center gap-2 border-blue-200 hover:border-blue-300 hover:bg-blue-50"
+                onClick={() => handleFederatedLogin('Facebook')}
+                disabled={isLoading}
+              >
+                <svg className="w-4 h-4" viewBox="0 0 24 24">
+                  <path fill="#1877F2" d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                </svg>
+                Continue with Facebook
+              </Button>
+            </div>
             
             <div className="relative w-full">
               <div className="absolute inset-0 flex items-center">

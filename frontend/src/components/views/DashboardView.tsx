@@ -29,9 +29,9 @@ export const DashboardView: React.FC = () => {
     const isLocalhost = typeof window !== 'undefined' && window.location.hostname === 'localhost'
     
     if (isDev || isLocalhost) {
-      return 'Version 1.0.0-dev'
+      return 'Version 1.1.0-dev'
     } else {
-      return 'Version 1.0.0-prod'
+      return 'Version 1.1.0-prod'
     }
   }
 
