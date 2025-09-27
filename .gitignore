@@ -166,6 +166,7 @@ Dockerfile.local
 # Logs
 logs/
 *.log
+transcript-monitor.log
 
 # Database
 database.db
