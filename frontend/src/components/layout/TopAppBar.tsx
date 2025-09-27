@@ -228,6 +228,7 @@ export const TopAppBar: React.FC<TopAppBarProps> = ({ className }) => {
                   <Avatar 
                     email={user.email} 
                     name={user.name} 
+                    picture={user.picture}
                     size={28}
                   />
                   <span className="hidden md:inline text-sm font-medium text-gray-700">

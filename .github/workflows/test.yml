@@ -19,6 +19,13 @@ on:
           - e2e
           - security
           - load
+  workflow_call:
+    inputs:
+      test_suite:
+        description: 'Test suite to run'
+        required: false
+        default: 'all'
+        type: string
 
 env:
   NODE_VERSION: '18'

@@ -5,6 +5,7 @@ import { cn } from '../../lib/utils'
 interface AvatarProps {
   email: string
   name: string
+  picture?: string  // Direct picture URL (from federated providers or uploads)
   size?: number
   className?: string
 }
@@ -12,6 +13,7 @@ interface AvatarProps {
 export const Avatar: React.FC<AvatarProps> = ({ 
   email, 
   name, 
+  picture,
   size = 40, 
   className 
 }) => {
@@ -23,6 +25,9 @@ export const Avatar: React.FC<AvatarProps> = ({
     setImageError(true)
   }
 
+  // Priority: direct picture URL > Gravatar > initials
+  const imageUrl = picture || gravatarUrl
+
   return (
     <div 
       className={cn(
@@ -31,9 +36,9 @@ export const Avatar: React.FC<AvatarProps> = ({
       )}
       style={{ width: size, height: size }}
     >
-      {!imageError ? (
+      {!imageError && imageUrl ? (
         <img
-          src={gravatarUrl}
+          src={imageUrl}
           alt={`${name}'s avatar`}
           className="w-full h-full object-cover"
           onError={handleImageError}

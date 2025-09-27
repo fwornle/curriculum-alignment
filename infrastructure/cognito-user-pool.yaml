@@ -57,9 +57,49 @@ Parameters:
     MaxValue: 3650
     Description: Token validity period in days
 
+  # Federated Identity Provider Parameters
+  GoogleClientId:
+    Type: String
+    Description: Google OAuth Client ID
+    Default: ''
+    NoEcho: false
+  
+  GoogleClientSecret:
+    Type: String
+    Description: Google OAuth Client Secret
+    Default: ''
+    NoEcho: true
+  
+  GitHubClientId:
+    Type: String
+    Description: GitHub OAuth App Client ID
+    Default: ''
+    NoEcho: false
+  
+  GitHubClientSecret:
+    Type: String
+    Description: GitHub OAuth App Client Secret
+    Default: ''
+    NoEcho: true
+  
+  FacebookClientId:
+    Type: String
+    Description: Facebook App ID
+    Default: ''
+    NoEcho: false
+  
+  FacebookClientSecret:
+    Type: String
+    Description: Facebook App Secret
+    Default: ''
+    NoEcho: true
+
 Conditions:
   IsProd: !Equals [!Ref Environment, 'prod']
   EnableMFACondition: !Equals [!Ref EnableMFA, 'true']
+  HasGoogleProvider: !Not [!Equals [!Ref GoogleClientId, '']]
+  HasGitHubProvider: !Not [!Equals [!Ref GitHubClientId, '']]
+  HasFacebookProvider: !Not [!Equals [!Ref FacebookClientId, '']]
 
 Resources:
   # Cognito User Pool
@@ -103,6 +143,11 @@ Resources:
         - Name: family_name
           AttributeDataType: String
           Required: true
+          Mutable: true
+        
+        - Name: picture
+          AttributeDataType: String
+          Required: false
           Mutable: true
         
         # Custom attributes for CEU
@@ -222,12 +267,86 @@ Resources:
       Domain: !Sub '${AWS::StackName}-${Environment}-auth'
       UserPoolId: !Ref CurriculumAlignmentUserPool
 
+  # Google Identity Provider
+  GoogleIdentityProvider:
+    Type: AWS::Cognito::UserPoolIdentityProvider
+    Condition: HasGoogleProvider
+    Properties:
+      UserPoolId: !Ref CurriculumAlignmentUserPool
+      ProviderName: Google
+      ProviderType: Google
+      ProviderDetails:
+        client_id: !Ref GoogleClientId
+        client_secret: !Ref GoogleClientSecret
+        authorize_scopes: 'email openid profile'
+      AttributeMapping:
+        email: email
+        given_name: given_name
+        family_name: family_name
+        picture: picture
+        email_verified: email_verified
+
+  # GitHub Identity Provider
+  GitHubIdentityProvider:
+    Type: AWS::Cognito::UserPoolIdentityProvider
+    Condition: HasGitHubProvider
+    Properties:
+      UserPoolId: !Ref CurriculumAlignmentUserPool
+      ProviderName: GitHub
+      ProviderType: OIDC
+      ProviderDetails:
+        client_id: !Ref GitHubClientId
+        client_secret: !Ref GitHubClientSecret
+        attributes_request_method: GET
+        oidc_issuer: 'https://github.com'
+        authorize_scopes: 'user:email'
+        authorize_url: 'https://github.com/login/oauth/authorize'
+        token_url: 'https://github.com/login/oauth/access_token'
+        attributes_url: 'https://api.github.com/user'
+        jwks_uri: 'https://token.actions.githubusercontent.com/.well-known/jwks'
+      AttributeMapping:
+        email: email
+        given_name: name
+        family_name: name
+        picture: avatar_url
+        username: login
+
+  # Facebook Identity Provider
+  FacebookIdentityProvider:
+    Type: AWS::Cognito::UserPoolIdentityProvider
+    Condition: HasFacebookProvider
+    Properties:
+      UserPoolId: !Ref CurriculumAlignmentUserPool
+      ProviderName: Facebook
+      ProviderType: Facebook
+      ProviderDetails:
+        client_id: !Ref FacebookClientId
+        client_secret: !Ref FacebookClientSecret
+        authorize_scopes: 'email public_profile'
+        api_version: 'v17.0'
+      AttributeMapping:
+        email: email
+        given_name: first_name
+        family_name: last_name
+        picture: picture
+
   # Web Application Client
   CurriculumAlignmentWebClient:
     Type: AWS::Cognito::UserPoolClient
+    DependsOn:
+      - GoogleIdentityProvider
+      - GitHubIdentityProvider
+      - FacebookIdentityProvider
     Properties:
       ClientName: !Sub '${AWS::StackName}-web-client'
       UserPoolId: !Ref CurriculumAlignmentUserPool
+      
+      # Supported Identity Providers
+      SupportedIdentityProviders:
+        - COGNITO
+        - !If [HasGoogleProvider, Google, !Ref 'AWS::NoValue']
+        - !If [HasGitHubProvider, GitHub, !Ref 'AWS::NoValue']
+        - !If [HasFacebookProvider, Facebook, !Ref 'AWS::NoValue']
       
       # OAuth Configuration
       AllowedOAuthFlows:
@@ -281,6 +400,7 @@ Resources:
         - email_verified
         - given_name
         - family_name
+        - picture
         - custom:department
         - custom:role
         - custom:university_id
@@ -290,6 +410,7 @@ Resources:
         - email
         - given_name
         - family_name
+        - picture
         - custom:department
         - custom:role
         - custom:university_id
@@ -325,6 +446,9 @@ Resources:
           ProviderName: !GetAtt CurriculumAlignmentUserPool.ProviderName
         - ClientId: !Ref CurriculumAlignmentMobileClient
           ProviderName: !GetAtt CurriculumAlignmentUserPool.ProviderName
+      SupportedLoginProviders:
+        accounts.google.com: !If [HasGoogleProvider, !Ref GoogleClientId, !Ref 'AWS::NoValue']
+        graph.facebook.com: !If [HasFacebookProvider, !Ref FacebookClientId, !Ref 'AWS::NoValue']
 
   # IAM Roles for Cognito Identity Pool
   CognitoAuthenticatedRole:

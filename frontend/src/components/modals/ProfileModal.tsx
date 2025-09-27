@@ -82,12 +82,21 @@ export const ProfileModal: React.FC = () => {
             <Avatar 
               email={user.email} 
               name={user.name} 
+              picture={user.picture}
               size={64}
               className="shadow-lg"
             />
-            <div>
+            <div className="flex-1">
               <h3 className="font-medium text-gray-900">{user.name}</h3>
               <p className="text-sm text-gray-500 capitalize">{user.role}</p>
+              {!user.picture && (
+                <button
+                  className="mt-1 text-xs text-blue-600 hover:text-blue-700"
+                  onClick={() => {/* TODO: Implement profile picture upload */}}
+                >
+                  Upload profile picture
+                </button>
+              )}
             </div>
           </div>
 
