@@ -28,7 +28,7 @@ on:
         type: string
 
 env:
-  NODE_VERSION: '18'
+  NODE_VERSION: '20'
   PYTHON_VERSION: '3.11'
   AWS_REGION: 'us-east-1'
 
