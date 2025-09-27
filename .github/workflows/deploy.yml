@@ -242,14 +242,23 @@ jobs:
       - name: Get deployment outputs
         id: outputs
         run: |
+          # Map environment to actual stack name
+          if [[ "${{ needs.determine-environment.outputs.environment }}" == "staging" ]]; then
+            STACK_NAME="curriculum-alignment-dev"
+          else
+            STACK_NAME="curriculum-alignment-${{ needs.determine-environment.outputs.environment }}"
+          fi
+          
+          echo "Using stack name: $STACK_NAME"
+          
           # Get CloudFormation outputs
           API_URL=$(aws cloudformation describe-stacks \
-            --stack-name curriculum-alignment-${{ needs.determine-environment.outputs.environment }} \
+            --stack-name "$STACK_NAME" \
             --query 'Stacks[0].Outputs[?OutputKey==`CurriculumAlignmentApiUrl`].OutputValue' \
             --output text)
           
           FRONTEND_BUCKET=$(aws cloudformation describe-stacks \
-            --stack-name curriculum-alignment-${{ needs.determine-environment.outputs.environment }} \
+            --stack-name "$STACK_NAME" \
             --query 'Stacks[0].Outputs[?OutputKey==`StaticWebsiteBucketName`].OutputValue' \
             --output text)
             
