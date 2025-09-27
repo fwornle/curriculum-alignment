@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 import type { PayloadAction } from '@reduxjs/toolkit'
-import { samplePrograms, sampleUploadedDocuments } from '@/lib/sampleData.js'
+import { samplePrograms, sampleUploadedDocuments } from '@/lib/sampleData.ts'
 import { programService } from '../../services/api/programService'
 import type { CreateProgramRequest, UpdateProgramRequest, Course as APICourse, Program as APIProgram } from '../../services/api/types'
 
