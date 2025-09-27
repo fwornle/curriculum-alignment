@@ -245,12 +245,12 @@ jobs:
           # Get CloudFormation outputs
           API_URL=$(aws cloudformation describe-stacks \
             --stack-name curriculum-alignment-${{ needs.determine-environment.outputs.environment }} \
-            --query 'Stacks[0].Outputs[?OutputKey==`ApiUrl`].OutputValue' \
+            --query 'Stacks[0].Outputs[?OutputKey==`CurriculumAlignmentApiUrl`].OutputValue' \
             --output text)
           
           FRONTEND_BUCKET=$(aws cloudformation describe-stacks \
             --stack-name curriculum-alignment-${{ needs.determine-environment.outputs.environment }} \
-            --query 'Stacks[0].Outputs[?OutputKey==`FrontendBucket`].OutputValue' \
+            --query 'Stacks[0].Outputs[?OutputKey==`StaticWebsiteBucketName`].OutputValue' \
             --output text)
             
           echo "api_url=$API_URL" >> $GITHUB_OUTPUT
