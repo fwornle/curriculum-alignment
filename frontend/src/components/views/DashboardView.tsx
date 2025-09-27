@@ -14,7 +14,7 @@ import {
   Shield,
   Sparkles
 } from 'lucide-react'
-import { cn } from "../../lib/utils.js"
+import { cn } from "@/lib/utils"
 
 export const DashboardView: React.FC = () => {
   const dispatch = useAppDispatch()
