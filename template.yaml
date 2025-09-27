@@ -4,18 +4,6 @@ Description: >
   Multi-Agent Curriculum Alignment System (MACAS)
   Serverless infrastructure for CEU curriculum analysis and alignment
 
-Metadata:
-  AWS::ServerlessRepo::Application:
-    Name: curriculum-alignment-system
-    Description: Multi-agent system for curriculum analysis and alignment
-    Author: CEU IT Services
-    SpdxLicenseId: MIT
-    LicenseUrl: LICENSE
-    ReadmeUrl: README.md
-    Labels: ['education', 'curriculum', 'ai', 'multi-agent']
-    HomePageUrl: https://github.com/fwornle/curriculum-alignment
-    SemanticVersion: 1.0.0
-    SourceCodeUrl: https://github.com/fwornle/curriculum-alignment
 
 # Global configuration for all functions
 Globals:
