@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useAppDispatch, useAppSelector } from '../../store'
 import { closeModal } from '../../store/slices/uiSlice'
-import { loginUser, signUpUser } from '../../store/slices/authSlice'
+import { loginUser, signUpUser, confirmSignUp, resendConfirmationCode, setPendingVerification, clearPendingVerification } from '../../store/slices/authSlice'
 import { Button } from '../ui/button'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../ui/card'
 import { User, Mail, Lock, AlertCircle, LogIn, UserPlus } from 'lucide-react'
@@ -10,11 +10,14 @@ import { cn } from '../../lib/utils'
 export const LoginModal: React.FC = () => {
   const dispatch = useAppDispatch()
   const { modals } = useAppSelector(state => state.ui)
+  const { pendingVerification, isLoading, error } = useAppSelector(state => state.auth)
   const [isRegister, setIsRegister] = useState(false)
+  const [verificationCode, setVerificationCode] = useState('')
   const [formData, setFormData] = useState({
     email: '',
     password: '',
-    name: '',
+    firstName: '',
+    lastName: '',
     confirmPassword: ''
   })
   const [rememberMe, setRememberMe] = useState(false)
@@ -30,6 +33,14 @@ export const LoginModal: React.FC = () => {
       setRememberMe(true)
     }
   }, [])
+
+  // Reset states when modal opens/closes
+  useEffect(() => {
+    if (isOpen) {
+      setErrors({})
+      setVerificationCode('')
+    }
+  }, [isOpen])
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {}
@@ -47,8 +58,12 @@ export const LoginModal: React.FC = () => {
     }
     
     if (isRegister) {
-      if (!formData.name) {
-        newErrors.name = 'Name is required'
+      if (!formData.firstName.trim()) {
+        newErrors.firstName = 'First name is required'
+      }
+      
+      if (!formData.lastName.trim()) {
+        newErrors.lastName = 'Last name is required'
       }
       
       if (formData.password !== formData.confirmPassword) {
@@ -60,6 +75,19 @@ export const LoginModal: React.FC = () => {
     return Object.keys(newErrors).length === 0
   }
 
+  const validateVerificationCode = () => {
+    if (!verificationCode || verificationCode.length !== 6) {
+      setErrors({ code: 'Please enter the 6-digit verification code' })
+      return false
+    }
+    if (!/^\d{6}$/.test(verificationCode)) {
+      setErrors({ code: 'Verification code must be 6 digits' })
+      return false
+    }
+    setErrors({})
+    return true
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
@@ -67,18 +95,26 @@ export const LoginModal: React.FC = () => {
       return
     }
     
+    // Always save email if "Remember me" is checked, even before attempting login
+    if (rememberMe) {
+      localStorage.setItem('rememberedEmail', formData.email)
+    } else {
+      localStorage.removeItem('rememberedEmail')
+    }
+    
     try {
       if (isRegister) {
-        // Sign up with Cognito
+        // Sign up with Cognito using separate first/last names
         await dispatch(signUpUser({
           username: formData.email,
           email: formData.email,
           password: formData.password,
-          given_name: formData.name?.split(' ')[0] || '',
-          family_name: formData.name?.split(' ').slice(1).join(' ') || ''
+          firstName: formData.firstName.trim(),
+          lastName: formData.lastName.trim()
         })).unwrap()
         
-        // Don't close modal yet - user needs to verify email
+        // Don't close modal - user needs to verify email
+        // pendingVerification will be set in Redux, UI will switch to verification step
         setErrors({})
       } else {
         // Sign in with Cognito
@@ -87,28 +123,122 @@ export const LoginModal: React.FC = () => {
           password: formData.password
         })).unwrap()
         
-        // Handle "Remember me" functionality
-        if (rememberMe) {
-          localStorage.setItem('rememberedEmail', formData.email)
-        } else {
-          localStorage.removeItem('rememberedEmail')
-        }
-        
         dispatch(closeModal('login'))
-        
-        // Reset form
-        setFormData({
-          email: '',
-          password: '',
-          name: '',
-          confirmPassword: ''
-        })
-        setRememberMe(false)
-        setErrors({})
+        handleClose()
       }
     } catch (error: any) {
+      console.error('Login error:', error)
+      
+      // Check for unverified user and automatically switch to verification mode
+      if (error.includes('not been verified') || 
+          error.includes('UserNotConfirmedException') || 
+          error.includes('CONFIRM_SIGN_UP') ||
+          error.includes('Additional steps required')) {
+        
+        // Set up pending verification state to show verification UI
+        dispatch(setPendingVerification({
+          username: formData.email,
+          email: formData.email
+        }))
+        
+        // Trigger resend of verification code
+        try {
+          await dispatch(resendConfirmationCode(formData.email)).unwrap()
+          setErrors({ 
+            form: 'Your email is not verified. We\'ve sent a new 6-digit verification code to your email. Please check your inbox and enter it below.' 
+          })
+        } catch (resendError: any) {
+          setErrors({ 
+            form: 'Your email is not verified. Please check your inbox for a verification code or sign up again.' 
+          })
+        }
+      } else if (error.includes('Invalid email or password') || 
+                 error.includes('NotAuthorizedException')) {
+        setErrors({ 
+          form: 'Invalid email or password. Please check your credentials and try again.' 
+        })
+      } else if (error.includes('No account found') || 
+                 error.includes('UserNotFoundException')) {
+        setErrors({ 
+          form: 'No account found with this email address. Please sign up first.' 
+        })
+      } else {
+        // Use the actual error message from the service
+        setErrors({ 
+          form: error || 'Authentication failed. Please try again.' 
+        })
+      }
+    }
+  }
+
+  const handleVerificationSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    
+    if (!validateVerificationCode() || !pendingVerification) {
+      return
+    }
+    
+    try {
+      // First, confirm the signup
+      await dispatch(confirmSignUp({
+        username: pendingVerification.username,
+        confirmationCode: verificationCode
+      })).unwrap()
+      
+      // Success! Now automatically sign in the user
+      setErrors({})
+      setVerificationCode('')
+      
+      // Auto-login with stored credentials
+      if (formData.password) {
+        try {
+          await dispatch(loginUser({
+            username: pendingVerification.username,
+            password: formData.password
+          })).unwrap()
+          
+          // Save email if remember me was checked
+          if (rememberMe) {
+            localStorage.setItem('rememberedEmail', pendingVerification.email)
+          }
+          
+          dispatch(closeModal('login'))
+          handleClose()
+        } catch (loginError: any) {
+          // If auto-login fails, show message to manually sign in
+          setErrors({ 
+            form: 'Email verified! Please sign in with your credentials.' 
+          })
+          // Clear verification state to go back to login form
+          dispatch(clearPendingVerification())
+          setIsRegister(false)
+        }
+      } else {
+        // No password stored, user needs to manually sign in
+        setErrors({ 
+          form: 'Email verified successfully! Please sign in with your credentials.' 
+        })
+        dispatch(clearPendingVerification())
+        setIsRegister(false)
+      }
+      
+    } catch (error: any) {
       setErrors({ 
-        form: error || 'Authentication failed. Please try again.' 
+        code: error || 'Verification failed. Please try again.' 
+      })
+    }
+  }
+
+  const handleResendCode = async () => {
+    if (!pendingVerification) return
+    
+    try {
+      await dispatch(resendConfirmationCode(pendingVerification.username)).unwrap()
+      setErrors({})
+      alert('Verification code sent to your email!')
+    } catch (error: any) {
+      setErrors({ 
+        form: error || 'Failed to resend verification code.' 
       })
     }
   }
@@ -121,16 +251,119 @@ export const LoginModal: React.FC = () => {
     setFormData({
       email: shouldKeepEmail || '',
       password: '',
-      name: '',
+      firstName: '',
+      lastName: '',
       confirmPassword: ''
     })
     setRememberMe(!!shouldKeepEmail)
     setErrors({})
+    setVerificationCode('')
     setIsRegister(false)
+  }
+
+  const handleBackToSignup = () => {
+    dispatch(clearPendingVerification())
+    setVerificationCode('')
+    setErrors({})
+    setIsRegister(true)
   }
 
   if (!isOpen) return null
 
+  // Show verification step if pendingVerification exists
+  if (pendingVerification) {
+    return (
+      <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
+        <Card className="w-full max-w-md">
+          <CardHeader>
+            <CardTitle className="text-2xl font-bold flex items-center gap-3">
+              <div className="p-2 bg-gradient-to-br from-blue-500 to-purple-500 rounded-xl text-white">
+                <Mail className="h-5 w-5" />
+              </div>
+              Verify Your Email
+            </CardTitle>
+            <CardDescription>
+              We sent a 6-digit verification code to {pendingVerification.email}
+            </CardDescription>
+          </CardHeader>
+          
+          <form onSubmit={handleVerificationSubmit}>
+            <CardContent className="space-y-4">
+              {(errors.form || errors.code) && (
+                <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
+                  <p className="text-sm text-red-600 flex items-center gap-2">
+                    <AlertCircle className="h-4 w-4" />
+                    {errors.form || errors.code}
+                  </p>
+                </div>
+              )}
+              
+              <div>
+                <label htmlFor="verificationCode" className="block text-sm font-medium text-gray-700 mb-1">
+                  Verification Code
+                </label>
+                <input
+                  id="verificationCode"
+                  type="text"
+                  value={verificationCode}
+                  onChange={(e) => setVerificationCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                  className={cn(
+                    "w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-center text-lg tracking-widest",
+                    errors.code ? "border-red-500" : "border-gray-300"
+                  )}
+                  placeholder="123456"
+                  maxLength={6}
+                  autoComplete="one-time-code"
+                />
+                <p className="mt-1 text-xs text-gray-500">
+                  Enter the 6-digit code from your email
+                </p>
+              </div>
+            </CardContent>
+            
+            <CardFooter className="flex flex-col gap-3">
+              <Button
+                type="submit"
+                disabled={isLoading || verificationCode.length !== 6}
+                className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700"
+              >
+                {isLoading ? 'Verifying...' : 'Verify Email'}
+              </Button>
+              
+              <div className="flex items-center justify-between w-full text-sm">
+                <button
+                  type="button"
+                  onClick={handleResendCode}
+                  disabled={isLoading}
+                  className="text-blue-600 hover:text-blue-700 disabled:opacity-50"
+                >
+                  Resend Code
+                </button>
+                <button
+                  type="button"
+                  onClick={handleBackToSignup}
+                  className="text-gray-600 hover:text-gray-700"
+                >
+                  Back to Sign Up
+                </button>
+              </div>
+              
+              <Button
+                type="button"
+                variant="ghost"
+                className="w-full"
+                onClick={handleClose}
+              >
+                Cancel
+              </Button>
+            </CardFooter>
+          </form>
+        </Card>
+      </div>
+    )
+  }
+
+  // Normal login/signup flow
   return (
     <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
       <Card className="w-full max-w-md">
@@ -158,31 +391,60 @@ export const LoginModal: React.FC = () => {
                 </p>
               </div>
             )}
+            
             {isRegister && (
-              <div>
-                <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
-                  Full Name
-                </label>
-                <div className="relative">
-                  <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                  <input
-                    id="name"
-                    type="text"
-                    value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    className={cn(
-                      "w-full pl-10 pr-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500",
-                      errors.name ? "border-red-500" : "border-gray-300"
-                    )}
-                    placeholder="John Doe"
-                  />
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-1">
+                    First Name
+                  </label>
+                  <div className="relative">
+                    <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                    <input
+                      id="firstName"
+                      type="text"
+                      value={formData.firstName}
+                      onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
+                      className={cn(
+                        "w-full pl-10 pr-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500",
+                        errors.firstName ? "border-red-500" : "border-gray-300"
+                      )}
+                      placeholder="John"
+                    />
+                  </div>
+                  {errors.firstName && (
+                    <p className="mt-1 text-sm text-red-500 flex items-center gap-1">
+                      <AlertCircle className="h-3 w-3" />
+                      {errors.firstName}
+                    </p>
+                  )}
                 </div>
-                {errors.name && (
-                  <p className="mt-1 text-sm text-red-500 flex items-center gap-1">
-                    <AlertCircle className="h-3 w-3" />
-                    {errors.name}
-                  </p>
-                )}
+                
+                <div>
+                  <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 mb-1">
+                    Last Name
+                  </label>
+                  <div className="relative">
+                    <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                    <input
+                      id="lastName"
+                      type="text"
+                      value={formData.lastName}
+                      onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
+                      className={cn(
+                        "w-full pl-10 pr-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500",
+                        errors.lastName ? "border-red-500" : "border-gray-300"
+                      )}
+                      placeholder="Doe"
+                    />
+                  </div>
+                  {errors.lastName && (
+                    <p className="mt-1 text-sm text-red-500 flex items-center gap-1">
+                      <AlertCircle className="h-3 w-3" />
+                      {errors.lastName}
+                    </p>
+                  )}
+                </div>
               </div>
             )}
             
@@ -290,9 +552,10 @@ export const LoginModal: React.FC = () => {
           <CardFooter className="flex flex-col gap-3">
             <Button
               type="submit"
+              disabled={isLoading}
               className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700"
             >
-              {isRegister ? 'Create Account' : 'Sign In'}
+              {isLoading ? (isRegister ? 'Creating Account...' : 'Signing In...') : (isRegister ? 'Create Account' : 'Sign In')}
             </Button>
             
             <div className="relative w-full">

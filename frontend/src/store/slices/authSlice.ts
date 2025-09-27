@@ -255,6 +255,9 @@ const authSlice = createSlice({
     clearPendingVerification: (state) => {
       state.pendingVerification = null
     },
+    setPendingVerification: (state, action: PayloadAction<{ username: string; email: string }>) => {
+      state.pendingVerification = action.payload
+    },
     // Simple login for demo purposes without Cognito
     login: (state, action: PayloadAction<Omit<User, 'preferences'> & { preferences?: Partial<User['preferences']> }>) => {
       state.user = {
@@ -468,6 +471,7 @@ export const {
   resetLoginAttempts,
   updateUserPreferences,
   clearPendingVerification,
+  setPendingVerification,
   login,
   logoutLocal
 } = authSlice.actions
