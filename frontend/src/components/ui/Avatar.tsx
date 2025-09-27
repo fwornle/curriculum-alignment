@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { getGravatarUrl, getInitials } from '../../lib/gravatar'
-import { cn } from "../../lib/utils.js"
+import { cn } from "@/lib/utils"
 
 interface AvatarProps {
   email: string

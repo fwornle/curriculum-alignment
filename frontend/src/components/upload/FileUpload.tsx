@@ -16,7 +16,7 @@ import {
   FileImage,
   FileSpreadsheet
 } from 'lucide-react'
-import { cn } from "../../lib/utils.js"
+import { cn } from "@/lib/utils"
 
 interface FileUploadProps {
   acceptedFormats?: string[]
