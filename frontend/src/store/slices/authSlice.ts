@@ -88,7 +88,26 @@ const initialState: AuthState = {
 function mapCognitoUserToUser(cognitoUser: CognitoUser): User {
   const firstName = cognitoUser.firstName || ''
   const lastName = cognitoUser.lastName || ''
-  const name = `${firstName} ${lastName}`.trim() || cognitoUser.username
+  
+  // Enhanced name fallback logic
+  let name = ''
+  if (firstName && lastName) {
+    name = `${firstName} ${lastName}`.trim()
+  } else if (firstName) {
+    name = firstName
+  } else if (lastName) {
+    name = lastName
+  } else if (cognitoUser.email) {
+    // Extract name from email (better than showing user ID)
+    name = cognitoUser.email.split('@')[0].replace(/[._-]/g, ' ')
+  } else {
+    name = cognitoUser.username || 'User'
+  }
+  
+  console.log('mapCognitoUserToUser:', {
+    input: cognitoUser,
+    output: { firstName, lastName, name }
+  })
   
   return {
     id: cognitoUser.userId,
@@ -97,6 +116,7 @@ function mapCognitoUserToUser(cognitoUser: CognitoUser): User {
     firstName: firstName,
     lastName: lastName,
     name: name,
+    picture: cognitoUser.picture,
     role: 'faculty', // Default role - this should be determined by user attributes or groups
     permissions: [], // This should be determined by user groups/roles
     preferences: {

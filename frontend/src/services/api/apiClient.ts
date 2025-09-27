@@ -37,7 +37,7 @@ class APIClient {
   constructor(config: Partial<APIClientConfig> = {}) {
     const defaultBaseURL = typeof window !== 'undefined' && window.location.hostname === 'localhost' 
       ? 'http://localhost:3000/api'
-      : 'https://ihqwce6c41.execute-api.eu-central-1.amazonaws.com/dev';
+      : 'https://ihqwce6c41.execute-api.eu-central-1.amazonaws.com/prod';
       
     this.config = {
       baseURL: (typeof window !== 'undefined' && (window as any).VITE_API_URL) || defaultBaseURL,
