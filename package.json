@@ -23,7 +23,7 @@
     "deploy:prod": "sam deploy --config-env prod",
     "install:all": "npm install && cd frontend && npm install",
     "clean": "rm -rf node_modules frontend/node_modules .aws-sam dist",
-    "prepare": "husky install",
+    "prepare": "[ \"$HUSKY\" = '0' ] || husky install",
     "db:setup": "ts-node scripts/setup-database.sh",
     "db:test": "ts-node scripts/test-database.ts",
     "db:health": "ts-node scripts/test-database.ts",
