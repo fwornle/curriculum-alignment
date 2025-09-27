@@ -48,7 +48,8 @@
       "Bash(aws cloudformation:*)",
       "WebFetch(domain:curriculum.tanfra.com)",
       "mcp__semantic-analysis__determine_insights",
-      "mcp__serena__insert_after_symbol"
+      "mcp__serena__insert_after_symbol",
+      "Bash(git push:*)"
     ],
     "additionalDirectories": []
   },
