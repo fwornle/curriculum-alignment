@@ -121,7 +121,42 @@ jobs:
 
       - name: Build frontend
         run: |
+          echo "=== DEBUGGING FILE STRUCTURE ==="
+          echo "Current directory: $(pwd)"
+          echo "Directory listing:"
+          ls -la
+          echo "=== Frontend directory structure ==="
           cd frontend
+          echo "Current directory: $(pwd)"
+          ls -la
+          echo "=== src directory structure ==="
+          ls -la src/
+          echo "=== lib directory check ==="
+          if [ -d "src/lib" ]; then
+            echo "src/lib exists:"
+            ls -la src/lib/
+          else
+            echo "ERROR: src/lib directory does not exist!"
+          fi
+          echo "=== components/modals directory ==="
+          if [ -d "src/components/modals" ]; then
+            echo "src/components/modals exists:"
+            ls -la src/components/modals/
+            echo "=== UploadDocumentModal.tsx import check ==="
+            if [ -f "src/components/modals/UploadDocumentModal.tsx" ]; then
+              echo "UploadDocumentModal.tsx imports:"
+              head -20 src/components/modals/UploadDocumentModal.tsx | grep "import.*lib"
+            fi
+          fi
+          echo "=== Path resolution test ==="
+          echo "From src/components/modals, ../../lib/utils should resolve to:"
+          (cd src/components/modals && echo "$(pwd)/../../lib/utils")
+          if [ -f "src/lib/utils.ts" ]; then
+            echo "utils.ts EXISTS"
+          else
+            echo "ERROR: utils.ts NOT FOUND"
+          fi
+          echo "=== Starting build ==="
           npm run build
           echo "Frontend build completed"
 
