@@ -5,7 +5,7 @@ import { loginUser, signUpUser, confirmSignUp, resendConfirmationCode, setPendin
 import { Button } from '../ui/button'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../ui/card'
 import { User, Mail, Lock, AlertCircle, LogIn, UserPlus, Github } from 'lucide-react'
-import { cn } from '../../lib/utils'
+import { cn } from "../../lib/utils.js"
 import { cognitoService } from '../../services/auth/cognitoService'
 
 export const LoginModal: React.FC = () => {

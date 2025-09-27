@@ -26,7 +26,7 @@ import {
   Calendar,
   Award
 } from 'lucide-react'
-import { cn } from '../../lib/utils'
+import { cn } from "../../lib/utils.js"
 
 export const ProgramsView: React.FC = () => {
   const dispatch = useAppDispatch()
