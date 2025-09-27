@@ -703,6 +703,12 @@ Outputs:
     Export:
       Name: !Sub "curriculum-alignment-${Environment}-api-url"
 
+  ApiUrl:
+    Description: "API Gateway endpoint URL (alias for CurriculumAlignmentApiUrl)"
+    Value: !Sub "https://${CurriculumAlignmentApi}.execute-api.${AWS::Region}.amazonaws.com/${Environment}/"
+    Export:
+      Name: !Sub "curriculum-alignment-${Environment}-api"
+
   WebSocketApiUrl:
     Description: "WebSocket API endpoint URL for real-time communication"
     Value: !Sub "wss://${WebSocketApi}.execute-api.${AWS::Region}.amazonaws.com/${Environment}"
@@ -734,6 +740,12 @@ Outputs:
     Value: !Ref StaticWebsiteBucket
     Export:
       Name: !Sub "curriculum-alignment-${Environment}-static-bucket"
+
+  FrontendBucket:
+    Description: "Frontend S3 bucket name (alias for StaticWebsiteBucketName)"
+    Value: !Ref StaticWebsiteBucket
+    Export:
+      Name: !Sub "curriculum-alignment-${Environment}-frontend-bucket"
 
   # Lambda Function ARNs
   CoordinatorFunctionArn:
