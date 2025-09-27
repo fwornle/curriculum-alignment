@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 import type { PayloadAction } from '@reduxjs/toolkit'
-import { sampleReports, sampleReportTemplates } from '../../lib/sampleData'
+// Temporarily remove circular import - will be replaced with API data
+// import { sampleReports, sampleReportTemplates } from '../../lib/sampleData'
 import { reportService } from '../../services/api/reportService'
 import type { CreateReportRequest } from '../../services/api/types'
 
@@ -87,8 +88,8 @@ export interface ReportState {
 }
 
 const initialState: ReportState = {
-  templates: sampleReportTemplates,
-  reports: sampleReports,
+  templates: [],
+  reports: [],
   currentReport: null,
   generationQueue: [],
   isGenerating: false,
