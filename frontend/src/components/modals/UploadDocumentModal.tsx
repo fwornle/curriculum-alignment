@@ -12,7 +12,7 @@ import {
   Loader2,
   File
 } from 'lucide-react'
-import { cn } from "@/lib/utils.js"
+import { cn } from "@/lib/utils.ts"
 
 export const UploadDocumentModal: React.FC = () => {
   const dispatch = useAppDispatch()

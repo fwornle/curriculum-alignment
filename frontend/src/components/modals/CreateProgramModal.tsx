@@ -12,7 +12,7 @@ import {
   Save,
   AlertTriangle
 } from 'lucide-react'
-import { cn } from "@/lib/utils.js"
+import { cn } from "@/lib/utils.ts"
 
 export const CreateProgramModal: React.FC = () => {
   const dispatch = useAppDispatch()

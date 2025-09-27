@@ -33,7 +33,7 @@ import {
   CheckCircle,
   XCircle
 } from 'lucide-react'
-import { cn } from "@/lib/utils.js"
+import { cn } from "@/lib/utils.ts"
 
 export const LLMConfigModal: React.FC = () => {
   const dispatch = useAppDispatch()
