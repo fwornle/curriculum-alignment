@@ -17,7 +17,7 @@ import {
   FileText,
   MessageSquare
 } from 'lucide-react'
-import { cn } from '../../lib/utils'
+import { cn } from "../../lib/utils.js"
 import { Avatar } from '../ui/Avatar'
 
 interface TopAppBarProps {
