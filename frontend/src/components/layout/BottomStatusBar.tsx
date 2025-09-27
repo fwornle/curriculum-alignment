@@ -12,7 +12,7 @@ import {
   WifiOff,
   DollarSign
 } from 'lucide-react'
-import { cn } from "@/lib/utils.ts"
+import { cn } from "../../lib/utils"
 
 interface BottomStatusBarProps {
   className?: string

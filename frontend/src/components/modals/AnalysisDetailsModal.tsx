@@ -17,7 +17,7 @@ import {
   ExternalLink,
   Download
 } from 'lucide-react'
-import { cn } from "@/lib/utils.ts"
+import { cn } from "../../lib/utils"
 
 export const AnalysisDetailsModal: React.FC = () => {
   const dispatch = useAppDispatch()

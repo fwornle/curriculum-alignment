@@ -28,7 +28,7 @@ import {
   Target,
   Activity
 } from 'lucide-react'
-import { cn } from "@/lib/utils.ts"
+import { cn } from "../../lib/utils"
 
 export const AnalysisView: React.FC = () => {
   const dispatch = useAppDispatch()

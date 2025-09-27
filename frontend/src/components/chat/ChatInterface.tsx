@@ -18,7 +18,7 @@ import {
   Paperclip,
   RotateCcw
 } from 'lucide-react'
-import { cn } from "@/lib/utils.ts"
+import { cn } from "../../lib/utils"
 
 
 export const ChatInterface: React.FC = () => {

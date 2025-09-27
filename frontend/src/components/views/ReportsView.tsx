@@ -25,7 +25,7 @@ import {
   Grid,
   List
 } from 'lucide-react'
-import { cn } from "@/lib/utils.ts"
+import { cn } from "../../lib/utils"
 
 export const ReportsView: React.FC = () => {
   const { reports, templates } = useAppSelector(state => state.report)
