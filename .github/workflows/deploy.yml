@@ -75,7 +75,8 @@ jobs:
 
       - name: Install dependencies
         run: |
-          HUSKY=0 npm ci
+          export HUSKY=0
+          npm ci
           cd frontend && HUSKY=0 npm ci
 
       - name: Run tests
@@ -116,7 +117,8 @@ jobs:
 
       - name: Install dependencies
         run: |
-          HUSKY=0 npm ci
+          export HUSKY=0
+          npm ci
           cd frontend && HUSKY=0 npm ci
 
       - name: Build frontend
@@ -319,15 +321,25 @@ jobs:
           echo "Debug - frontend_bucket from infrastructure: '${{ needs.deploy-infrastructure.outputs.frontend_bucket }}'"
           echo "Debug - api_url from infrastructure: '${{ needs.deploy-infrastructure.outputs.api_url }}'"
           
+          # Deploy JavaScript files with correct MIME type
           aws s3 sync frontend-dist/ s3://${{ needs.deploy-infrastructure.outputs.frontend_bucket }}/ \
             --delete \
             --cache-control "public, max-age=31536000" \
             --exclude "index.html" \
-            --exclude "*.json"
+            --exclude "*.json" \
+            --exclude "*.js"
+          
+          # Deploy JavaScript files with explicit content-type
+          aws s3 sync frontend-dist/ s3://${{ needs.deploy-infrastructure.outputs.frontend_bucket }}/ \
+            --exclude "*" \
+            --include "*.js" \
+            --content-type "application/javascript" \
+            --cache-control "public, max-age=31536000"
           
           # Deploy index.html and manifest files with no-cache
           aws s3 cp frontend-dist/index.html s3://${{ needs.deploy-infrastructure.outputs.frontend_bucket }}/index.html \
-            --cache-control "no-cache"
+            --cache-control "no-cache" \
+            --content-type "text/html"
           
           # Deploy manifest files
           find frontend-dist/ -name "*.json" -exec aws s3 cp {} s3://${{ needs.deploy-infrastructure.outputs.frontend_bucket }}/{} --cache-control "no-cache" \;
