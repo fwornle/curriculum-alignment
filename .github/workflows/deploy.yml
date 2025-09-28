@@ -246,7 +246,9 @@ jobs:
               Version=${{ needs.determine-environment.outputs.tag }} \
             --no-fail-on-empty-changeset \
             --config-file samconfig.toml \
-            --config-env $ENV
+            --config-env $ENV \
+            --region eu-central-1 \
+            --s3-bucket aws-sam-cli-managed-default-samclisourcebucket-avdxpdlpfxky
 
       - name: Get deployment outputs
         id: outputs
