@@ -188,9 +188,10 @@ jobs:
           # Package SAM application
           sam package \
             --template-file .aws-sam/build/template.yaml \
-            --s3-bucket curriculum-alignment-deployments-$BUCKET_ENV \
+            --s3-bucket aws-sam-cli-managed-default-samclisourcebucket-avdxpdlpfxky \
             --s3-prefix ${{ needs.determine-environment.outputs.tag }} \
-            --output-template-file packaged-template.yaml
+            --output-template-file packaged-template.yaml \
+            --region eu-central-1
           
           # Package frontend
           cd frontend/dist
