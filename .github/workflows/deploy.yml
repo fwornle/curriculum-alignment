@@ -205,6 +205,9 @@ jobs:
     runs-on: ubuntu-latest
     needs: [determine-environment, build]
     environment: ${{ needs.determine-environment.outputs.environment }}
+    outputs:
+      frontend_bucket: ${{ steps.outputs.outputs.frontend_bucket }}
+      api_url: ${{ steps.outputs.outputs.api_url }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
