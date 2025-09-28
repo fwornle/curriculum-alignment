@@ -447,17 +447,51 @@ const authSlice = createSlice({
     // Check auth status
     builder
       .addCase(checkAuthStatus.pending, (state) => {
+        console.log('🔄 AUTH SLICE: checkAuthStatus.pending - Starting auth check')
         state.isLoading = true
       })
       .addCase(checkAuthStatus.fulfilled, (state, action) => {
+        console.log('✅ AUTH SLICE: checkAuthStatus.fulfilled - Auth check success')
+        console.log('🔍 AUTH SLICE: action.payload:', {
+          payload: action.payload,
+          payloadType: typeof action.payload,
+          hasUser: !!action.payload?.user,
+          user: action.payload?.user,
+          userType: typeof action.payload?.user,
+          userName: action.payload?.user?.name,
+          userFirstName: action.payload?.user?.firstName,
+          userLastName: action.payload?.user?.lastName,
+          userEmail: action.payload?.user?.email,
+          hasTokens: !!action.payload?.tokens,
+          timestamp: new Date().toISOString()
+        })
+        
         state.isLoading = false
         if (action.payload) {
+          console.log('🔥 AUTH SLICE: Setting user and tokens in Redux state')
           state.user = action.payload.user
           state.tokens = action.payload.tokens
           state.isAuthenticated = true
+          
+          // ULTRA DEBUG: Log final Redux state after update
+          console.log('🎯 AUTH SLICE: Final Redux state after update:', {
+            isAuthenticated: state.isAuthenticated,
+            user: state.user,
+            userType: typeof state.user,
+            userName: state.user?.name,
+            userFirstName: state.user?.firstName,
+            userLastName: state.user?.lastName,
+            userEmail: state.user?.email,
+            hasTokens: !!state.tokens,
+            timestamp: new Date().toISOString()
+          })
+        } else {
+          console.log('❌ AUTH SLICE: No payload in checkAuthStatus.fulfilled')
         }
       })
-      .addCase(checkAuthStatus.rejected, (state) => {
+      .addCase(checkAuthStatus.rejected, (state, action) => {
+        console.log('❌ AUTH SLICE: checkAuthStatus.rejected - Auth check failed')
+        console.log('🔍 AUTH SLICE: Error payload:', action.payload)
         state.isLoading = false
         state.user = null
         state.tokens = null

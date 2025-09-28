@@ -9,6 +9,12 @@ export function useAuth() {
 
   useEffect(() => {
     // Connect the Redux store to API client for token management
+    console.log('🔗 USEAUTH HOOK: Connecting API client to Redux store with auth state:', {
+      user: authState.user,
+      isAuthenticated: authState.isAuthenticated,
+      hasTokens: !!authState.tokens,
+      timestamp: new Date().toISOString()
+    })
     apiClient.setStore({ 
       getState: () => ({ auth: authState }),
       dispatch
@@ -17,6 +23,14 @@ export function useAuth() {
 
   useEffect(() => {
     // Check authentication status on app initialization
+    console.log('🚀 USEAUTH HOOK: Dispatching checkAuthStatus on app initialization')
+    console.log('🔍 USEAUTH HOOK: Current auth state before dispatch:', {
+      user: authState.user,
+      isAuthenticated: authState.isAuthenticated,
+      isLoading: authState.isLoading,
+      hasTokens: !!authState.tokens,
+      timestamp: new Date().toISOString()
+    })
     dispatch(checkAuthStatus())
   }, [dispatch])
 
