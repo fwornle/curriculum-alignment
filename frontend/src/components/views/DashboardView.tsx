@@ -17,30 +17,53 @@ import {
 import { cn } from "@/lib/utils"
 
 export const DashboardView: React.FC = () => {
+  // LOUD DEBUG LOGGING TO VERIFY THIS COMPONENT IS ACTUALLY EXECUTING
+  console.log('🔥🔥🔥 DashboardView RENDERING - NEW VERSION WITH DEBUG LOGGING 🔥🔥🔥')
+  console.log('Current timestamp:', new Date().toISOString())
+  console.log('Window location:', typeof window !== 'undefined' ? window.location.href : 'SSR')
+  console.log('🚨 HOT RELOAD TEST - COMPONENT SHOULD BE EXECUTING 🚨')
+  
   const dispatch = useAppDispatch()
   const { user } = useAppSelector(state => state.auth)
   const { analyses } = useAppSelector(state => state.analysis)
   const { reports } = useAppSelector(state => state.report)
   const { programs } = useAppSelector(state => state.curriculum)
 
+  // 🔍 ULTRA DEBUG: Trace exactly what user data we're receiving
+  console.log('🔍 DASHBOARDVIEW REDUX STATE DEBUG:', {
+    user: user,
+    userType: typeof user,
+    userName: user?.name,
+    userFirstName: user?.firstName,
+    userLastName: user?.lastName,
+    userEmail: user?.email,
+    timestamp: new Date().toISOString()
+  })
+
   // Dynamic version based on environment
   const getVersion = () => {
+    console.log('🚀🚀🚀 getVersion() FUNCTION EXECUTING 🚀🚀🚀')
+    
     const isDev = import.meta.env.DEV
     const isLocalhost = typeof window !== 'undefined' && window.location.hostname === 'localhost'
     
-    // Debug info for deployment verification
-    console.log('Environment Debug:', {
+    // ULTRA LOUD Debug info for deployment verification
+    console.log('🔍 ENVIRONMENT DEBUG - CACHE BUSTER:', {
       isDev,
       isLocalhost,
       hostname: typeof window !== 'undefined' ? window.location.hostname : 'unknown',
       cognitoPoolId: import.meta.env.VITE_COGNITO_USER_POOL_ID,
-      mode: import.meta.env.MODE
+      mode: import.meta.env.MODE,
+      timestamp: new Date().toISOString(),
+      random: Math.random()
     })
     
     if (isDev || isLocalhost) {
-      return 'Version 1.1.0-dev'
+      console.log('✅ RETURNING DEV VERSION')
+      return 'Version 1.1.0-dev (CACHE BUSTER: ' + Date.now() + ')'
     } else {
-      return 'Version 1.1.0-prod'
+      console.log('✅ RETURNING PROD VERSION')
+      return 'Version 1.1.0-prod (CACHE BUSTER: ' + Date.now() + ')'
     }
   }
 

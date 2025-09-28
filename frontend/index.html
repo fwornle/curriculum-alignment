@@ -39,9 +39,13 @@
   <body>
     <div id="root"></div>
     
-    <!-- Register Service Worker -->
+    <!-- Register Service Worker - Only in Production -->
     <script>
-      if ('serviceWorker' in navigator) {
+      // Only register ServiceWorker in production to avoid development caching issues
+      // Use hostname to detect environment since import.meta is not available in HTML
+      const isProduction = window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1';
+      
+      if ('serviceWorker' in navigator && isProduction) {
         window.addEventListener('load', () => {
           navigator.serviceWorker.register('/service-worker.js')
             .then(registration => {
@@ -50,6 +54,14 @@
             .catch(err => {
               console.log('ServiceWorker registration failed: ', err);
             });
+        });
+      } else if ('serviceWorker' in navigator && !isProduction) {
+        // Unregister any existing service workers in development
+        navigator.serviceWorker.getRegistrations().then(function(registrations) {
+          for(let registration of registrations) {
+            registration.unregister();
+            console.log('Unregistered ServiceWorker for development');
+          }
         });
       }
     </script>

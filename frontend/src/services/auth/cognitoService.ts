@@ -345,16 +345,25 @@ class CognitoService {
     this.ensureConfigured()
 
     try {
-      const [currentUser, session] = await Promise.all([
+      const [currentUser, session, userAttributes] = await Promise.all([
         getCurrentUser(),
-        fetchAuthSession()
+        fetchAuthSession(),
+        fetchUserAttributes() // Fetch user attributes for existing sessions
       ])
 
       if (!currentUser || !session.tokens) {
         return null
       }
 
-      const user = this.mapUserAttributes(currentUser)
+      console.log('🔍 getCurrentAuthenticatedUser - Fetched user attributes:', userAttributes)
+
+      // Create user object with fetched attributes
+      const userWithAttributes = {
+        ...currentUser,
+        attributes: userAttributes
+      }
+
+      const user = this.mapUserAttributes(userWithAttributes)
       const tokens = this.extractTokens(session)
 
       return { user, tokens }
