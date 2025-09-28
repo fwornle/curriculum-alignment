@@ -28,6 +28,15 @@ export const DashboardView: React.FC = () => {
     const isDev = import.meta.env.DEV
     const isLocalhost = typeof window !== 'undefined' && window.location.hostname === 'localhost'
     
+    // Debug info for deployment verification
+    console.log('Environment Debug:', {
+      isDev,
+      isLocalhost,
+      hostname: typeof window !== 'undefined' ? window.location.hostname : 'unknown',
+      cognitoPoolId: import.meta.env.VITE_COGNITO_USER_POOL_ID,
+      mode: import.meta.env.MODE
+    })
+    
     if (isDev || isLocalhost) {
       return 'Version 1.1.0-dev'
     } else {
