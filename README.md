@@ -1,5 +1,7 @@
 # Multi-Agent Curriculum Alignment System (MACAS) for CEU
 
+> **Status**: ✅ Deployment pipeline successfully fixed and operational
+
 A comprehensive serverless platform designed to automatically align curricula across individual university programs at Central European University (CEU). The system enables automated data collection from diverse sources, semantic analysis of curriculum content, gap identification, and generation of unified curriculum documentation with peer university comparisons.
 
 ## Overview
