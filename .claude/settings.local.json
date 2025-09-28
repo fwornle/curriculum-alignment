@@ -54,7 +54,15 @@
       "Bash(gh run list:*)",
       "Bash(gh run view:*)",
       "Bash(xargs sed:*)",
-      "Read(//Users/q284340/Agentic/**)"
+      "Read(//Users/q284340/Agentic/**)",
+      "Bash(npm run sam:deploy:*)",
+      "Bash(awk:*)",
+      "Bash(aws s3:*)",
+      "Bash(sam build)",
+      "Bash(sam deploy:*)",
+      "Bash(gh run download:*)",
+      "Read(//private/tmp/build-artifacts/**)",
+      "Read(//tmp/build-artifacts/**)"
     ],
     "additionalDirectories": []
   },
