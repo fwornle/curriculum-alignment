@@ -121,42 +121,50 @@ jobs:
 
       - name: Build frontend
         run: |
-          echo "=== DEBUGGING FILE STRUCTURE ==="
-          echo "Current directory: $(pwd)"
-          echo "Directory listing:"
-          ls -la
-          echo "=== Frontend directory structure ==="
+          # Get Cognito configuration from CloudFormation
+          ENV="${{ needs.determine-environment.outputs.environment }}"
+          STACK_NAME="curriculum-alignment-$ENV"
+          
+          echo "=== Getting Cognito configuration from $STACK_NAME ==="
+          USER_POOL_ID=$(aws cloudformation describe-stacks \
+            --stack-name "$STACK_NAME" \
+            --query 'Stacks[0].Outputs[?OutputKey==`UserPoolId`].OutputValue' \
+            --output text)
+          
+          USER_POOL_CLIENT_ID=$(aws cloudformation describe-stacks \
+            --stack-name "$STACK_NAME" \
+            --query 'Stacks[0].Outputs[?OutputKey==`UserPoolClientId`].OutputValue' \
+            --output text)
+          
+          API_URL=$(aws cloudformation describe-stacks \
+            --stack-name "$STACK_NAME" \
+            --query 'Stacks[0].Outputs[?OutputKey==`CurriculumAlignmentApiUrl`].OutputValue' \
+            --output text)
+          
+          WS_URL=$(aws cloudformation describe-stacks \
+            --stack-name "$STACK_NAME" \
+            --query 'Stacks[0].Outputs[?OutputKey==`WebSocketApiUrl`].OutputValue' \
+            --output text)
+          
+          echo "Cognito User Pool ID: $USER_POOL_ID"
+          echo "Cognito Client ID: $USER_POOL_CLIENT_ID"
+          echo "API URL: $API_URL"
+          echo "WebSocket URL: $WS_URL"
+          
+          # Create .env file for frontend build
           cd frontend
-          echo "Current directory: $(pwd)"
-          ls -la
-          echo "=== src directory structure ==="
-          ls -la src/
-          echo "=== lib directory check ==="
-          if [ -d "src/lib" ]; then
-            echo "src/lib exists:"
-            ls -la src/lib/
-          else
-            echo "ERROR: src/lib directory does not exist!"
-          fi
-          echo "=== components/modals directory ==="
-          if [ -d "src/components/modals" ]; then
-            echo "src/components/modals exists:"
-            ls -la src/components/modals/
-            echo "=== UploadDocumentModal.tsx import check ==="
-            if [ -f "src/components/modals/UploadDocumentModal.tsx" ]; then
-              echo "UploadDocumentModal.tsx imports:"
-              head -20 src/components/modals/UploadDocumentModal.tsx | grep "import.*lib"
-            fi
-          fi
-          echo "=== Path resolution test ==="
-          echo "From src/components/modals, ../../lib/utils should resolve to:"
-          (cd src/components/modals && echo "$(pwd)/../../lib/utils")
-          if [ -f "src/lib/utils.ts" ]; then
-            echo "utils.ts EXISTS"
-          else
-            echo "ERROR: utils.ts NOT FOUND"
-          fi
-          echo "=== Starting build ==="
+          cat > .env << EOF
+          VITE_COGNITO_USER_POOL_ID=$USER_POOL_ID
+          VITE_COGNITO_USER_POOL_CLIENT_ID=$USER_POOL_CLIENT_ID
+          VITE_COGNITO_REGION=eu-central-1
+          VITE_API_BASE_URL=$API_URL
+          VITE_API_WS_URL=$WS_URL
+          EOF
+          
+          echo "=== Frontend .env configuration ==="
+          cat .env
+          
+          echo "=== Building frontend with environment variables ==="
           npm run build
           echo "Frontend build completed"
 
