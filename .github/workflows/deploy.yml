@@ -176,15 +176,6 @@ jobs:
           # Create deployment package
           PACKAGE_NAME="curriculum-alignment-${{ needs.determine-environment.outputs.tag }}.zip"
           
-          # Map environment to actual bucket name (same logic as stack name)
-          if [[ "${{ needs.determine-environment.outputs.environment }}" == "staging" ]]; then
-            BUCKET_ENV="dev"
-          else
-            BUCKET_ENV="${{ needs.determine-environment.outputs.environment }}"
-          fi
-          
-          echo "Using S3 bucket environment: $BUCKET_ENV"
-          
           # Package SAM application
           sam package \
             --template-file .aws-sam/build/template.yaml \
