@@ -127,7 +127,7 @@ export const DashboardView: React.FC = () => {
                   <Sparkles className="h-7 w-7" />
                 </div>
                 <h1 className="text-4xl font-bold">
-                  Welcome back, {user?.name || 'User'}
+                  {user?.name ? `Welcome back, ${user.name}` : 'Authentication Required'}
                 </h1>
               </div>
               <p className="text-blue-100 text-lg">
