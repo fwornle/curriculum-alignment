@@ -198,17 +198,45 @@ graph LR
 
 ## Deployment
 
-### Development Environment
+### 🚀 Deployment Strategy
+
+The system uses a **two-stage deployment pipeline** with automatic environment promotion:
+
+#### **Development Workflow**
 ```bash
-# Deploy to development
-npm run deploy:dev
+# 1. Commit to main branch → Auto-deploys to STAGING
+git add .
+git commit -m "feat: your feature description"
+git push origin main
+# ✅ Automatically deploys to: curriculum-alignment-staging
+
+# 2. Test staging deployment, then promote to production
+git tag v1.1.0
+git push origin v1.1.0
+# ✅ Automatically deploys to: curriculum-alignment-production
 ```
 
-### Production Environment
+#### **Environment Mapping**
+| Environment | Stack Name | Trigger | Version Display |
+|-------------|------------|---------|-----------------|
+| **Local Dev** | N/A | `npm run dev` | `Version 1.1.0-dev` |
+| **Staging** | `curriculum-alignment-staging` | Push to `main` | `Version 1.1.0-prod` |
+| **Production** | `curriculum-alignment-production` | Git tag `v*` | `Version 1.1.0-prod` |
+
+#### **Manual Deployment Options**
 ```bash
-# Deploy to production
-npm run deploy:prod
+# Deploy to specific environment
+npm run deploy:staging   # Deploy to staging manually
+npm run deploy:prod      # Deploy to production manually
+
+# Workflow dispatch (GitHub Actions)
+# Go to Actions tab → Deploy → Run workflow → Select environment
 ```
+
+#### **Environment Configuration**
+- **Staging**: Uses staging AWS resources for testing
+- **Production**: Uses production AWS resources with higher limits
+- **Local**: Connects to staging APIs for development
 
 ### Monitoring
 - **CloudWatch** dashboards for system health
