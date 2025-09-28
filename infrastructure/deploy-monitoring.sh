@@ -177,8 +177,14 @@ deploy_alarms() {
         --region "$AWS_REGION" && \
     log_success "Created alarm: CurriculumAlignment-ApiLatency"
     
-    # Daily Cost Alarm
-    aws cloudwatch put-metric-alarm \
+    # Daily Cost Alarm - requires us-east-1 region and special SNS topic
+    local cost_topic_arn_us_east="arn:aws:sns:us-east-1:$account_id:$SNS_TOPIC_COST"
+    
+    # Create SNS topic in us-east-1 for cost alerts
+    AWS_DEFAULT_REGION=us-east-1 aws sns create-topic --name "$SNS_TOPIC_COST" --region "us-east-1" &> /dev/null || true
+    
+    # Create cost alarm in us-east-1
+    AWS_DEFAULT_REGION=us-east-1 aws cloudwatch put-metric-alarm \
         --alarm-name "CurriculumAlignment-DailyCost" \
         --alarm-description "Monitors daily cost threshold" \
         --metric-name "EstimatedCharges" \
@@ -189,7 +195,7 @@ deploy_alarms() {
         --threshold 100 \
         --comparison-operator "GreaterThanThreshold" \
         --dimensions "Name=Currency,Value=USD" \
-        --alarm-actions "$cost_topic_arn" \
+        --alarm-actions "$cost_topic_arn_us_east" \
         --region "us-east-1" && \
     log_success "Created alarm: CurriculumAlignment-DailyCost"
 }
@@ -258,16 +264,22 @@ verify_deployment() {
     local dashboard_count=$(aws cloudwatch list-dashboards --region "$AWS_REGION" --query 'DashboardEntries[?starts_with(DashboardName, `CurriculumAlignmentSystem`)] | length(@)' --output text)
     log_info "Found $dashboard_count CurriculumAlignment dashboards"
     
-    # Check alarms
+    # Check alarms in main region
     local alarm_count=$(aws cloudwatch describe-alarms --region "$AWS_REGION" --alarm-names \
         "CurriculumAlignment-HighErrorRate" \
         "CurriculumAlignment-DatabaseConnections" \
         "CurriculumAlignment-ApiLatency" \
+        --query 'MetricAlarms | length(@)' --output text 2>/dev/null || echo "0")
+    
+    # Check cost alarm in us-east-1
+    local cost_alarm_count=$(AWS_DEFAULT_REGION=us-east-1 aws cloudwatch describe-alarms --region "us-east-1" --alarm-names \
         "CurriculumAlignment-DailyCost" \
         --query 'MetricAlarms | length(@)' --output text 2>/dev/null || echo "0")
-    log_info "Found $alarm_count CurriculumAlignment alarms"
     
-    if [[ "$dashboard_count" -ge 5 && "$alarm_count" -ge 4 ]]; then
+    local total_alarm_count=$((alarm_count + cost_alarm_count))
+    log_info "Found $total_alarm_count CurriculumAlignment alarms ($alarm_count in $AWS_REGION, $cost_alarm_count in us-east-1)"
+    
+    if [[ "$dashboard_count" -ge 5 && "$total_alarm_count" -ge 4 ]]; then
         log_success "Monitoring deployment verification passed"
     else
         log_warning "Monitoring deployment verification found issues"
@@ -282,13 +294,17 @@ cleanup_on_failure() {
     aws cloudwatch list-dashboards --region "$AWS_REGION" --query 'DashboardEntries[?starts_with(DashboardName, `CurriculumAlignmentSystem`)].DashboardName' --output text | \
     xargs -I {} aws cloudwatch delete-dashboards --dashboard-names {} --region "$AWS_REGION" 2>/dev/null || true
     
-    # Remove alarms
+    # Remove alarms in main region
     aws cloudwatch delete-alarms --alarm-names \
         "CurriculumAlignment-HighErrorRate" \
         "CurriculumAlignment-DatabaseConnections" \
         "CurriculumAlignment-ApiLatency" \
-        "CurriculumAlignment-DailyCost" \
         --region "$AWS_REGION" 2>/dev/null || true
+    
+    # Remove cost alarm in us-east-1
+    AWS_DEFAULT_REGION=us-east-1 aws cloudwatch delete-alarms --alarm-names \
+        "CurriculumAlignment-DailyCost" \
+        --region "us-east-1" 2>/dev/null || true
 }
 
 # Main execution
