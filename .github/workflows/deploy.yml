@@ -250,6 +250,13 @@ jobs:
           
           echo "Using stack name: $STACK_NAME"
           
+          # Debug: List all outputs first
+          echo "All CloudFormation outputs:"
+          aws cloudformation describe-stacks \
+            --stack-name "$STACK_NAME" \
+            --query 'Stacks[0].Outputs[*].{Key:OutputKey,Value:OutputValue}' \
+            --output table
+          
           # Get CloudFormation outputs
           API_URL=$(aws cloudformation describe-stacks \
             --stack-name "$STACK_NAME" \
@@ -260,6 +267,9 @@ jobs:
             --stack-name "$STACK_NAME" \
             --query 'Stacks[0].Outputs[?OutputKey==`StaticWebsiteBucketName`].OutputValue' \
             --output text)
+          
+          echo "Debug - API_URL: '$API_URL'"
+          echo "Debug - FRONTEND_BUCKET: '$FRONTEND_BUCKET'"
             
           echo "api_url=$API_URL" >> $GITHUB_OUTPUT
           echo "frontend_bucket=$FRONTEND_BUCKET" >> $GITHUB_OUTPUT
