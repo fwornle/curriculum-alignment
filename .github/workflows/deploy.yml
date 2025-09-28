@@ -245,12 +245,8 @@ jobs:
       - name: Get deployment outputs
         id: outputs
         run: |
-          # Map environment to actual stack name
-          if [[ "${{ needs.determine-environment.outputs.environment }}" == "staging" ]]; then
-            STACK_NAME="curriculum-alignment-dev"
-          else
-            STACK_NAME="curriculum-alignment-${{ needs.determine-environment.outputs.environment }}"
-          fi
+          # Use the actual stack name created by SAM
+          STACK_NAME="curriculum-alignment-${{ needs.determine-environment.outputs.environment }}"
           
           echo "Using stack name: $STACK_NAME"
           
@@ -317,12 +313,15 @@ jobs:
           DISTRIBUTION_ID=$(aws cloudformation describe-stacks \
             --stack-name curriculum-alignment-${{ needs.determine-environment.outputs.environment }} \
             --query 'Stacks[0].Outputs[?OutputKey==`CloudFrontDistributionId`].OutputValue' \
-            --output text)
+            --output text 2>/dev/null || echo "")
           
-          if [[ -n "$DISTRIBUTION_ID" ]]; then
+          if [[ -n "$DISTRIBUTION_ID" && "$DISTRIBUTION_ID" != "None" ]]; then
             aws cloudfront create-invalidation \
               --distribution-id $DISTRIBUTION_ID \
               --paths "/*"
+            echo "CloudFront cache invalidated"
+          else
+            echo "No CloudFront distribution found, skipping invalidation"
           fi
 
   database-migration:
@@ -344,35 +343,43 @@ jobs:
 
       - name: Run database migrations
         run: |
-          # Get database connection info from SSM
-          DB_HOST=$(aws ssm get-parameter \
-            --name "/curriculum-alignment/${{ needs.determine-environment.outputs.environment }}/db/host" \
-            --query "Parameter.Value" --output text)
-          
-          DB_NAME=$(aws ssm get-parameter \
-            --name "/curriculum-alignment/${{ needs.determine-environment.outputs.environment }}/db/name" \
-            --query "Parameter.Value" --output text)
-          
-          DB_USER=$(aws ssm get-parameter \
-            --name "/curriculum-alignment/${{ needs.determine-environment.outputs.environment }}/db/username" \
-            --query "Parameter.Value" --output text)
-          
-          DB_PASS=$(aws ssm get-parameter \
-            --name "/curriculum-alignment/${{ needs.determine-environment.outputs.environment }}/db/password" \
-            --with-decryption \
-            --query "Parameter.Value" --output text)
-          
-          # Run migrations
-          export PGPASSWORD="$DB_PASS"
-          cd scripts/migrations
-          
-          echo "Running database migrations..."
-          psql -h "$DB_HOST" -U "$DB_USER" -d "$DB_NAME" -f 001_initial_schema.sql || echo "Schema already exists"
-          psql -h "$DB_HOST" -U "$DB_USER" -d "$DB_NAME" -f 002_indexes_and_performance.sql || echo "Performance optimizations already applied"
-          
-          # Only run seed data in non-production environments
-          if [[ "${{ needs.determine-environment.outputs.environment }}" != "production" ]]; then
-            psql -h "$DB_HOST" -U "$DB_USER" -d "$DB_NAME" -f 003_seed_data.sql || echo "Seed data already exists"
+          # Check if database SSM parameters exist
+          if aws ssm get-parameter --name "/curriculum-alignment/${{ needs.determine-environment.outputs.environment }}/db/host" &>/dev/null; then
+            echo "Database configuration found, running migrations..."
+            
+            # Get database connection info from SSM
+            DB_HOST=$(aws ssm get-parameter \
+              --name "/curriculum-alignment/${{ needs.determine-environment.outputs.environment }}/db/host" \
+              --query "Parameter.Value" --output text)
+            
+            DB_NAME=$(aws ssm get-parameter \
+              --name "/curriculum-alignment/${{ needs.determine-environment.outputs.environment }}/db/name" \
+              --query "Parameter.Value" --output text)
+            
+            DB_USER=$(aws ssm get-parameter \
+              --name "/curriculum-alignment/${{ needs.determine-environment.outputs.environment }}/db/username" \
+              --query "Parameter.Value" --output text)
+            
+            DB_PASS=$(aws ssm get-parameter \
+              --name "/curriculum-alignment/${{ needs.determine-environment.outputs.environment }}/db/password" \
+              --with-decryption \
+              --query "Parameter.Value" --output text)
+            
+            # Run migrations
+            export PGPASSWORD="$DB_PASS"
+            cd scripts/migrations
+            
+            echo "Running database migrations..."
+            psql -h "$DB_HOST" -U "$DB_USER" -d "$DB_NAME" -f 001_initial_schema.sql || echo "Schema already exists"
+            psql -h "$DB_HOST" -U "$DB_USER" -d "$DB_NAME" -f 002_indexes_and_performance.sql || echo "Performance optimizations already applied"
+            
+            # Only run seed data in non-production environments
+            if [[ "${{ needs.determine-environment.outputs.environment }}" != "production" ]]; then
+              psql -h "$DB_HOST" -U "$DB_USER" -d "$DB_NAME" -f 003_seed_data.sql || echo "Seed data already exists"
+            fi
+          else
+            echo "No database configuration found, skipping migrations..."
+            echo "Database will use Lambda environment configuration from Secrets Manager"
           fi
 
   post-deployment-tests:
@@ -465,25 +472,33 @@ jobs:
           fi
 
       - name: Create GitHub deployment
+        continue-on-error: true
         uses: actions/github-script@v6
         with:
           script: |
-            const deployment = await github.rest.repos.createDeployment({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              ref: context.sha,
-              environment: '${{ needs.determine-environment.outputs.environment }}',
-              description: 'Automated deployment via GitHub Actions'
-            });
-            
-            await github.rest.repos.createDeploymentStatus({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              deployment_id: deployment.data.id,
-              state: '${{ steps.status.outputs.status }}',
-              description: '${{ steps.status.outputs.message }}',
-              environment_url: '${{ needs.deploy-infrastructure.outputs.api_url }}'
-            });
+            try {
+              const deployment = await github.rest.repos.createDeployment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                ref: context.sha,
+                environment: '${{ needs.determine-environment.outputs.environment }}',
+                description: 'Automated deployment via GitHub Actions'
+              });
+              
+              await github.rest.repos.createDeploymentStatus({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                deployment_id: deployment.data.id,
+                state: '${{ steps.status.outputs.status }}',
+                description: '${{ steps.status.outputs.message }}',
+                environment_url: '${{ needs.deploy-infrastructure.outputs.api_url }}'
+              });
+              
+              console.log('✅ GitHub deployment notification created successfully');
+            } catch (error) {
+              console.log('⚠️ GitHub deployment notification failed (permissions issue):', error.message);
+              console.log('This does not affect the actual deployment - the infrastructure is still deployed');
+            }
 
       - name: Tag successful production deployment
         if: needs.determine-environment.outputs.is_production == 'true' && steps.status.outputs.status == 'success'
