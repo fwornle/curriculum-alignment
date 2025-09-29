@@ -418,7 +418,7 @@ export const LoginModal: React.FC = () => {
           </CardTitle>
           <CardDescription>
             {isRegister 
-              ? 'Sign up to access the Curriculum Alignment System' 
+              ? 'Sign up to access CEU-it' 
               : 'Sign in to your account to continue'}
           </CardDescription>
         </CardHeader>

@@ -76,7 +76,7 @@ export const TopAppBar: React.FC<TopAppBarProps> = ({ className }) => {
             </div>
             <div className="hidden sm:block">
               <h1 className="text-xl font-semibold text-gray-900">
-                Curriculum Alignment
+                CEU-it
               </h1>
               <p className="text-sm text-gray-500 hidden md:block">
                 Central European University

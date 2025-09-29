@@ -176,7 +176,7 @@ export const DashboardView: React.FC = () => {
                 </h1>
               </div>
               <p className="text-blue-100 text-lg">
-                Ready to analyze and align your curriculum with intelligent automation.
+                Automate academic administration workflows.
               </p>
               <div className="flex items-center gap-6">
                 <div className="flex items-center gap-3 bg-white/10 rounded-full px-5 py-3">
