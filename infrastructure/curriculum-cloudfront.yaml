@@ -1,0 +1,371 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'CloudFront Distribution for Curriculum Alignment System with proper staging/production setup'
+
+Parameters:
+  Environment:
+    Type: String
+    Default: staging
+    AllowedValues: [staging, production]
+    Description: Deployment environment
+  
+  StaticWebsiteBucketName:
+    Type: String
+    Description: Name of the S3 bucket for static website hosting
+  
+  DocumentsBucketName:
+    Type: String
+    Description: Name of the S3 bucket for documents
+    Default: ''
+
+Conditions:
+  IsProduction: !Equals [!Ref Environment, 'production']
+  IsStaging: !Equals [!Ref Environment, 'staging']
+  HasDocumentsBucket: !Not [!Equals [!Ref DocumentsBucketName, '']]
+
+Resources:
+  # Origin Access Control for S3 bucket
+  StaticWebsiteOriginAccessControl:
+    Type: AWS::CloudFront::OriginAccessControl
+    Properties:
+      OriginAccessControlConfig:
+        Name: !Sub '${AWS::StackName}-static-website-oac'
+        OriginAccessControlOriginType: s3
+        SigningBehavior: always
+        SigningProtocol: sigv4
+        Description: 'Origin Access Control for static website bucket'
+
+  # CloudFront Distribution with proper asset handling
+  CloudFrontDistribution:
+    Type: AWS::CloudFront::Distribution
+    Properties:
+      DistributionConfig:
+        # Origins
+        Origins:
+          # Static Website Origin (React App)
+          - Id: StaticWebsiteOrigin
+            DomainName: !Sub '${StaticWebsiteBucketName}.s3.${AWS::Region}.amazonaws.com'
+            S3OriginConfig:
+              OriginAccessIdentity: ''
+            OriginAccessControlId: !Ref StaticWebsiteOriginAccessControl
+
+        # Default Cache Behavior (HTML files and SPA routing)
+        DefaultCacheBehavior:
+          TargetOriginId: StaticWebsiteOrigin
+          ViewerProtocolPolicy: redirect-to-https
+          AllowedMethods:
+            - GET
+            - HEAD
+            - OPTIONS
+          CachedMethods:
+            - GET
+            - HEAD
+          CachePolicyId: !Ref HtmlCachePolicy
+          OriginRequestPolicyId: !Ref StaticWebsiteOriginRequestPolicy
+          ResponseHeadersPolicyId: !Ref SecurityHeadersPolicy
+          Compress: true
+
+        # Cache Behaviors for proper asset handling
+        CacheBehaviors:
+          # JavaScript files - long cache, proper MIME type
+          - PathPattern: '*.js'
+            TargetOriginId: StaticWebsiteOrigin
+            ViewerProtocolPolicy: redirect-to-https
+            AllowedMethods: [GET, HEAD]
+            CachedMethods: [GET, HEAD]
+            CachePolicyId: !Ref StaticAssetsCachePolicy
+            OriginRequestPolicyId: !Ref StaticWebsiteOriginRequestPolicy
+            ResponseHeadersPolicyId: !Ref StaticAssetsHeadersPolicy
+            Compress: true
+
+          # CSS files - long cache, proper MIME type  
+          - PathPattern: '*.css'
+            TargetOriginId: StaticWebsiteOrigin
+            ViewerProtocolPolicy: redirect-to-https
+            AllowedMethods: [GET, HEAD]
+            CachedMethods: [GET, HEAD]
+            CachePolicyId: !Ref StaticAssetsCachePolicy
+            OriginRequestPolicyId: !Ref StaticWebsiteOriginRequestPolicy
+            ResponseHeadersPolicyId: !Ref StaticAssetsHeadersPolicy
+            Compress: true
+
+          # Images and other assets
+          - PathPattern: '*.png'
+            TargetOriginId: StaticWebsiteOrigin
+            ViewerProtocolPolicy: redirect-to-https
+            AllowedMethods: [GET, HEAD]
+            CachedMethods: [GET, HEAD]
+            CachePolicyId: !Ref StaticAssetsCachePolicy
+            OriginRequestPolicyId: !Ref StaticWebsiteOriginRequestPolicy
+            ResponseHeadersPolicyId: !Ref StaticAssetsHeadersPolicy
+            Compress: true
+
+          - PathPattern: '*.jpg'
+            TargetOriginId: StaticWebsiteOrigin
+            ViewerProtocolPolicy: redirect-to-https
+            AllowedMethods: [GET, HEAD]
+            CachedMethods: [GET, HEAD]
+            CachePolicyId: !Ref StaticAssetsCachePolicy
+            OriginRequestPolicyId: !Ref StaticWebsiteOriginRequestPolicy
+            ResponseHeadersPolicyId: !Ref StaticAssetsHeadersPolicy
+            Compress: true
+
+          - PathPattern: '*.svg'
+            TargetOriginId: StaticWebsiteOrigin
+            ViewerProtocolPolicy: redirect-to-https
+            AllowedMethods: [GET, HEAD]
+            CachedMethods: [GET, HEAD]
+            CachePolicyId: !Ref StaticAssetsCachePolicy
+            OriginRequestPolicyId: !Ref StaticWebsiteOriginRequestPolicy
+            ResponseHeadersPolicyId: !Ref StaticAssetsHeadersPolicy
+            Compress: true
+
+          # Assets directory
+          - PathPattern: '/assets/*'
+            TargetOriginId: StaticWebsiteOrigin
+            ViewerProtocolPolicy: redirect-to-https
+            AllowedMethods: [GET, HEAD]
+            CachedMethods: [GET, HEAD]
+            CachePolicyId: !Ref StaticAssetsCachePolicy
+            OriginRequestPolicyId: !Ref StaticWebsiteOriginRequestPolicy
+            ResponseHeadersPolicyId: !Ref StaticAssetsHeadersPolicy
+            Compress: true
+
+          # JSON files (manifest, etc.) - short cache
+          - PathPattern: '*.json'
+            TargetOriginId: StaticWebsiteOrigin
+            ViewerProtocolPolicy: redirect-to-https
+            AllowedMethods: [GET, HEAD]
+            CachedMethods: [GET, HEAD]
+            CachePolicyId: !Ref ManifestCachePolicy
+            OriginRequestPolicyId: !Ref StaticWebsiteOriginRequestPolicy
+            ResponseHeadersPolicyId: !Ref SecurityHeadersPolicy
+            Compress: true
+
+          # Service Worker - no cache
+          - PathPattern: '/sw.js'
+            TargetOriginId: StaticWebsiteOrigin
+            ViewerProtocolPolicy: redirect-to-https
+            AllowedMethods: [GET, HEAD]
+            CachedMethods: [GET, HEAD]
+            CachePolicyId: !Ref ServiceWorkerCachePolicy
+            OriginRequestPolicyId: !Ref StaticWebsiteOriginRequestPolicy
+            ResponseHeadersPolicyId: !Ref SecurityHeadersPolicy
+            Compress: false
+
+        # Distribution Settings
+        Enabled: true
+        Comment: !Sub 'Curriculum Alignment System - ${Environment}'
+        DefaultRootObject: 'index.html'
+        
+        # Custom Error Responses - ONLY for HTML paths, not assets
+        CustomErrorResponses:
+          - ErrorCode: 404
+            ResponseCode: 200
+            ResponsePagePath: '/index.html'
+            ErrorCachingMinTTL: 0
+
+        # Domain Configuration
+        Aliases: !If 
+          - IsProduction
+          - ['ceu.tanfra.com']
+          - !If
+            - IsStaging
+            - ['curriculum.tanfra.com']
+            - !Ref 'AWS::NoValue'
+        
+        ViewerCertificate: !If
+          - IsProduction
+          - AcmCertificateArn: 'arn:aws:acm:us-east-1:930500114053:certificate/a89de3ae-89b5-458a-975d-b64a759672fa'
+            SslSupportMethod: sni-only
+            MinimumProtocolVersion: TLSv1.2_2021
+          - !If
+            - IsStaging
+            - AcmCertificateArn: 'arn:aws:acm:us-east-1:930500114053:certificate/cbe052e5-54d0-4aed-bf45-12bf1f90086c'
+              SslSupportMethod: sni-only
+              MinimumProtocolVersion: TLSv1.2_2021
+            - CloudFrontDefaultCertificate: true
+        
+        # Other settings
+        Restrictions:
+          GeoRestriction:
+            RestrictionType: none
+        PriceClass: PriceClass_100
+        HttpVersion: http2
+        IPV6Enabled: true
+
+      Tags:
+        - Key: Name
+          Value: !Sub '${AWS::StackName}-distribution'
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: Project
+          Value: curriculum-alignment
+
+  # Cache Policies
+  HtmlCachePolicy:
+    Type: AWS::CloudFront::CachePolicy
+    Properties:
+      CachePolicyConfig:
+        Name: !Sub '${AWS::StackName}-html-cache-policy'
+        Comment: 'Cache policy for HTML files and SPA routing'
+        DefaultTTL: 86400    # 1 day for HTML
+        MaxTTL: 31536000     # 1 year max
+        MinTTL: 0
+        ParametersInCacheKeyAndForwardedToOrigin:
+          EnableAcceptEncodingGzip: true
+          EnableAcceptEncodingBrotli: true
+          QueryStringsConfig:
+            QueryStringBehavior: none
+          HeadersConfig:
+            HeaderBehavior: none
+          CookiesConfig:
+            CookieBehavior: none
+
+  StaticAssetsCachePolicy:
+    Type: AWS::CloudFront::CachePolicy
+    Properties:
+      CachePolicyConfig:
+        Name: !Sub '${AWS::StackName}-static-assets-cache-policy'
+        Comment: 'Cache policy for static assets (CSS, JS, images) - long cache'
+        DefaultTTL: 31536000  # 1 year
+        MaxTTL: 31536000      # 1 year
+        MinTTL: 31536000      # 1 year - force long caching
+        ParametersInCacheKeyAndForwardedToOrigin:
+          EnableAcceptEncodingGzip: true
+          EnableAcceptEncodingBrotli: true
+          QueryStringsConfig:
+            QueryStringBehavior: none
+          HeadersConfig:
+            HeaderBehavior: none
+          CookiesConfig:
+            CookieBehavior: none
+
+  ManifestCachePolicy:
+    Type: AWS::CloudFront::CachePolicy
+    Properties:
+      CachePolicyConfig:
+        Name: !Sub '${AWS::StackName}-manifest-cache-policy'
+        Comment: 'Cache policy for manifest and JSON files - short cache'
+        DefaultTTL: 3600   # 1 hour
+        MaxTTL: 86400      # 1 day max
+        MinTTL: 0
+        ParametersInCacheKeyAndForwardedToOrigin:
+          EnableAcceptEncodingGzip: true
+          EnableAcceptEncodingBrotli: true
+          QueryStringsConfig:
+            QueryStringBehavior: none
+          HeadersConfig:
+            HeaderBehavior: none
+          CookiesConfig:
+            CookieBehavior: none
+
+  ServiceWorkerCachePolicy:
+    Type: AWS::CloudFront::CachePolicy
+    Properties:
+      CachePolicyConfig:
+        Name: !Sub '${AWS::StackName}-service-worker-cache-policy'
+        Comment: 'Cache policy for service worker (no caching)'
+        DefaultTTL: 0
+        MaxTTL: 0
+        MinTTL: 0
+        ParametersInCacheKeyAndForwardedToOrigin:
+          EnableAcceptEncodingGzip: false
+          EnableAcceptEncodingBrotli: false
+          QueryStringsConfig:
+            QueryStringBehavior: none
+          HeadersConfig:
+            HeaderBehavior: none
+          CookiesConfig:
+            CookieBehavior: none
+
+  # Origin Request Policies
+  StaticWebsiteOriginRequestPolicy:
+    Type: AWS::CloudFront::OriginRequestPolicy
+    Properties:
+      OriginRequestPolicyConfig:
+        Name: !Sub '${AWS::StackName}-static-website-origin-request-policy'
+        Comment: 'Origin request policy for static website'
+        QueryStringsConfig:
+          QueryStringBehavior: none
+        HeadersConfig:
+          HeaderBehavior: whitelist
+          Headers:
+            - CloudFront-Viewer-Country
+            - CloudFront-Is-Mobile-Viewer
+        CookiesConfig:
+          CookieBehavior: none
+
+  # Response Headers Policies
+  SecurityHeadersPolicy:
+    Type: AWS::CloudFront::ResponseHeadersPolicy
+    Properties:
+      ResponseHeadersPolicyConfig:
+        Name: !Sub '${AWS::StackName}-security-headers-policy'
+        Comment: 'Security headers for HTML files'
+        SecurityHeadersConfig:
+          StrictTransportSecurity:
+            AccessControlMaxAgeSec: 31536000
+            IncludeSubdomains: true
+            Preload: true
+            Override: true
+          ContentTypeOptions:
+            Override: true
+          FrameOptions:
+            FrameOption: DENY
+            Override: true
+          ReferrerPolicy:
+            ReferrerPolicy: strict-origin-when-cross-origin
+            Override: true
+        CustomHeadersConfig:
+          Items:
+            - Header: X-Curriculum-Environment
+              Value: !Ref Environment
+              Override: false
+
+  StaticAssetsHeadersPolicy:
+    Type: AWS::CloudFront::ResponseHeadersPolicy
+    Properties:
+      ResponseHeadersPolicyConfig:
+        Name: !Sub '${AWS::StackName}-static-assets-headers-policy'
+        Comment: 'Headers for static assets with proper MIME types'
+        SecurityHeadersConfig:
+          StrictTransportSecurity:
+            AccessControlMaxAgeSec: 31536000
+            IncludeSubdomains: true
+            Preload: true
+            Override: true
+          ContentTypeOptions:
+            Override: true
+        CustomHeadersConfig:
+          Items:
+            - Header: Cache-Control
+              Value: 'public, max-age=31536000, immutable'
+              Override: true
+            - Header: X-Curriculum-Asset-Version
+              Value: !Sub '${Environment}'
+              Override: false
+
+Outputs:
+  CloudFrontDistributionId:
+    Description: 'CloudFront Distribution ID'
+    Value: !Ref CloudFrontDistribution
+    Export:
+      Name: !Sub '${AWS::StackName}-distribution-id'
+
+  CloudFrontDomainName:
+    Description: 'CloudFront Distribution Domain Name'
+    Value: !GetAtt CloudFrontDistribution.DomainName
+    Export:
+      Name: !Sub '${AWS::StackName}-domain-name'
+
+  WebsiteURL:
+    Description: 'Website URL'
+    Value: !If
+      - IsProduction
+      - 'https://ceu.tanfra.com'
+      - !If
+        - IsStaging
+        - 'https://curriculum.tanfra.com'
+        - !Sub 'https://${CloudFrontDistribution.DomainName}'
+    Export:
+      Name: !Sub '${AWS::StackName}-website-url'

@@ -62,7 +62,15 @@
       "Bash(sam deploy:*)",
       "Bash(gh run download:*)",
       "Read(//private/tmp/build-artifacts/**)",
-      "Read(//tmp/build-artifacts/**)"
+      "Read(//tmp/build-artifacts/**)",
+      "Read(//private/tmp/latest-deployment/**)",
+      "Bash(unzip:*)",
+      "Bash(kill:*)",
+      "Bash(open:*)",
+      "Bash(aws:*)",
+      "Bash(NODE_ENV=production npm run build)",
+      "Bash(Environment=staging )",
+      "Bash(StaticWebsiteBucketName=curriculum-alignment-static-staging-930500114053 )"
     ],
     "additionalDirectories": []
   },
