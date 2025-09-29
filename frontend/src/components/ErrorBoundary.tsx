@@ -171,8 +171,14 @@ export class ErrorBoundary extends Component<Props, State> {
               Page Error
             </h2>
             <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-              {error?.userMessage || 'An error occurred while loading this page.'}
+              {error?.userMessage || error?.message || 'An error occurred while loading this page.'}
             </p>
+            
+            {process.env.NODE_ENV === 'development' && error?.code && (
+              <p className="text-xs text-gray-500 dark:text-gray-500 mb-4 font-mono">
+                Error Code: {error.code} | Type: {error.type} | ID: {error.id?.slice(-8)}
+              </p>
+            )}
             
             <div className="flex space-x-2 justify-center">
               <Button onClick={this.retry} size="sm">
@@ -197,6 +203,58 @@ export class ErrorBoundary extends Component<Props, State> {
   private renderComponentError() {
     const { error } = this.state
 
+    // Get specific error message
+    const getErrorMessage = () => {
+      if (error?.userMessage) {
+        return error.userMessage
+      }
+      
+      if (error?.message) {
+        // For development, show the actual error message
+        if (process.env.NODE_ENV === 'development') {
+          return `Component error: ${error.message}`
+        }
+        
+        // For production, categorize common errors with helpful messages
+        if (error.message.includes('Cannot read prop')) {
+          return 'Component failed to load due to missing data. Please refresh the page.'
+        }
+        if (error.message.includes('undefined')) {
+          return 'Component failed to load due to missing information. Please try again.'
+        }
+        if (error.message.includes('fetch')) {
+          return 'Failed to load component data. Please check your connection and try again.'
+        }
+        if (error.message.includes('network')) {
+          return 'Network error prevented component from loading. Please try again.'
+        }
+        
+        return `Component error: ${error.message}`
+      }
+      
+      // If we have error type information, use it
+      if (error?.type) {
+        switch (error.type) {
+          case 'network':
+            return 'Network connection issue prevented this component from loading.'
+          case 'authentication':
+            return 'Authentication issue prevented this component from loading. Please sign in again.'
+          case 'authorization':
+            return 'You don\'t have permission to access this component.'
+          case 'validation':
+            return 'Invalid data prevented this component from loading.'
+          case 'system':
+            return 'A system error prevented this component from loading.'
+          default:
+            return 'An error prevented this component from loading.'
+        }
+      }
+      
+      return 'This component encountered an error and could not be displayed.'
+    }
+
+    const errorMessage = getErrorMessage()
+
     return (
       <div className="border border-yellow-200 dark:border-yellow-800 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg p-4">
         <div className="flex items-start space-x-3">
@@ -206,8 +264,14 @@ export class ErrorBoundary extends Component<Props, State> {
               Component Error
             </h3>
             <p className="mt-1 text-sm text-yellow-700 dark:text-yellow-300">
-              {error?.userMessage || 'This component encountered an error and could not be displayed.'}
+              {errorMessage}
             </p>
+            
+            {process.env.NODE_ENV === 'development' && error?.code && (
+              <p className="mt-1 text-xs text-yellow-600 dark:text-yellow-400 font-mono">
+                Error Code: {error.code} | ID: {error.id?.slice(-8)}
+              </p>
+            )}
             
             <div className="mt-3 flex space-x-2">
               <button

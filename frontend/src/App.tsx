@@ -12,7 +12,7 @@ import { ComponentsTestView } from './components/views/ComponentsTestView'
 import { ChatInterface } from './components/chat/ChatInterface'
 import { LLMConfigModal } from './components/modals/LLMConfigModal'
 import { SettingsModal } from './components/modals/SettingsModal'
-import { ProfileModal } from './components/modals/ProfileModal'
+import { EnhancedProfileModal } from './components/modals/EnhancedProfileModal'
 import { UploadDocumentModal } from './components/modals/UploadDocumentModal'
 import { CreateProgramModal } from './components/modals/CreateProgramModal'
 import { AnalysisDetailsModal } from './components/modals/AnalysisDetailsModal'
@@ -92,7 +92,7 @@ function App() {
           <LoginModal />
           <LLMConfigModal />
           <SettingsModal />
-          <ProfileModal />
+          <EnhancedProfileModal />
           <UploadDocumentModal />
           <CreateProgramModal />
           <AnalysisDetailsModal />

@@ -3,7 +3,7 @@ import { useAppDispatch, useAppSelector } from '../../store'
 import { closeModal } from '../../store/slices/uiSlice'
 import { updateUserPreferences } from '../../store/slices/authSlice'
 import { Button } from '../ui/button'
-import { Avatar } from '../ui/Avatar'
+import { ProfilePicture } from '../ui/ProfilePicture'
 import { 
   X,
   User,
@@ -79,12 +79,12 @@ export const ProfileModal: React.FC = () => {
         <div className="p-6 space-y-6">
           {/* Profile Picture */}
           <div className="flex items-center gap-4">
-            <Avatar 
-              email={user.email} 
-              name={user.name} 
-              picture={user.picture}
-              size={64}
+            <ProfilePicture 
+              src={user.picture}
+              userId={user.id}
+              size="xl"
               className="shadow-lg"
+              alt={user.name}
             />
             <div className="flex-1">
               <h3 className="font-medium text-gray-900">{user.name}</h3>

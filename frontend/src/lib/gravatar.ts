@@ -27,12 +27,23 @@ function md5(text: string): string {
 /**
  * Generate a Gravatar URL for an email address
  */
-export function getGravatarUrl(email: string, options: GravatarOptions = {}): string {
+export function getGravatarUrl(email?: string, options: GravatarOptions = {}): string {
   const {
     size = 80,
     default: defaultImage = 'identicon',
     rating = 'g'
   } = options
+
+  // Handle undefined or null email
+  if (!email || typeof email !== 'string') {
+    // Return a default gravatar URL with a placeholder hash
+    const params = new URLSearchParams({
+      s: size.toString(),
+      d: defaultImage,
+      r: rating
+    })
+    return `https://www.gravatar.com/avatar/00000000?${params.toString()}`
+  }
 
   // Normalize email: trim and lowercase
   const normalizedEmail = email.trim().toLowerCase()
@@ -53,7 +64,12 @@ export function getGravatarUrl(email: string, options: GravatarOptions = {}): st
 /**
  * Get initials from a name for fallback display
  */
-export function getInitials(name: string): string {
+export function getInitials(name?: string): string {
+  // Handle undefined or null name
+  if (!name || typeof name !== 'string') {
+    return '??'
+  }
+
   return name
     .split(' ')
     .map(part => part.charAt(0).toUpperCase())

@@ -18,7 +18,7 @@ import {
   MessageSquare
 } from 'lucide-react'
 import { cn } from "@/lib/utils"
-import { Avatar } from '../ui/Avatar'
+import { ProfilePicture } from '../ui/ProfilePicture'
 
 interface TopAppBarProps {
   className?: string
@@ -225,11 +225,11 @@ export const TopAppBar: React.FC<TopAppBarProps> = ({ className }) => {
                   onClick={() => setShowUserMenu(!showUserMenu)}
                   className="flex items-center gap-2 px-3 py-2 hover:bg-gray-100 rounded-md"
                 >
-                  <Avatar 
-                    email={user.email} 
-                    name={user.name} 
-                    picture={user.picture}
-                    size={28}
+                  <ProfilePicture 
+                    src={user.picture}
+                    userId={user.id}
+                    size="sm"
+                    alt={user.name}
                   />
                   <span className="hidden md:inline text-sm font-medium text-gray-700">
                     {user.name}

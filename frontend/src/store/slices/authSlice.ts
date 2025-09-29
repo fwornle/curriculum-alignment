@@ -18,7 +18,9 @@ export interface User {
   firstName: string
   lastName: string
   name: string // Full name computed from firstName + lastName
+  picture?: string // Profile picture URL - from federated provider or uploaded
   role: 'admin' | 'faculty' | 'student' | 'guest'
+  faculty?: string // Faculty assignment - configurable by admin
   permissions: string[]
   preferences: {
     theme: 'light' | 'dark' | 'system'
@@ -27,6 +29,8 @@ export interface User {
   }
   emailVerified: boolean
   phoneVerified?: boolean
+  createdAt?: string
+  lastLoginAt?: string
 }
 
 export interface AuthState {
@@ -104,9 +108,70 @@ function mapCognitoUserToUser(cognitoUser: CognitoUser): User {
     name = cognitoUser.username || 'User'
   }
   
+  // Determine user role with automatic admin assignment for first user
+  let userRole: User['role'] = 'faculty' // Default role
+  let permissions: string[] = []
+  
+  // Check if this is the first user (admin auto-assignment)
+  try {
+    const firstAdminSet = localStorage.getItem('ceu_first_admin_set')
+    if (!firstAdminSet) {
+      // This is the first user - make them admin
+      userRole = 'admin'
+      permissions = [
+        'manage_users',
+        'manage_roles',
+        'manage_faculties',
+        'manage_settings',
+        'view_all_programs',
+        'edit_all_programs',
+        'delete_programs',
+        'manage_uploads',
+        'view_analytics',
+        'manage_agents'
+      ]
+      localStorage.setItem('ceu_first_admin_set', 'true')
+      localStorage.setItem('ceu_first_admin_id', cognitoUser.userId)
+      console.log('🔥 First user detected - assigning admin role:', cognitoUser.email)
+    } else {
+      // Check role based on Cognito user attributes or groups
+      // For now, use default faculty role with basic permissions
+      userRole = 'faculty'
+      permissions = [
+        'view_programs',
+        'create_programs',
+        'edit_own_programs',
+        'upload_documents',
+        'view_analysis',
+        'chat_access'
+      ]
+    }
+  } catch (error) {
+    console.warn('Error determining user role:', error)
+    // Fallback to faculty role
+    userRole = 'faculty'
+    permissions = ['view_programs', 'create_programs', 'edit_own_programs']
+  }
+  
+  // Preserve local profile picture if it exists, otherwise use Cognito's picture
+  let profilePicture = cognitoUser.picture
+  try {
+    const storedAuth = localStorage.getItem('auth_state')
+    if (storedAuth) {
+      const parsed = JSON.parse(storedAuth)
+      if (parsed.user?.id === cognitoUser.userId && parsed.user?.picture && parsed.user.picture.startsWith('cloud-storage://')) {
+        // Preserve the local uploaded profile picture
+        profilePicture = parsed.user.picture
+        console.log('🖼️ mapCognitoUserToUser: Preserving local profile picture:', profilePicture)
+      }
+    }
+  } catch (error) {
+    console.warn('Error checking for local profile picture:', error)
+  }
+  
   console.log('mapCognitoUserToUser:', {
     input: cognitoUser,
-    output: { firstName, lastName, name }
+    output: { firstName, lastName, name, role: userRole, permissions, preservedPicture: profilePicture }
   })
   
   return {
@@ -116,9 +181,9 @@ function mapCognitoUserToUser(cognitoUser: CognitoUser): User {
     firstName: firstName,
     lastName: lastName,
     name: name,
-    picture: cognitoUser.picture,
-    role: 'faculty', // Default role - this should be determined by user attributes or groups
-    permissions: [], // This should be determined by user groups/roles
+    picture: profilePicture,
+    role: userRole,
+    permissions: permissions,
     preferences: {
       theme: 'system',
       language: 'en',
@@ -270,6 +335,50 @@ const authSlice = createSlice({
     updateUserPreferences: (state, action: PayloadAction<Partial<User['preferences']>>) => {
       if (state.user) {
         state.user.preferences = { ...state.user.preferences, ...action.payload }
+      }
+    },
+
+    updateUserProfile: (state, action: PayloadAction<{ picture?: string; faculty?: string }>) => {
+      if (state.user) {
+        if (action.payload.picture !== undefined) {
+          state.user.picture = action.payload.picture
+        }
+        if (action.payload.faculty !== undefined) {
+          state.user.faculty = action.payload.faculty
+        }
+        
+        // Persist updated auth state to localStorage
+        try {
+          localStorage.setItem('auth_state', JSON.stringify({
+            user: state.user,
+            tokens: state.tokens,
+            isAuthenticated: state.isAuthenticated,
+            lastLoginTime: state.lastLoginTime
+          }))
+        } catch (error) {
+          console.warn('Failed to persist updated auth state to localStorage:', error)
+        }
+      }
+    },
+    updateUserRole: (state, action: PayloadAction<{ userId: string; role: User['role']; permissions?: string[] }>) => {
+      // Only admins can update roles - this will be enforced in the thunk
+      if (state.user && state.user.id === action.payload.userId) {
+        state.user.role = action.payload.role
+        if (action.payload.permissions) {
+          state.user.permissions = action.payload.permissions
+        }
+        
+        // Persist updated auth state to localStorage
+        try {
+          localStorage.setItem('auth_state', JSON.stringify({
+            user: state.user,
+            tokens: state.tokens,
+            isAuthenticated: state.isAuthenticated,
+            lastLoginTime: state.lastLoginTime
+          }))
+        } catch (error) {
+          console.warn('Failed to persist updated auth state to localStorage:', error)
+        }
       }
     },
     clearPendingVerification: (state) => {
@@ -524,6 +633,8 @@ export const {
   incrementLoginAttempts,
   resetLoginAttempts,
   updateUserPreferences,
+  updateUserProfile,
+  updateUserRole,
   clearPendingVerification,
   setPendingVerification,
   login,
