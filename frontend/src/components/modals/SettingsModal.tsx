@@ -11,12 +11,14 @@ import {
   Save,
   Zap,
   Palette,
+  Users,
   Settings as SettingsIcon
 } from 'lucide-react'
 
 export const SettingsModal: React.FC = () => {
   const dispatch = useAppDispatch()
   const { modals, theme, preferences } = useAppSelector(state => state.ui)
+  const { user } = useAppSelector(state => state.auth)
 
   if (!modals.settings) return null
 
@@ -32,10 +34,54 @@ export const SettingsModal: React.FC = () => {
     dispatch(updatePreferences({ [key]: value }))
   }
 
+  // Mock user data for demonstration - in a real app this would come from an API
+  const allUsers = [
+    {
+      id: '1',
+      name: 'John Smith',
+      email: 'john.smith@ceu.edu',
+      role: 'admin' as const,
+      faculty: 'business',
+      active: true,
+      permissions: ['manage_users', 'manage_roles', 'manage_faculties']
+    },
+    {
+      id: '2', 
+      name: 'Sarah Johnson',
+      email: 'sarah.johnson@ceu.edu',
+      role: 'faculty' as const,
+      faculty: 'public-policy',
+      active: true,
+      permissions: ['view_programs', 'create_programs', 'edit_own_programs']
+    },
+    {
+      id: '3',
+      name: 'Michael Brown',
+      email: 'michael.brown@ceu.edu', 
+      role: 'student' as const,
+      faculty: 'legal-studies',
+      active: true,
+      permissions: ['view_programs', 'submit_assignments']
+    }
+  ]
+
+  const handleRoleChange = (userId: string, newRole: 'admin' | 'faculty' | 'student' | 'guest') => {
+    // In a real app, this would call an API
+    console.log(`Changing user ${userId} role to ${newRole}`)
+    // dispatch(updateUserRole({ userId, role: newRole }))
+  }
+
+  const handleUserToggle = (userId: string, active: boolean) => {
+    // In a real app, this would call an API
+    console.log(`${active ? 'Activating' : 'Deactivating'} user ${userId}`)
+  }
+
+  const isAdmin = user?.role === 'admin'
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       <div className="fixed inset-0 bg-black/50" onClick={handleClose} />
-      <div className="relative w-full max-w-2xl mx-4 bg-background rounded-lg shadow-lg border">
+      <div className="relative w-full max-w-4xl mx-4 bg-background rounded-lg shadow-lg border">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b">
           <div className="flex items-center space-x-2">
@@ -48,7 +94,87 @@ export const SettingsModal: React.FC = () => {
         </div>
 
         {/* Content */}
-        <div className="p-6 space-y-6 max-h-96 overflow-y-auto">
+        <div className="p-6 space-y-6 max-h-[70vh] overflow-y-auto">
+          {/* User Management - Admin Only */}
+          {isAdmin && (
+            <div className="space-y-3">
+              <div className="flex items-center space-x-2">
+                <Users className="h-4 w-4 text-muted-foreground" />
+                <h3 className="font-medium">User Management</h3>
+                <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">Admin Only</span>
+              </div>
+              <div className="space-y-4">
+                <div className="border rounded-lg overflow-hidden">
+                  <div className="bg-gray-50 px-4 py-2 border-b">
+                    <div className="grid grid-cols-12 gap-4 text-sm font-medium text-gray-600">
+                      <div className="col-span-3">User</div>
+                      <div className="col-span-2">Role</div>
+                      <div className="col-span-2">Faculty</div>
+                      <div className="col-span-3">Permissions</div>
+                      <div className="col-span-1">Status</div>
+                      <div className="col-span-1">Actions</div>
+                    </div>
+                  </div>
+                  <div className="max-h-64 overflow-y-auto">
+                    {allUsers.map((user) => (
+                      <div key={user.id} className="px-4 py-3 border-b last:border-b-0 hover:bg-gray-50">
+                        <div className="grid grid-cols-12 gap-4 items-center text-sm">
+                          <div className="col-span-3">
+                            <div>
+                              <div className="font-medium">{user.name}</div>
+                              <div className="text-gray-500 text-xs">{user.email}</div>
+                            </div>
+                          </div>
+                          <div className="col-span-2">
+                            <select
+                              value={user.role}
+                              onChange={(e) => handleRoleChange(user.id, e.target.value as any)}
+                              className="w-full px-2 py-1 border rounded text-sm"
+                            >
+                              <option value="admin">Admin</option>
+                              <option value="faculty">Faculty</option>
+                              <option value="student">Student</option>
+                              <option value="guest">Guest</option>
+                            </select>
+                          </div>
+                          <div className="col-span-2">
+                            <span className="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded">
+                              {user.faculty || 'None'}
+                            </span>
+                          </div>
+                          <div className="col-span-3">
+                            <div className="text-xs text-gray-500">
+                              {user.permissions.slice(0, 2).join(', ')}
+                              {user.permissions.length > 2 && `... +${user.permissions.length - 2} more`}
+                            </div>
+                          </div>
+                          <div className="col-span-1">
+                            <Button
+                              variant={user.active ? "default" : "outline"}
+                              size="sm"
+                              onClick={() => handleUserToggle(user.id, !user.active)}
+                              className="text-xs px-2 py-1"
+                            >
+                              {user.active ? 'Active' : 'Inactive'}
+                            </Button>
+                          </div>
+                          <div className="col-span-1">
+                            <Button variant="ghost" size="sm" className="text-xs px-2 py-1">
+                              Edit
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <div className="text-xs text-gray-500">
+                  Total Users: {allUsers.length} | Active: {allUsers.filter(u => u.active).length} | Admins: {allUsers.filter(u => u.role === 'admin').length}
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Theme Settings */}
           <div className="space-y-3">
             <div className="flex items-center space-x-2">
