@@ -1,6 +1,7 @@
 # Curriculum-alignment Repository Trajectory
 
 *Generated: 2025-09-29T14:10:36.752Z | September 29, 2025 at 04:10 PM*
+subtitle to 'Automate academic administration workflows')
 
 ## What This Repository Does
 
