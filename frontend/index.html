@@ -43,7 +43,16 @@
     <script>
       // Only register ServiceWorker in production to avoid development caching issues
       // Use hostname to detect environment since import.meta is not available in HTML
-      const isProduction = window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1';
+      const isProduction = window.location.hostname === 'ceu.tanfra.com';
+      const isStaging = window.location.hostname === 'curriculum.tanfra.com';
+      const isDevelopment = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+      
+      console.log('Environment detection:', { 
+        hostname: window.location.hostname, 
+        isProduction, 
+        isStaging, 
+        isDevelopment 
+      });
       
       if ('serviceWorker' in navigator && isProduction) {
         window.addEventListener('load', () => {
@@ -55,12 +64,12 @@
               console.log('ServiceWorker registration failed: ', err);
             });
         });
-      } else if ('serviceWorker' in navigator && !isProduction) {
-        // Unregister any existing service workers in development
+      } else if ('serviceWorker' in navigator && (isStaging || isDevelopment)) {
+        // Unregister any existing service workers in staging and development
         navigator.serviceWorker.getRegistrations().then(function(registrations) {
           for(let registration of registrations) {
             registration.unregister();
-            console.log('Unregistered ServiceWorker for development');
+            console.log(`Unregistered ServiceWorker for ${isStaging ? 'staging' : 'development'}`);
           }
         });
       }
