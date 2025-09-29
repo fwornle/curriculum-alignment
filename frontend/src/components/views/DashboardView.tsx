@@ -45,25 +45,38 @@ export const DashboardView: React.FC = () => {
     console.log('🚀🚀🚀 getVersion() FUNCTION EXECUTING 🚀🚀🚀')
     
     const isDev = import.meta.env.DEV
-    const isLocalhost = typeof window !== 'undefined' && window.location.hostname === 'localhost'
+    const hostname = typeof window !== 'undefined' ? window.location.hostname : 'unknown'
+    
+    // Environment detection based on hostname
+    const isLocalhost = hostname === 'localhost' || hostname === '127.0.0.1'
+    const isStaging = hostname === 'curriculum.tanfra.com'
+    const isProduction = hostname === 'ceu.tanfra.com'
     
     // ULTRA LOUD Debug info for deployment verification
     console.log('🔍 ENVIRONMENT DEBUG - CACHE BUSTER:', {
       isDev,
+      hostname,
       isLocalhost,
-      hostname: typeof window !== 'undefined' ? window.location.hostname : 'unknown',
+      isStaging, 
+      isProduction,
       cognitoPoolId: import.meta.env.VITE_COGNITO_USER_POOL_ID,
       mode: import.meta.env.MODE,
       timestamp: new Date().toISOString(),
       random: Math.random()
     })
     
-    if (isDev || isLocalhost) {
-      console.log('✅ RETURNING DEV VERSION')
-      return 'Version 1.1.0-dev (CACHE BUSTER: ' + Date.now() + ')'
+    if (isProduction) {
+      console.log('✅ RETURNING PRODUCTION VERSION')
+      return 'Version 1.1.0-production (CACHE BUSTER: ' + Date.now() + ')'
+    } else if (isStaging) {
+      console.log('✅ RETURNING STAGING VERSION')
+      return 'Version 1.1.0-staging (CACHE BUSTER: ' + Date.now() + ')'
+    } else if (isDev || isLocalhost) {
+      console.log('✅ RETURNING DEVELOPMENT VERSION')
+      return 'Version 1.1.0-development (CACHE BUSTER: ' + Date.now() + ')'
     } else {
-      console.log('✅ RETURNING PROD VERSION')
-      return 'Version 1.1.0-prod (CACHE BUSTER: ' + Date.now() + ')'
+      console.log('⚠️ UNKNOWN ENVIRONMENT - RETURNING FALLBACK VERSION')
+      return 'Version 1.1.0-unknown-' + hostname + ' (CACHE BUSTER: ' + Date.now() + ')'
     }
   }
 

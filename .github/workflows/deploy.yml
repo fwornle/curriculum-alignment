@@ -344,20 +344,48 @@ jobs:
           # Deploy manifest files
           find frontend-dist/ -name "*.json" -exec aws s3 cp {} s3://${{ needs.deploy-infrastructure.outputs.frontend_bucket }}/{} --cache-control "no-cache" \;
 
-      - name: Invalidate CloudFront
+      - name: Deploy CloudFront for staging/production
         run: |
-          DISTRIBUTION_ID=$(aws cloudformation describe-stacks \
-            --stack-name curriculum-alignment-${{ needs.determine-environment.outputs.environment }} \
-            --query 'Stacks[0].Outputs[?OutputKey==`CloudFrontDistributionId`].OutputValue' \
-            --output text 2>/dev/null || echo "")
+          ENV="${{ needs.determine-environment.outputs.environment }}"
+          
+          if [[ "$ENV" == "staging" ]]; then
+            echo "Deploying CloudFront for staging environment"
+            # Deploy staging CloudFront if it doesn't exist
+            if ! aws cloudformation describe-stacks --stack-name curriculum-cloudfront-staging --region eu-central-1 2>/dev/null; then
+              echo "Creating staging CloudFront distribution..."
+              aws cloudformation deploy \
+                --template-file infrastructure/curriculum-cloudfront.yaml \
+                --stack-name curriculum-cloudfront-staging \
+                --parameter-overrides \
+                  Environment=staging \
+                  StaticWebsiteBucketName=${{ needs.deploy-infrastructure.outputs.frontend_bucket }} \
+                --capabilities CAPABILITY_IAM \
+                --region eu-central-1
+            fi
+            
+            # Get staging CloudFront distribution ID
+            DISTRIBUTION_ID=$(aws cloudformation describe-stacks \
+              --stack-name curriculum-cloudfront-staging \
+              --query 'Stacks[0].Outputs[?OutputKey==`CloudFrontDistributionId`].OutputValue' \
+              --output text --region eu-central-1)
+            
+          elif [[ "$ENV" == "production" ]]; then
+            echo "Production deployment would use ceu.tanfra.com CloudFront (to be implemented)"
+            # For now, use the existing production CloudFront
+            DISTRIBUTION_ID="E2DGUOYHQAA61E"
+          else
+            echo "Development environment - no CloudFront invalidation needed"
+            DISTRIBUTION_ID=""
+          fi
           
           if [[ -n "$DISTRIBUTION_ID" && "$DISTRIBUTION_ID" != "None" ]]; then
+            echo "Invalidating CloudFront distribution: $DISTRIBUTION_ID"
             aws cloudfront create-invalidation \
               --distribution-id $DISTRIBUTION_ID \
               --paths "/*"
             echo "CloudFront cache invalidated"
           else
-            echo "No CloudFront distribution found, skipping invalidation"
+            echo "No CloudFront distribution found or not needed for this environment"
           fi
 
   database-migration:
