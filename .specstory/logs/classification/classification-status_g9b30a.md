@@ -1,16 +1,16 @@
 # Classification Status - curriculum-alignment
 
-**Generated**: 2025-10-05T17:47:37.644Z
-**Total Sessions**: 184
-**Total Decisions**: 3102
+**Generated**: 2025-10-05T19:13:42.998Z
+**Total Sessions**: 186
+**Total Decisions**: 3115
 
 ---
 
 ## Overall Statistics
 
-- **Total Prompt Sets Classified**: 3102
+- **Total Prompt Sets Classified**: 3115
 - **Classified as CODING**: 774 (25%)
-- **Classified as LOCAL**: 2328 (75%)
+- **Classified as LOCAL**: 2341 (75%)
 
 ### Classification Method Distribution
 
@@ -18,10 +18,10 @@ Click on a classification method to view all sessions decided by that layer.
 
 | Layer | Method | Decisions | Percentage |
 |-------|--------|-----------|------------|
-| 0 | [Session Filter](#layer-0-session-filter) | 389 | 13% |
+| 0 | [Session Filter](#layer-0-session-filter) | 389 | 12% |
 | 1 | [Path Analysis](#layer-1-path-analysis) | 319 | 10% |
-| 2 | [Keyword Matching](#layer-2-keyword-matching) | 450 | 15% |
-| 3 | [Embedding Search](#layer-3-embedding-search) | 1285 | 41% |
+| 2 | [Keyword Matching](#layer-2-keyword-matching) | 450 | 14% |
+| 3 | [Embedding Search](#layer-3-embedding-search) | 1298 | 42% |
 | 4 | [Semantic Analysis](#layer-4-semantic-analysis) | 658 | 21% |
 
 **Average Processing Time**: 68ms
@@ -527,6 +527,8 @@ Sessions grouped by the classification layer that made the final decision.
 - **[2025-10-05_1700-1800_g9b30a](2025-10-05_1700-1800_g9b30a-summary.md)** - 13 local decisions
 - **[2025-10-05_1800-1900_g9b30a](2025-10-05_1800-1900_g9b30a-summary.md)** - 1 local decisions
 - **[2025-10-05_1900-2000_g9b30a](2025-10-05_1900-2000_g9b30a-summary.md)** - 1 local decisions
+- **[2025-10-05_2000-2100_g9b30a](2025-10-05_2000-2100_g9b30a-summary.md)** - 7 local decisions
+- **[2025-10-05_2100-2200_g9b30a](2025-10-05_2100-2200_g9b30a-summary.md)** - 6 local decisions
 
 ### Layer 4: Semantic Analysis
 
@@ -855,6 +857,8 @@ Complete chronological list of all classification sessions.
 - **[2025-10-05_1700-1800_g9b30a](2025-10-05_1700-1800_g9b30a-summary.md)** - 23 decisions (9 coding, 14 local)
 - **[2025-10-05_1800-1900_g9b30a](2025-10-05_1800-1900_g9b30a-summary.md)** - 4 decisions (3 coding, 1 local)
 - **[2025-10-05_1900-2000_g9b30a](2025-10-05_1900-2000_g9b30a-summary.md)** - 1 decisions (0 coding, 1 local)
+- **[2025-10-05_2000-2100_g9b30a](2025-10-05_2000-2100_g9b30a-summary.md)** - 7 decisions (0 coding, 7 local)
+- **[2025-10-05_2100-2200_g9b30a](2025-10-05_2100-2200_g9b30a-summary.md)** - 6 decisions (0 coding, 6 local)
 
 ---
 
