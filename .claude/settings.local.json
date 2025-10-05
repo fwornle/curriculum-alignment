@@ -77,7 +77,8 @@
       "Bash(curl:*)",
       "Bash(python3:*)",
       "Bash(java:*)",
-      "Bash(plantuml:*)"
+      "Bash(plantuml:*)",
+      "Bash(cat:*)"
     ],
     "additionalDirectories": []
   },
