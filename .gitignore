@@ -272,3 +272,6 @@ samconfig.toml
 # Local development overrides
 docker-compose.override.yml
 .env.override
+
+# Live logging runtime data (volatile state - not for version control)
+.specstory/trajectory/live-state.json
