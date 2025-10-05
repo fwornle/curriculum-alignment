@@ -1,0 +1,861 @@
+# Classification Status - curriculum-alignment
+
+**Generated**: 2025-10-05T17:43:07.672Z
+**Total Sessions**: 184
+**Total Decisions**: 3102
+
+---
+
+## Overall Statistics
+
+- **Total Prompt Sets Classified**: 3102
+- **Classified as CODING**: 774 (25%)
+- **Classified as LOCAL**: 2328 (75%)
+
+### Classification Method Distribution
+
+Click on a classification method to view all sessions decided by that layer.
+
+| Layer | Method | Decisions | Percentage |
+|-------|--------|-----------|------------|
+| 0 | [Session Filter](#layer-0-session-filter) | 389 | 13% |
+| 1 | [Path Analysis](#layer-1-path-analysis) | 319 | 10% |
+| 2 | [Keyword Matching](#layer-2-keyword-matching) | 450 | 15% |
+| 3 | [Embedding Search](#layer-3-embedding-search) | 1285 | 41% |
+| 4 | [Semantic Analysis](#layer-4-semantic-analysis) | 658 | 21% |
+
+**Average Processing Time**: 68ms
+
+---
+
+## Classification Categories
+
+Sessions grouped by the classification layer that made the final decision.
+
+### Layer 0: Session Filter
+
+#### Local (LOCAL)
+
+- **[2025-09-19_0700-0800_g9b30a](2025-09-19_0700-0800_g9b30a-summary.md)** - 2 local decisions
+- **[2025-09-19_0800-0900_g9b30a](2025-09-19_0800-0900_g9b30a-summary.md)** - 1 local decisions
+- **[2025-09-19_1300-1400_g9b30a](2025-09-19_1300-1400_g9b30a-summary.md)** - 4 local decisions
+- **[2025-09-19_1400-1500_g9b30a](2025-09-19_1400-1500_g9b30a-summary.md)** - 1 local decisions
+- **[2025-09-20_0800-0900_g9b30a](2025-09-20_0800-0900_g9b30a-summary.md)** - 1 local decisions
+- **[2025-09-20_0900-1000_g9b30a](2025-09-20_0900-1000_g9b30a-summary.md)** - 2 local decisions
+- **[2025-09-20_1200-1300_g9b30a](2025-09-20_1200-1300_g9b30a-summary.md)** - 1 local decisions
+- **[2025-09-20_1600-1700_g9b30a](2025-09-20_1600-1700_g9b30a-summary.md)** - 1 local decisions
+- **[2025-09-20_1700-1800_g9b30a](2025-09-20_1700-1800_g9b30a-summary.md)** - 1 local decisions
+- **[2025-09-20_1900-2000_g9b30a](2025-09-20_1900-2000_g9b30a-summary.md)** - 1 local decisions
+- **[2025-09-20_2100-2200_g9b30a](2025-09-20_2100-2200_g9b30a-summary.md)** - 1 local decisions
+- **[2025-09-20_2200-2300_g9b30a](2025-09-20_2200-2300_g9b30a-summary.md)** - 1 local decisions
+- **[2025-09-21_0600-0700_g9b30a](2025-09-21_0600-0700_g9b30a-summary.md)** - 1 local decisions
+- **[2025-09-21_0700-0800_g9b30a](2025-09-21_0700-0800_g9b30a-summary.md)** - 2 local decisions
+- **[2025-09-21_0800-0900_g9b30a](2025-09-21_0800-0900_g9b30a-summary.md)** - 1 local decisions
+- **[2025-09-21_1100-1200_g9b30a](2025-09-21_1100-1200_g9b30a-summary.md)** - 1 local decisions
+- **[2025-09-21_1300-1400_g9b30a](2025-09-21_1300-1400_g9b30a-summary.md)** - 3 local decisions
+- **[2025-09-21_1400-1500_g9b30a](2025-09-21_1400-1500_g9b30a-summary.md)** - 1 local decisions
+- **[2025-09-21_1800-1900_g9b30a](2025-09-21_1800-1900_g9b30a-summary.md)** - 1 local decisions
+- **[2025-09-22_0600-0700_g9b30a](2025-09-22_0600-0700_g9b30a-summary.md)** - 1 local decisions
+- **[2025-09-22_0700-0800_g9b30a](2025-09-22_0700-0800_g9b30a-summary.md)** - 4 local decisions
+- **[2025-09-22_1000-1100_g9b30a](2025-09-22_1000-1100_g9b30a-summary.md)** - 3 local decisions
+- **[2025-09-22_1100-1200_g9b30a](2025-09-22_1100-1200_g9b30a-summary.md)** - 4 local decisions
+- **[2025-09-22_1400-1500_g9b30a](2025-09-22_1400-1500_g9b30a-summary.md)** - 4 local decisions
+- **[2025-09-22_1800-1900_g9b30a](2025-09-22_1800-1900_g9b30a-summary.md)** - 1 local decisions
+- **[2025-09-22_1900-2000_g9b30a](2025-09-22_1900-2000_g9b30a-summary.md)** - 1 local decisions
+- **[2025-09-22_2100-2200_g9b30a](2025-09-22_2100-2200_g9b30a-summary.md)** - 4 local decisions
+- **[2025-09-23_0700-0800_g9b30a](2025-09-23_0700-0800_g9b30a-summary.md)** - 4 local decisions
+- **[2025-09-23_0800-0900_g9b30a](2025-09-23_0800-0900_g9b30a-summary.md)** - 4 local decisions
+- **[2025-09-23_0900-1000_g9b30a](2025-09-23_0900-1000_g9b30a-summary.md)** - 3 local decisions
+- **[2025-09-23_1000-1100_g9b30a](2025-09-23_1000-1100_g9b30a-summary.md)** - 3 local decisions
+- **[2025-09-23_1900-2000_g9b30a](2025-09-23_1900-2000_g9b30a-summary.md)** - 3 local decisions
+- **[2025-09-23_2100-2200_g9b30a](2025-09-23_2100-2200_g9b30a-summary.md)** - 6 local decisions
+- **[2025-09-24_1200-1300_g9b30a](2025-09-24_1200-1300_g9b30a-summary.md)** - 4 local decisions
+- **[2025-09-24_1400-1500_g9b30a](2025-09-24_1400-1500_g9b30a-summary.md)** - 3 local decisions
+- **[2025-09-24_1500-1600_g9b30a](2025-09-24_1500-1600_g9b30a-summary.md)** - 3 local decisions
+- **[2025-09-24_1600-1700_g9b30a](2025-09-24_1600-1700_g9b30a-summary.md)** - 1 local decisions
+- **[2025-09-24_1700-1800_g9b30a](2025-09-24_1700-1800_g9b30a-summary.md)** - 4 local decisions
+- **[2025-09-24_1800-1900_g9b30a](2025-09-24_1800-1900_g9b30a-summary.md)** - 3 local decisions
+- **[2025-09-24_1900-2000_g9b30a](2025-09-24_1900-2000_g9b30a-summary.md)** - 5 local decisions
+- **[2025-09-24_2200-2300_g9b30a](2025-09-24_2200-2300_g9b30a-summary.md)** - 2 local decisions
+- **[2025-09-24_2300-0000_g9b30a](2025-09-24_2300-0000_g9b30a-summary.md)** - 4 local decisions
+- **[2025-09-25_0600-0700_g9b30a](2025-09-25_0600-0700_g9b30a-summary.md)** - 3 local decisions
+- **[2025-09-25_0700-0800_g9b30a](2025-09-25_0700-0800_g9b30a-summary.md)** - 4 local decisions
+- **[2025-09-25_1700-1800_g9b30a](2025-09-25_1700-1800_g9b30a-summary.md)** - 4 local decisions
+- **[2025-09-25_1800-1900_g9b30a](2025-09-25_1800-1900_g9b30a-summary.md)** - 12 local decisions
+- **[2025-09-25_1900-2000_g9b30a](2025-09-25_1900-2000_g9b30a-summary.md)** - 1 local decisions
+- **[2025-09-25_2100-2200_g9b30a](2025-09-25_2100-2200_g9b30a-summary.md)** - 3 local decisions
+- **[2025-09-25_2200-2300_g9b30a](2025-09-25_2200-2300_g9b30a-summary.md)** - 1 local decisions
+- **[2025-09-26_0700-0800_g9b30a](2025-09-26_0700-0800_g9b30a-summary.md)** - 5 local decisions
+- **[2025-09-26_0800-0900_g9b30a](2025-09-26_0800-0900_g9b30a-summary.md)** - 1 local decisions
+- **[2025-09-26_0900-1000_g9b30a](2025-09-26_0900-1000_g9b30a-summary.md)** - 3 local decisions
+- **[2025-09-26_1100-1200_g9b30a](2025-09-26_1100-1200_g9b30a-summary.md)** - 4 local decisions
+- **[2025-09-26_1200-1300_g9b30a](2025-09-26_1200-1300_g9b30a-summary.md)** - 4 local decisions
+- **[2025-09-26_1300-1400_g9b30a](2025-09-26_1300-1400_g9b30a-summary.md)** - 2 local decisions
+- **[2025-09-26_1400-1500_g9b30a](2025-09-26_1400-1500_g9b30a-summary.md)** - 3 local decisions
+- **[2025-09-26_1600-1700_g9b30a](2025-09-26_1600-1700_g9b30a-summary.md)** - 7 local decisions
+- **[2025-09-26_1700-1800_g9b30a](2025-09-26_1700-1800_g9b30a-summary.md)** - 8 local decisions
+- **[2025-09-26_1800-1900_g9b30a](2025-09-26_1800-1900_g9b30a-summary.md)** - 1 local decisions
+- **[2025-09-26_1900-2000_g9b30a](2025-09-26_1900-2000_g9b30a-summary.md)** - 3 local decisions
+- **[2025-09-27_1000-1100_g9b30a](2025-09-27_1000-1100_g9b30a-summary.md)** - 8 local decisions
+- **[2025-09-27_1100-1200_g9b30a](2025-09-27_1100-1200_g9b30a-summary.md)** - 4 local decisions
+- **[2025-09-27_1200-1300_g9b30a](2025-09-27_1200-1300_g9b30a-summary.md)** - 5 local decisions
+- **[2025-09-27_1500-1600_g9b30a](2025-09-27_1500-1600_g9b30a-summary.md)** - 4 local decisions
+- **[2025-09-27_1700-1800_g9b30a](2025-09-27_1700-1800_g9b30a-summary.md)** - 6 local decisions
+- **[2025-09-27_1800-1900_g9b30a](2025-09-27_1800-1900_g9b30a-summary.md)** - 4 local decisions
+- **[2025-09-27_1900-2000_g9b30a](2025-09-27_1900-2000_g9b30a-summary.md)** - 1 local decisions
+- **[2025-09-27_2000-2100_g9b30a](2025-09-27_2000-2100_g9b30a-summary.md)** - 1 local decisions
+- **[2025-09-27_2100-2200_g9b30a](2025-09-27_2100-2200_g9b30a-summary.md)** - 4 local decisions
+- **[2025-09-27_2200-2300_g9b30a](2025-09-27_2200-2300_g9b30a-summary.md)** - 3 local decisions
+- **[2025-09-28_0600-0700_g9b30a](2025-09-28_0600-0700_g9b30a-summary.md)** - 3 local decisions
+- **[2025-09-28_0700-0800_g9b30a](2025-09-28_0700-0800_g9b30a-summary.md)** - 2 local decisions
+- **[2025-09-28_0800-0900_g9b30a](2025-09-28_0800-0900_g9b30a-summary.md)** - 6 local decisions
+- **[2025-09-28_0900-1000_g9b30a](2025-09-28_0900-1000_g9b30a-summary.md)** - 6 local decisions
+- **[2025-09-28_1000-1100_g9b30a](2025-09-28_1000-1100_g9b30a-summary.md)** - 4 local decisions
+- **[2025-09-28_1100-1200_g9b30a](2025-09-28_1100-1200_g9b30a-summary.md)** - 6 local decisions
+- **[2025-09-28_1200-1300_g9b30a](2025-09-28_1200-1300_g9b30a-summary.md)** - 1 local decisions
+- **[2025-09-28_1300-1400_g9b30a](2025-09-28_1300-1400_g9b30a-summary.md)** - 2 local decisions
+- **[2025-09-28_1400-1500_g9b30a](2025-09-28_1400-1500_g9b30a-summary.md)** - 1 local decisions
+- **[2025-09-28_1600-1700_g9b30a](2025-09-28_1600-1700_g9b30a-summary.md)** - 8 local decisions
+- **[2025-09-28_1700-1800_g9b30a](2025-09-28_1700-1800_g9b30a-summary.md)** - 1 local decisions
+- **[2025-09-28_1800-1900_g9b30a](2025-09-28_1800-1900_g9b30a-summary.md)** - 5 local decisions
+- **[2025-09-28_1900-2000_g9b30a](2025-09-28_1900-2000_g9b30a-summary.md)** - 4 local decisions
+- **[2025-09-28_2000-2100_g9b30a](2025-09-28_2000-2100_g9b30a-summary.md)** - 1 local decisions
+- **[2025-09-28_2100-2200_g9b30a](2025-09-28_2100-2200_g9b30a-summary.md)** - 6 local decisions
+- **[2025-09-28_2200-2300_g9b30a](2025-09-28_2200-2300_g9b30a-summary.md)** - 6 local decisions
+- **[2025-09-29_0600-0700_g9b30a](2025-09-29_0600-0700_g9b30a-summary.md)** - 1 local decisions
+- **[2025-09-29_0700-0800_g9b30a](2025-09-29_0700-0800_g9b30a-summary.md)** - 5 local decisions
+- **[2025-09-29_0800-0900_g9b30a](2025-09-29_0800-0900_g9b30a-summary.md)** - 7 local decisions
+- **[2025-09-29_1000-1100_g9b30a](2025-09-29_1000-1100_g9b30a-summary.md)** - 1 local decisions
+- **[2025-09-29_1100-1200_g9b30a](2025-09-29_1100-1200_g9b30a-summary.md)** - 7 local decisions
+- **[2025-09-29_1300-1400_g9b30a](2025-09-29_1300-1400_g9b30a-summary.md)** - 9 local decisions
+- **[2025-09-29_1400-1500_g9b30a](2025-09-29_1400-1500_g9b30a-summary.md)** - 6 local decisions
+- **[2025-09-29_1500-1600_g9b30a](2025-09-29_1500-1600_g9b30a-summary.md)** - 4 local decisions
+- **[2025-09-29_1600-1700_g9b30a](2025-09-29_1600-1700_g9b30a-summary.md)** - 1 local decisions
+- **[2025-09-29_1700-1800_g9b30a](2025-09-29_1700-1800_g9b30a-summary.md)** - 1 local decisions
+- **[2025-10-01_0900-1000_g9b30a](2025-10-01_0900-1000_g9b30a-summary.md)** - 1 local decisions
+- **[2025-10-01_1300-1400_g9b30a](2025-10-01_1300-1400_g9b30a-summary.md)** - 3 local decisions
+- **[2025-10-01_1600-1700_g9b30a](2025-10-01_1600-1700_g9b30a-summary.md)** - 3 local decisions
+- **[2025-10-01_1800-1900_g9b30a](2025-10-01_1800-1900_g9b30a-summary.md)** - 1 local decisions
+- **[2025-10-02_0800-0900_g9b30a](2025-10-02_0800-0900_g9b30a-summary.md)** - 1 local decisions
+- **[2025-10-02_0900-1000_g9b30a](2025-10-02_0900-1000_g9b30a-summary.md)** - 1 local decisions
+- **[2025-10-02_1600-1700_g9b30a](2025-10-02_1600-1700_g9b30a-summary.md)** - 3 local decisions
+- **[2025-10-02_1700-1800_g9b30a](2025-10-02_1700-1800_g9b30a-summary.md)** - 3 local decisions
+- **[2025-10-02_1800-1900_g9b30a](2025-10-02_1800-1900_g9b30a-summary.md)** - 2 local decisions
+- **[2025-10-02_2000-2100_g9b30a](2025-10-02_2000-2100_g9b30a-summary.md)** - 1 local decisions
+- **[2025-10-03_0700-0800_g9b30a](2025-10-03_0700-0800_g9b30a-summary.md)** - 3 local decisions
+- **[2025-10-03_0800-0900_g9b30a](2025-10-03_0800-0900_g9b30a-summary.md)** - 3 local decisions
+- **[2025-10-03_0900-1000_g9b30a](2025-10-03_0900-1000_g9b30a-summary.md)** - 1 local decisions
+- **[2025-10-03_1000-1100_g9b30a](2025-10-03_1000-1100_g9b30a-summary.md)** - 4 local decisions
+- **[2025-10-03_1100-1200_g9b30a](2025-10-03_1100-1200_g9b30a-summary.md)** - 1 local decisions
+- **[2025-10-03_1300-1400_g9b30a](2025-10-03_1300-1400_g9b30a-summary.md)** - 3 local decisions
+- **[2025-10-03_1400-1500_g9b30a](2025-10-03_1400-1500_g9b30a-summary.md)** - 2 local decisions
+- **[2025-10-03_1500-1600_g9b30a](2025-10-03_1500-1600_g9b30a-summary.md)** - 1 local decisions
+- **[2025-10-03_1600-1700_g9b30a](2025-10-03_1600-1700_g9b30a-summary.md)** - 3 local decisions
+- **[2025-10-03_1800-1900_g9b30a](2025-10-03_1800-1900_g9b30a-summary.md)** - 2 local decisions
+- **[2025-10-03_1900-2000_g9b30a](2025-10-03_1900-2000_g9b30a-summary.md)** - 2 local decisions
+- **[2025-10-04_0800-0900_g9b30a](2025-10-04_0800-0900_g9b30a-summary.md)** - 5 local decisions
+- **[2025-10-04_0900-1000_g9b30a](2025-10-04_0900-1000_g9b30a-summary.md)** - 2 local decisions
+- **[2025-10-04_1000-1100_g9b30a](2025-10-04_1000-1100_g9b30a-summary.md)** - 3 local decisions
+- **[2025-10-04_1100-1200_g9b30a](2025-10-04_1100-1200_g9b30a-summary.md)** - 1 local decisions
+- **[2025-10-04_1300-1400_g9b30a](2025-10-04_1300-1400_g9b30a-summary.md)** - 1 local decisions
+- **[2025-10-04_1400-1500_g9b30a](2025-10-04_1400-1500_g9b30a-summary.md)** - 1 local decisions
+- **[2025-10-04_1500-1600_g9b30a](2025-10-04_1500-1600_g9b30a-summary.md)** - 2 local decisions
+- **[2025-10-04_1600-1700_g9b30a](2025-10-04_1600-1700_g9b30a-summary.md)** - 1 local decisions
+- **[2025-10-04_1700-1800_g9b30a](2025-10-04_1700-1800_g9b30a-summary.md)** - 2 local decisions
+- **[2025-10-04_1800-1900_g9b30a](2025-10-04_1800-1900_g9b30a-summary.md)** - 1 local decisions
+- **[2025-10-05_0900-1000_g9b30a](2025-10-05_0900-1000_g9b30a-summary.md)** - 2 local decisions
+- **[2025-10-05_1000-1100_g9b30a](2025-10-05_1000-1100_g9b30a-summary.md)** - 4 local decisions
+- **[2025-10-05_1100-1200_g9b30a](2025-10-05_1100-1200_g9b30a-summary.md)** - 4 local decisions
+- **[2025-10-05_1400-1500_g9b30a](2025-10-05_1400-1500_g9b30a-summary.md)** - 2 local decisions
+
+### Layer 1: Path Analysis
+
+#### Redirected (CODING)
+
+- **[2025-09-22_0700-0800_g9b30a](2025-09-22_0700-0800_g9b30a-summary.md)** - 1 coding decisions
+- **[2025-09-24_1300-1400_g9b30a](2025-09-24_1300-1400_g9b30a-summary.md)** - 1 coding decisions
+- **[2025-09-24_1500-1600_g9b30a](2025-09-24_1500-1600_g9b30a-summary.md)** - 1 coding decisions
+- **[2025-09-24_1600-1700_g9b30a](2025-09-24_1600-1700_g9b30a-summary.md)** - 4 coding decisions
+- **[2025-09-24_1700-1800_g9b30a](2025-09-24_1700-1800_g9b30a-summary.md)** - 2 coding decisions
+- **[2025-09-24_2200-2300_g9b30a](2025-09-24_2200-2300_g9b30a-summary.md)** - 1 coding decisions
+- **[2025-09-24_2300-0000_g9b30a](2025-09-24_2300-0000_g9b30a-summary.md)** - 2 coding decisions
+- **[2025-09-25_0600-0700_g9b30a](2025-09-25_0600-0700_g9b30a-summary.md)** - 1 coding decisions
+- **[2025-09-25_0700-0800_g9b30a](2025-09-25_0700-0800_g9b30a-summary.md)** - 4 coding decisions
+- **[2025-09-25_0800-0900_g9b30a](2025-09-25_0800-0900_g9b30a-summary.md)** - 1 coding decisions
+- **[2025-09-25_1700-1800_g9b30a](2025-09-25_1700-1800_g9b30a-summary.md)** - 1 coding decisions
+- **[2025-09-25_1800-1900_g9b30a](2025-09-25_1800-1900_g9b30a-summary.md)** - 3 coding decisions
+- **[2025-09-25_1900-2000_g9b30a](2025-09-25_1900-2000_g9b30a-summary.md)** - 1 coding decisions
+- **[2025-09-26_0700-0800_g9b30a](2025-09-26_0700-0800_g9b30a-summary.md)** - 4 coding decisions
+- **[2025-09-26_0800-0900_g9b30a](2025-09-26_0800-0900_g9b30a-summary.md)** - 4 coding decisions
+- **[2025-09-26_0900-1000_g9b30a](2025-09-26_0900-1000_g9b30a-summary.md)** - 4 coding decisions
+- **[2025-09-26_1000-1100_g9b30a](2025-09-26_1000-1100_g9b30a-summary.md)** - 2 coding decisions
+- **[2025-09-26_1100-1200_g9b30a](2025-09-26_1100-1200_g9b30a-summary.md)** - 3 coding decisions
+- **[2025-09-26_1200-1300_g9b30a](2025-09-26_1200-1300_g9b30a-summary.md)** - 3 coding decisions
+- **[2025-09-26_1300-1400_g9b30a](2025-09-26_1300-1400_g9b30a-summary.md)** - 4 coding decisions
+- **[2025-09-26_1400-1500_g9b30a](2025-09-26_1400-1500_g9b30a-summary.md)** - 1 coding decisions
+- **[2025-09-26_1600-1700_g9b30a](2025-09-26_1600-1700_g9b30a-summary.md)** - 5 coding decisions
+- **[2025-09-26_1700-1800_g9b30a](2025-09-26_1700-1800_g9b30a-summary.md)** - 8 coding decisions
+- **[2025-09-26_1900-2000_g9b30a](2025-09-26_1900-2000_g9b30a-summary.md)** - 3 coding decisions
+- **[2025-09-27_0900-1000_g9b30a](2025-09-27_0900-1000_g9b30a-summary.md)** - 1 coding decisions
+- **[2025-09-27_1000-1100_g9b30a](2025-09-27_1000-1100_g9b30a-summary.md)** - 2 coding decisions
+- **[2025-09-27_1100-1200_g9b30a](2025-09-27_1100-1200_g9b30a-summary.md)** - 3 coding decisions
+- **[2025-09-27_1200-1300_g9b30a](2025-09-27_1200-1300_g9b30a-summary.md)** - 4 coding decisions
+- **[2025-09-27_1400-1500_g9b30a](2025-09-27_1400-1500_g9b30a-summary.md)** - 1 coding decisions
+- **[2025-09-27_1500-1600_g9b30a](2025-09-27_1500-1600_g9b30a-summary.md)** - 1 coding decisions
+- **[2025-09-27_1700-1800_g9b30a](2025-09-27_1700-1800_g9b30a-summary.md)** - 5 coding decisions
+- **[2025-09-27_1800-1900_g9b30a](2025-09-27_1800-1900_g9b30a-summary.md)** - 1 coding decisions
+- **[2025-09-27_2100-2200_g9b30a](2025-09-27_2100-2200_g9b30a-summary.md)** - 2 coding decisions
+- **[2025-09-28_0600-0700_g9b30a](2025-09-28_0600-0700_g9b30a-summary.md)** - 4 coding decisions
+- **[2025-09-28_0700-0800_g9b30a](2025-09-28_0700-0800_g9b30a-summary.md)** - 4 coding decisions
+- **[2025-09-28_0800-0900_g9b30a](2025-09-28_0800-0900_g9b30a-summary.md)** - 4 coding decisions
+- **[2025-09-28_0900-1000_g9b30a](2025-09-28_0900-1000_g9b30a-summary.md)** - 4 coding decisions
+- **[2025-09-28_1100-1200_g9b30a](2025-09-28_1100-1200_g9b30a-summary.md)** - 2 coding decisions
+- **[2025-09-28_1200-1300_g9b30a](2025-09-28_1200-1300_g9b30a-summary.md)** - 4 coding decisions
+- **[2025-09-28_1300-1400_g9b30a](2025-09-28_1300-1400_g9b30a-summary.md)** - 3 coding decisions
+- **[2025-09-28_1400-1500_g9b30a](2025-09-28_1400-1500_g9b30a-summary.md)** - 8 coding decisions
+- **[2025-09-28_1500-1600_g9b30a](2025-09-28_1500-1600_g9b30a-summary.md)** - 4 coding decisions
+- **[2025-09-28_1600-1700_g9b30a](2025-09-28_1600-1700_g9b30a-summary.md)** - 3 coding decisions
+- **[2025-09-28_1700-1800_g9b30a](2025-09-28_1700-1800_g9b30a-summary.md)** - 2 coding decisions
+- **[2025-09-28_1900-2000_g9b30a](2025-09-28_1900-2000_g9b30a-summary.md)** - 1 coding decisions
+- **[2025-09-28_2100-2200_g9b30a](2025-09-28_2100-2200_g9b30a-summary.md)** - 1 coding decisions
+- **[2025-09-28_2200-2300_g9b30a](2025-09-28_2200-2300_g9b30a-summary.md)** - 5 coding decisions
+- **[2025-09-29_0600-0700_g9b30a](2025-09-29_0600-0700_g9b30a-summary.md)** - 1 coding decisions
+- **[2025-09-29_0700-0800_g9b30a](2025-09-29_0700-0800_g9b30a-summary.md)** - 3 coding decisions
+- **[2025-09-29_0800-0900_g9b30a](2025-09-29_0800-0900_g9b30a-summary.md)** - 6 coding decisions
+- **[2025-09-29_1000-1100_g9b30a](2025-09-29_1000-1100_g9b30a-summary.md)** - 1 coding decisions
+- **[2025-09-29_1100-1200_g9b30a](2025-09-29_1100-1200_g9b30a-summary.md)** - 2 coding decisions
+- **[2025-09-29_1200-1300_g9b30a](2025-09-29_1200-1300_g9b30a-summary.md)** - 1 coding decisions
+- **[2025-09-29_1400-1500_g9b30a](2025-09-29_1400-1500_g9b30a-summary.md)** - 7 coding decisions
+- **[2025-09-29_1600-1700_g9b30a](2025-09-29_1600-1700_g9b30a-summary.md)** - 6 coding decisions
+- **[2025-09-29_1700-1800_g9b30a](2025-09-29_1700-1800_g9b30a-summary.md)** - 3 coding decisions
+- **[2025-09-29_1800-1900_g9b30a](2025-09-29_1800-1900_g9b30a-summary.md)** - 2 coding decisions
+- **[2025-10-01_0700-0800_g9b30a](2025-10-01_0700-0800_g9b30a-summary.md)** - 1 coding decisions
+- **[2025-10-01_0800-0900_g9b30a](2025-10-01_0800-0900_g9b30a-summary.md)** - 1 coding decisions
+- **[2025-10-01_0900-1000_g9b30a](2025-10-01_0900-1000_g9b30a-summary.md)** - 3 coding decisions
+- **[2025-10-01_1300-1400_g9b30a](2025-10-01_1300-1400_g9b30a-summary.md)** - 1 coding decisions
+- **[2025-10-01_1800-1900_g9b30a](2025-10-01_1800-1900_g9b30a-summary.md)** - 1 coding decisions
+- **[2025-10-02_0700-0800_g9b30a](2025-10-02_0700-0800_g9b30a-summary.md)** - 1 coding decisions
+- **[2025-10-02_0800-0900_g9b30a](2025-10-02_0800-0900_g9b30a-summary.md)** - 3 coding decisions
+- **[2025-10-02_0900-1000_g9b30a](2025-10-02_0900-1000_g9b30a-summary.md)** - 1 coding decisions
+- **[2025-10-02_1500-1600_g9b30a](2025-10-02_1500-1600_g9b30a-summary.md)** - 2 coding decisions
+- **[2025-10-02_1600-1700_g9b30a](2025-10-02_1600-1700_g9b30a-summary.md)** - 6 coding decisions
+- **[2025-10-02_1700-1800_g9b30a](2025-10-02_1700-1800_g9b30a-summary.md)** - 1 coding decisions
+- **[2025-10-02_1800-1900_g9b30a](2025-10-02_1800-1900_g9b30a-summary.md)** - 3 coding decisions
+- **[2025-10-03_0700-0800_g9b30a](2025-10-03_0700-0800_g9b30a-summary.md)** - 5 coding decisions
+- **[2025-10-03_0800-0900_g9b30a](2025-10-03_0800-0900_g9b30a-summary.md)** - 10 coding decisions
+- **[2025-10-03_0900-1000_g9b30a](2025-10-03_0900-1000_g9b30a-summary.md)** - 1 coding decisions
+- **[2025-10-03_1000-1100_g9b30a](2025-10-03_1000-1100_g9b30a-summary.md)** - 2 coding decisions
+- **[2025-10-03_1100-1200_g9b30a](2025-10-03_1100-1200_g9b30a-summary.md)** - 2 coding decisions
+- **[2025-10-03_1200-1300_g9b30a](2025-10-03_1200-1300_g9b30a-summary.md)** - 1 coding decisions
+- **[2025-10-03_1300-1400_g9b30a](2025-10-03_1300-1400_g9b30a-summary.md)** - 6 coding decisions
+- **[2025-10-03_1400-1500_g9b30a](2025-10-03_1400-1500_g9b30a-summary.md)** - 7 coding decisions
+- **[2025-10-03_1500-1600_g9b30a](2025-10-03_1500-1600_g9b30a-summary.md)** - 6 coding decisions
+- **[2025-10-03_1600-1700_g9b30a](2025-10-03_1600-1700_g9b30a-summary.md)** - 3 coding decisions
+- **[2025-10-03_1700-1800_g9b30a](2025-10-03_1700-1800_g9b30a-summary.md)** - 4 coding decisions
+- **[2025-10-03_1800-1900_g9b30a](2025-10-03_1800-1900_g9b30a-summary.md)** - 7 coding decisions
+- **[2025-10-03_1900-2000_g9b30a](2025-10-03_1900-2000_g9b30a-summary.md)** - 2 coding decisions
+- **[2025-10-04_0800-0900_g9b30a](2025-10-04_0800-0900_g9b30a-summary.md)** - 4 coding decisions
+- **[2025-10-04_0900-1000_g9b30a](2025-10-04_0900-1000_g9b30a-summary.md)** - 2 coding decisions
+- **[2025-10-04_1000-1100_g9b30a](2025-10-04_1000-1100_g9b30a-summary.md)** - 1 coding decisions
+- **[2025-10-04_1100-1200_g9b30a](2025-10-04_1100-1200_g9b30a-summary.md)** - 2 coding decisions
+- **[2025-10-04_1400-1500_g9b30a](2025-10-04_1400-1500_g9b30a-summary.md)** - 2 coding decisions
+- **[2025-10-04_1500-1600_g9b30a](2025-10-04_1500-1600_g9b30a-summary.md)** - 4 coding decisions
+- **[2025-10-04_1600-1700_g9b30a](2025-10-04_1600-1700_g9b30a-summary.md)** - 3 coding decisions
+- **[2025-10-04_1700-1800_g9b30a](2025-10-04_1700-1800_g9b30a-summary.md)** - 4 coding decisions
+- **[2025-10-04_1800-1900_g9b30a](2025-10-04_1800-1900_g9b30a-summary.md)** - 3 coding decisions
+- **[2025-10-05_0800-0900_g9b30a](2025-10-05_0800-0900_g9b30a-summary.md)** - 2 coding decisions
+- **[2025-10-05_0900-1000_g9b30a](2025-10-05_0900-1000_g9b30a-summary.md)** - 7 coding decisions
+- **[2025-10-05_1000-1100_g9b30a](2025-10-05_1000-1100_g9b30a-summary.md)** - 10 coding decisions
+- **[2025-10-05_1100-1200_g9b30a](2025-10-05_1100-1200_g9b30a-summary.md)** - 4 coding decisions
+- **[2025-10-05_1200-1300_g9b30a](2025-10-05_1200-1300_g9b30a-summary.md)** - 4 coding decisions
+- **[2025-10-05_1400-1500_g9b30a](2025-10-05_1400-1500_g9b30a-summary.md)** - 6 coding decisions
+- **[2025-10-05_1500-1600_g9b30a](2025-10-05_1500-1600_g9b30a-summary.md)** - 1 coding decisions
+- **[2025-10-05_1600-1700_g9b30a](2025-10-05_1600-1700_g9b30a-summary.md)** - 8 coding decisions
+- **[2025-10-05_1700-1800_g9b30a](2025-10-05_1700-1800_g9b30a-summary.md)** - 6 coding decisions
+- **[2025-10-05_1800-1900_g9b30a](2025-10-05_1800-1900_g9b30a-summary.md)** - 1 coding decisions
+
+### Layer 2: Keyword Matching
+
+#### Redirected (CODING)
+
+- **[2025-09-19_0600-0700_g9b30a](2025-09-19_0600-0700_g9b30a-summary.md)** - 3 coding decisions
+- **[2025-09-19_0700-0800_g9b30a](2025-09-19_0700-0800_g9b30a-summary.md)** - 1 coding decisions
+- **[2025-09-19_0800-0900_g9b30a](2025-09-19_0800-0900_g9b30a-summary.md)** - 1 coding decisions
+- **[2025-09-19_1300-1400_g9b30a](2025-09-19_1300-1400_g9b30a-summary.md)** - 6 coding decisions
+- **[2025-09-20_1200-1300_g9b30a](2025-09-20_1200-1300_g9b30a-summary.md)** - 2 coding decisions
+- **[2025-09-20_2000-2100_g9b30a](2025-09-20_2000-2100_g9b30a-summary.md)** - 1 coding decisions
+- **[2025-09-20_2200-2300_g9b30a](2025-09-20_2200-2300_g9b30a-summary.md)** - 1 coding decisions
+- **[2025-09-21_0600-0700_g9b30a](2025-09-21_0600-0700_g9b30a-summary.md)** - 2 coding decisions
+- **[2025-09-21_0700-0800_g9b30a](2025-09-21_0700-0800_g9b30a-summary.md)** - 3 coding decisions
+- **[2025-09-21_0800-0900_g9b30a](2025-09-21_0800-0900_g9b30a-summary.md)** - 1 coding decisions
+- **[2025-09-21_2200-2300_g9b30a](2025-09-21_2200-2300_g9b30a-summary.md)** - 8 coding decisions
+- **[2025-09-22_0600-0700_g9b30a](2025-09-22_0600-0700_g9b30a-summary.md)** - 9 coding decisions
+- **[2025-09-22_0700-0800_g9b30a](2025-09-22_0700-0800_g9b30a-summary.md)** - 12 coding decisions
+- **[2025-09-22_0800-0900_g9b30a](2025-09-22_0800-0900_g9b30a-summary.md)** - 9 coding decisions
+- **[2025-09-22_1000-1100_g9b30a](2025-09-22_1000-1100_g9b30a-summary.md)** - 6 coding decisions
+- **[2025-09-22_1100-1200_g9b30a](2025-09-22_1100-1200_g9b30a-summary.md)** - 4 coding decisions
+- **[2025-09-22_1300-1400_g9b30a](2025-09-22_1300-1400_g9b30a-summary.md)** - 3 coding decisions
+- **[2025-09-22_1400-1500_g9b30a](2025-09-22_1400-1500_g9b30a-summary.md)** - 1 coding decisions
+- **[2025-09-22_1600-1700_g9b30a](2025-09-22_1600-1700_g9b30a-summary.md)** - 8 coding decisions
+- **[2025-09-22_1800-1900_g9b30a](2025-09-22_1800-1900_g9b30a-summary.md)** - 1 coding decisions
+- **[2025-09-22_1900-2000_g9b30a](2025-09-22_1900-2000_g9b30a-summary.md)** - 1 coding decisions
+- **[2025-09-22_2000-2100_g9b30a](2025-09-22_2000-2100_g9b30a-summary.md)** - 2 coding decisions
+- **[2025-09-23_0700-0800_g9b30a](2025-09-23_0700-0800_g9b30a-summary.md)** - 7 coding decisions
+- **[2025-09-23_0800-0900_g9b30a](2025-09-23_0800-0900_g9b30a-summary.md)** - 3 coding decisions
+- **[2025-09-23_0900-1000_g9b30a](2025-09-23_0900-1000_g9b30a-summary.md)** - 1 coding decisions
+- **[2025-09-24_1000-1100_g9b30a](2025-09-24_1000-1100_g9b30a-summary.md)** - 4 coding decisions
+- **[2025-09-24_1100-1200_g9b30a](2025-09-24_1100-1200_g9b30a-summary.md)** - 3 coding decisions
+- **[2025-09-24_1200-1300_g9b30a](2025-09-24_1200-1300_g9b30a-summary.md)** - 7 coding decisions
+- **[2025-09-24_1400-1500_g9b30a](2025-09-24_1400-1500_g9b30a-summary.md)** - 3 coding decisions
+- **[2025-09-24_1500-1600_g9b30a](2025-09-24_1500-1600_g9b30a-summary.md)** - 3 coding decisions
+- **[2025-09-24_1700-1800_g9b30a](2025-09-24_1700-1800_g9b30a-summary.md)** - 3 coding decisions
+- **[2025-09-24_1800-1900_g9b30a](2025-09-24_1800-1900_g9b30a-summary.md)** - 1 coding decisions
+- **[2025-09-24_1900-2000_g9b30a](2025-09-24_1900-2000_g9b30a-summary.md)** - 5 coding decisions
+- **[2025-09-24_2200-2300_g9b30a](2025-09-24_2200-2300_g9b30a-summary.md)** - 6 coding decisions
+- **[2025-09-25_0600-0700_g9b30a](2025-09-25_0600-0700_g9b30a-summary.md)** - 4 coding decisions
+- **[2025-09-25_0700-0800_g9b30a](2025-09-25_0700-0800_g9b30a-summary.md)** - 4 coding decisions
+- **[2025-09-25_1700-1800_g9b30a](2025-09-25_1700-1800_g9b30a-summary.md)** - 1 coding decisions
+- **[2025-09-25_1800-1900_g9b30a](2025-09-25_1800-1900_g9b30a-summary.md)** - 5 coding decisions
+- **[2025-09-25_2100-2200_g9b30a](2025-09-25_2100-2200_g9b30a-summary.md)** - 1 coding decisions
+- **[2025-09-25_2200-2300_g9b30a](2025-09-25_2200-2300_g9b30a-summary.md)** - 9 coding decisions
+- **[2025-09-26_0700-0800_g9b30a](2025-09-26_0700-0800_g9b30a-summary.md)** - 6 coding decisions
+- **[2025-09-26_0800-0900_g9b30a](2025-09-26_0800-0900_g9b30a-summary.md)** - 5 coding decisions
+- **[2025-09-26_0900-1000_g9b30a](2025-09-26_0900-1000_g9b30a-summary.md)** - 2 coding decisions
+- **[2025-09-26_1000-1100_g9b30a](2025-09-26_1000-1100_g9b30a-summary.md)** - 1 coding decisions
+- **[2025-09-26_1100-1200_g9b30a](2025-09-26_1100-1200_g9b30a-summary.md)** - 2 coding decisions
+- **[2025-09-26_1300-1400_g9b30a](2025-09-26_1300-1400_g9b30a-summary.md)** - 1 coding decisions
+- **[2025-09-26_1600-1700_g9b30a](2025-09-26_1600-1700_g9b30a-summary.md)** - 15 coding decisions
+- **[2025-09-26_1700-1800_g9b30a](2025-09-26_1700-1800_g9b30a-summary.md)** - 14 coding decisions
+- **[2025-09-26_1800-1900_g9b30a](2025-09-26_1800-1900_g9b30a-summary.md)** - 21 coding decisions
+- **[2025-09-27_1000-1100_g9b30a](2025-09-27_1000-1100_g9b30a-summary.md)** - 6 coding decisions
+- **[2025-09-27_1100-1200_g9b30a](2025-09-27_1100-1200_g9b30a-summary.md)** - 2 coding decisions
+- **[2025-09-27_1200-1300_g9b30a](2025-09-27_1200-1300_g9b30a-summary.md)** - 1 coding decisions
+- **[2025-09-27_1800-1900_g9b30a](2025-09-27_1800-1900_g9b30a-summary.md)** - 1 coding decisions
+- **[2025-09-28_0600-0700_g9b30a](2025-09-28_0600-0700_g9b30a-summary.md)** - 22 coding decisions
+- **[2025-09-28_0700-0800_g9b30a](2025-09-28_0700-0800_g9b30a-summary.md)** - 2 coding decisions
+- **[2025-09-28_0800-0900_g9b30a](2025-09-28_0800-0900_g9b30a-summary.md)** - 5 coding decisions
+- **[2025-09-28_0900-1000_g9b30a](2025-09-28_0900-1000_g9b30a-summary.md)** - 8 coding decisions
+- **[2025-09-28_1000-1100_g9b30a](2025-09-28_1000-1100_g9b30a-summary.md)** - 2 coding decisions
+- **[2025-09-28_1100-1200_g9b30a](2025-09-28_1100-1200_g9b30a-summary.md)** - 2 coding decisions
+- **[2025-09-28_1200-1300_g9b30a](2025-09-28_1200-1300_g9b30a-summary.md)** - 3 coding decisions
+- **[2025-09-28_1300-1400_g9b30a](2025-09-28_1300-1400_g9b30a-summary.md)** - 2 coding decisions
+- **[2025-09-28_1400-1500_g9b30a](2025-09-28_1400-1500_g9b30a-summary.md)** - 4 coding decisions
+- **[2025-09-28_1500-1600_g9b30a](2025-09-28_1500-1600_g9b30a-summary.md)** - 6 coding decisions
+- **[2025-09-28_1600-1700_g9b30a](2025-09-28_1600-1700_g9b30a-summary.md)** - 15 coding decisions
+- **[2025-09-28_1700-1800_g9b30a](2025-09-28_1700-1800_g9b30a-summary.md)** - 3 coding decisions
+- **[2025-09-28_1800-1900_g9b30a](2025-09-28_1800-1900_g9b30a-summary.md)** - 5 coding decisions
+- **[2025-09-28_1900-2000_g9b30a](2025-09-28_1900-2000_g9b30a-summary.md)** - 5 coding decisions
+- **[2025-09-28_2100-2200_g9b30a](2025-09-28_2100-2200_g9b30a-summary.md)** - 9 coding decisions
+- **[2025-09-28_2200-2300_g9b30a](2025-09-28_2200-2300_g9b30a-summary.md)** - 3 coding decisions
+- **[2025-09-29_0700-0800_g9b30a](2025-09-29_0700-0800_g9b30a-summary.md)** - 4 coding decisions
+- **[2025-09-29_0800-0900_g9b30a](2025-09-29_0800-0900_g9b30a-summary.md)** - 2 coding decisions
+- **[2025-09-29_1000-1100_g9b30a](2025-09-29_1000-1100_g9b30a-summary.md)** - 5 coding decisions
+- **[2025-09-29_1300-1400_g9b30a](2025-09-29_1300-1400_g9b30a-summary.md)** - 5 coding decisions
+- **[2025-09-29_1400-1500_g9b30a](2025-09-29_1400-1500_g9b30a-summary.md)** - 5 coding decisions
+- **[2025-09-29_1500-1600_g9b30a](2025-09-29_1500-1600_g9b30a-summary.md)** - 2 coding decisions
+- **[2025-09-29_1600-1700_g9b30a](2025-09-29_1600-1700_g9b30a-summary.md)** - 1 coding decisions
+- **[2025-09-29_1700-1800_g9b30a](2025-09-29_1700-1800_g9b30a-summary.md)** - 11 coding decisions
+- **[2025-09-29_1800-1900_g9b30a](2025-09-29_1800-1900_g9b30a-summary.md)** - 4 coding decisions
+- **[2025-09-29_1900-2000_g9b30a](2025-09-29_1900-2000_g9b30a-summary.md)** - 2 coding decisions
+- **[2025-10-01_0900-1000_g9b30a](2025-10-01_0900-1000_g9b30a-summary.md)** - 1 coding decisions
+- **[2025-10-01_1300-1400_g9b30a](2025-10-01_1300-1400_g9b30a-summary.md)** - 6 coding decisions
+- **[2025-10-01_1600-1700_g9b30a](2025-10-01_1600-1700_g9b30a-summary.md)** - 1 coding decisions
+- **[2025-10-01_1700-1800_g9b30a](2025-10-01_1700-1800_g9b30a-summary.md)** - 9 coding decisions
+- **[2025-10-02_0700-0800_g9b30a](2025-10-02_0700-0800_g9b30a-summary.md)** - 2 coding decisions
+- **[2025-10-02_0800-0900_g9b30a](2025-10-02_0800-0900_g9b30a-summary.md)** - 1 coding decisions
+- **[2025-10-02_0900-1000_g9b30a](2025-10-02_0900-1000_g9b30a-summary.md)** - 1 coding decisions
+- **[2025-10-02_1800-1900_g9b30a](2025-10-02_1800-1900_g9b30a-summary.md)** - 2 coding decisions
+- **[2025-10-03_0700-0800_g9b30a](2025-10-03_0700-0800_g9b30a-summary.md)** - 2 coding decisions
+- **[2025-10-03_0800-0900_g9b30a](2025-10-03_0800-0900_g9b30a-summary.md)** - 1 coding decisions
+- **[2025-10-03_1000-1100_g9b30a](2025-10-03_1000-1100_g9b30a-summary.md)** - 5 coding decisions
+- **[2025-10-03_1100-1200_g9b30a](2025-10-03_1100-1200_g9b30a-summary.md)** - 1 coding decisions
+- **[2025-10-03_1400-1500_g9b30a](2025-10-03_1400-1500_g9b30a-summary.md)** - 1 coding decisions
+- **[2025-10-03_1800-1900_g9b30a](2025-10-03_1800-1900_g9b30a-summary.md)** - 1 coding decisions
+- **[2025-10-04_0800-0900_g9b30a](2025-10-04_0800-0900_g9b30a-summary.md)** - 3 coding decisions
+- **[2025-10-04_0900-1000_g9b30a](2025-10-04_0900-1000_g9b30a-summary.md)** - 6 coding decisions
+- **[2025-10-04_1000-1100_g9b30a](2025-10-04_1000-1100_g9b30a-summary.md)** - 1 coding decisions
+- **[2025-10-04_1100-1200_g9b30a](2025-10-04_1100-1200_g9b30a-summary.md)** - 1 coding decisions
+- **[2025-10-04_1500-1600_g9b30a](2025-10-04_1500-1600_g9b30a-summary.md)** - 3 coding decisions
+- **[2025-10-04_1800-1900_g9b30a](2025-10-04_1800-1900_g9b30a-summary.md)** - 1 coding decisions
+- **[2025-10-05_0900-1000_g9b30a](2025-10-05_0900-1000_g9b30a-summary.md)** - 8 coding decisions
+- **[2025-10-05_1000-1100_g9b30a](2025-10-05_1000-1100_g9b30a-summary.md)** - 4 coding decisions
+- **[2025-10-05_1100-1200_g9b30a](2025-10-05_1100-1200_g9b30a-summary.md)** - 2 coding decisions
+- **[2025-10-05_1200-1300_g9b30a](2025-10-05_1200-1300_g9b30a-summary.md)** - 4 coding decisions
+- **[2025-10-05_1400-1500_g9b30a](2025-10-05_1400-1500_g9b30a-summary.md)** - 8 coding decisions
+- **[2025-10-05_1600-1700_g9b30a](2025-10-05_1600-1700_g9b30a-summary.md)** - 1 coding decisions
+- **[2025-10-05_1700-1800_g9b30a](2025-10-05_1700-1800_g9b30a-summary.md)** - 3 coding decisions
+- **[2025-10-05_1800-1900_g9b30a](2025-10-05_1800-1900_g9b30a-summary.md)** - 2 coding decisions
+
+### Layer 3: Embedding Search
+
+#### Redirected (CODING)
+
+- **[2025-10-05_1600-1700_g9b30a](2025-10-05_1600-1700_g9b30a-summary.md)** - 1 coding decisions
+
+#### Local (LOCAL)
+
+- **[2025-09-19_0600-0700_g9b30a](2025-09-19_0600-0700_g9b30a-summary.md)** - 3 local decisions
+- **[2025-09-19_0700-0800_g9b30a](2025-09-19_0700-0800_g9b30a-summary.md)** - 3 local decisions
+- **[2025-09-19_1000-1100_g9b30a](2025-09-19_1000-1100_g9b30a-summary.md)** - 1 local decisions
+- **[2025-09-19_1200-1300_g9b30a](2025-09-19_1200-1300_g9b30a-summary.md)** - 2 local decisions
+- **[2025-09-19_1400-1500_g9b30a](2025-09-19_1400-1500_g9b30a-summary.md)** - 6 local decisions
+- **[2025-09-19_1800-1900_g9b30a](2025-09-19_1800-1900_g9b30a-summary.md)** - 3 local decisions
+- **[2025-09-19_1900-2000_g9b30a](2025-09-19_1900-2000_g9b30a-summary.md)** - 6 local decisions
+- **[2025-09-19_2000-2100_g9b30a](2025-09-19_2000-2100_g9b30a-summary.md)** - 4 local decisions
+- **[2025-09-20_0800-0900_g9b30a](2025-09-20_0800-0900_g9b30a-summary.md)** - 2 local decisions
+- **[2025-09-20_0900-1000_g9b30a](2025-09-20_0900-1000_g9b30a-summary.md)** - 2 local decisions
+- **[2025-09-20_1100-1200_g9b30a](2025-09-20_1100-1200_g9b30a-summary.md)** - 3 local decisions
+- **[2025-09-20_1200-1300_g9b30a](2025-09-20_1200-1300_g9b30a-summary.md)** - 1 local decisions
+- **[2025-09-20_1600-1700_g9b30a](2025-09-20_1600-1700_g9b30a-summary.md)** - 2 local decisions
+- **[2025-09-20_1700-1800_g9b30a](2025-09-20_1700-1800_g9b30a-summary.md)** - 1 local decisions
+- **[2025-09-20_2200-2300_g9b30a](2025-09-20_2200-2300_g9b30a-summary.md)** - 1 local decisions
+- **[2025-09-21_0600-0700_g9b30a](2025-09-21_0600-0700_g9b30a-summary.md)** - 2 local decisions
+- **[2025-09-21_0700-0800_g9b30a](2025-09-21_0700-0800_g9b30a-summary.md)** - 1 local decisions
+- **[2025-09-21_0800-0900_g9b30a](2025-09-21_0800-0900_g9b30a-summary.md)** - 1 local decisions
+- **[2025-09-21_1000-1100_g9b30a](2025-09-21_1000-1100_g9b30a-summary.md)** - 2 local decisions
+- **[2025-09-21_1100-1200_g9b30a](2025-09-21_1100-1200_g9b30a-summary.md)** - 2 local decisions
+- **[2025-09-21_1200-1300_g9b30a](2025-09-21_1200-1300_g9b30a-summary.md)** - 1 local decisions
+- **[2025-09-21_1300-1400_g9b30a](2025-09-21_1300-1400_g9b30a-summary.md)** - 1 local decisions
+- **[2025-09-21_1400-1500_g9b30a](2025-09-21_1400-1500_g9b30a-summary.md)** - 3 local decisions
+- **[2025-09-21_1500-1600_g9b30a](2025-09-21_1500-1600_g9b30a-summary.md)** - 1 local decisions
+- **[2025-09-21_1700-1800_g9b30a](2025-09-21_1700-1800_g9b30a-summary.md)** - 1 local decisions
+- **[2025-09-21_1900-2000_g9b30a](2025-09-21_1900-2000_g9b30a-summary.md)** - 2 local decisions
+- **[2025-09-21_2100-2200_g9b30a](2025-09-21_2100-2200_g9b30a-summary.md)** - 8 local decisions
+- **[2025-09-22_0600-0700_g9b30a](2025-09-22_0600-0700_g9b30a-summary.md)** - 12 local decisions
+- **[2025-09-22_0700-0800_g9b30a](2025-09-22_0700-0800_g9b30a-summary.md)** - 15 local decisions
+- **[2025-09-22_0800-0900_g9b30a](2025-09-22_0800-0900_g9b30a-summary.md)** - 6 local decisions
+- **[2025-09-22_1000-1100_g9b30a](2025-09-22_1000-1100_g9b30a-summary.md)** - 43 local decisions
+- **[2025-09-22_1100-1200_g9b30a](2025-09-22_1100-1200_g9b30a-summary.md)** - 5 local decisions
+- **[2025-09-22_1300-1400_g9b30a](2025-09-22_1300-1400_g9b30a-summary.md)** - 2 local decisions
+- **[2025-09-22_1400-1500_g9b30a](2025-09-22_1400-1500_g9b30a-summary.md)** - 4 local decisions
+- **[2025-09-22_1600-1700_g9b30a](2025-09-22_1600-1700_g9b30a-summary.md)** - 19 local decisions
+- **[2025-09-22_1800-1900_g9b30a](2025-09-22_1800-1900_g9b30a-summary.md)** - 1 local decisions
+- **[2025-09-22_1900-2000_g9b30a](2025-09-22_1900-2000_g9b30a-summary.md)** - 2 local decisions
+- **[2025-09-22_2100-2200_g9b30a](2025-09-22_2100-2200_g9b30a-summary.md)** - 34 local decisions
+- **[2025-09-23_0600-0700_g9b30a](2025-09-23_0600-0700_g9b30a-summary.md)** - 21 local decisions
+- **[2025-09-23_0700-0800_g9b30a](2025-09-23_0700-0800_g9b30a-summary.md)** - 33 local decisions
+- **[2025-09-23_0800-0900_g9b30a](2025-09-23_0800-0900_g9b30a-summary.md)** - 24 local decisions
+- **[2025-09-23_0900-1000_g9b30a](2025-09-23_0900-1000_g9b30a-summary.md)** - 2 local decisions
+- **[2025-09-23_1000-1100_g9b30a](2025-09-23_1000-1100_g9b30a-summary.md)** - 14 local decisions
+- **[2025-09-23_1900-2000_g9b30a](2025-09-23_1900-2000_g9b30a-summary.md)** - 5 local decisions
+- **[2025-09-23_2100-2200_g9b30a](2025-09-23_2100-2200_g9b30a-summary.md)** - 21 local decisions
+- **[2025-09-23_2200-2300_g9b30a](2025-09-23_2200-2300_g9b30a-summary.md)** - 9 local decisions
+- **[2025-09-24_0600-0700_g9b30a](2025-09-24_0600-0700_g9b30a-summary.md)** - 1 local decisions
+- **[2025-09-24_0900-1000_g9b30a](2025-09-24_0900-1000_g9b30a-summary.md)** - 1 local decisions
+- **[2025-09-24_1000-1100_g9b30a](2025-09-24_1000-1100_g9b30a-summary.md)** - 16 local decisions
+- **[2025-09-24_1100-1200_g9b30a](2025-09-24_1100-1200_g9b30a-summary.md)** - 3 local decisions
+- **[2025-09-24_1200-1300_g9b30a](2025-09-24_1200-1300_g9b30a-summary.md)** - 11 local decisions
+- **[2025-09-24_1400-1500_g9b30a](2025-09-24_1400-1500_g9b30a-summary.md)** - 6 local decisions
+- **[2025-09-24_1500-1600_g9b30a](2025-09-24_1500-1600_g9b30a-summary.md)** - 13 local decisions
+- **[2025-09-24_1600-1700_g9b30a](2025-09-24_1600-1700_g9b30a-summary.md)** - 10 local decisions
+- **[2025-09-24_1700-1800_g9b30a](2025-09-24_1700-1800_g9b30a-summary.md)** - 16 local decisions
+- **[2025-09-24_1800-1900_g9b30a](2025-09-24_1800-1900_g9b30a-summary.md)** - 3 local decisions
+- **[2025-09-24_1900-2000_g9b30a](2025-09-24_1900-2000_g9b30a-summary.md)** - 33 local decisions
+- **[2025-09-24_2200-2300_g9b30a](2025-09-24_2200-2300_g9b30a-summary.md)** - 4 local decisions
+- **[2025-09-24_2300-0000_g9b30a](2025-09-24_2300-0000_g9b30a-summary.md)** - 10 local decisions
+- **[2025-09-25_0600-0700_g9b30a](2025-09-25_0600-0700_g9b30a-summary.md)** - 20 local decisions
+- **[2025-09-25_0700-0800_g9b30a](2025-09-25_0700-0800_g9b30a-summary.md)** - 15 local decisions
+- **[2025-09-25_1700-1800_g9b30a](2025-09-25_1700-1800_g9b30a-summary.md)** - 7 local decisions
+- **[2025-09-25_1800-1900_g9b30a](2025-09-25_1800-1900_g9b30a-summary.md)** - 7 local decisions
+- **[2025-09-25_1900-2000_g9b30a](2025-09-25_1900-2000_g9b30a-summary.md)** - 3 local decisions
+- **[2025-09-26_0600-0700_g9b30a](2025-09-26_0600-0700_g9b30a-summary.md)** - 6 local decisions
+- **[2025-09-26_0700-0800_g9b30a](2025-09-26_0700-0800_g9b30a-summary.md)** - 1 local decisions
+- **[2025-09-26_0800-0900_g9b30a](2025-09-26_0800-0900_g9b30a-summary.md)** - 14 local decisions
+- **[2025-09-26_0900-1000_g9b30a](2025-09-26_0900-1000_g9b30a-summary.md)** - 9 local decisions
+- **[2025-09-26_1100-1200_g9b30a](2025-09-26_1100-1200_g9b30a-summary.md)** - 27 local decisions
+- **[2025-09-26_1200-1300_g9b30a](2025-09-26_1200-1300_g9b30a-summary.md)** - 10 local decisions
+- **[2025-09-26_1300-1400_g9b30a](2025-09-26_1300-1400_g9b30a-summary.md)** - 40 local decisions
+- **[2025-09-26_1400-1500_g9b30a](2025-09-26_1400-1500_g9b30a-summary.md)** - 15 local decisions
+- **[2025-09-26_1600-1700_g9b30a](2025-09-26_1600-1700_g9b30a-summary.md)** - 18 local decisions
+- **[2025-09-26_1700-1800_g9b30a](2025-09-26_1700-1800_g9b30a-summary.md)** - 12 local decisions
+- **[2025-09-26_1800-1900_g9b30a](2025-09-26_1800-1900_g9b30a-summary.md)** - 24 local decisions
+- **[2025-09-27_0900-1000_g9b30a](2025-09-27_0900-1000_g9b30a-summary.md)** - 39 local decisions
+- **[2025-09-27_1000-1100_g9b30a](2025-09-27_1000-1100_g9b30a-summary.md)** - 45 local decisions
+- **[2025-09-27_1100-1200_g9b30a](2025-09-27_1100-1200_g9b30a-summary.md)** - 11 local decisions
+- **[2025-09-27_1200-1300_g9b30a](2025-09-27_1200-1300_g9b30a-summary.md)** - 32 local decisions
+- **[2025-09-27_1400-1500_g9b30a](2025-09-27_1400-1500_g9b30a-summary.md)** - 12 local decisions
+- **[2025-09-27_1500-1600_g9b30a](2025-09-27_1500-1600_g9b30a-summary.md)** - 3 local decisions
+- **[2025-09-27_1700-1800_g9b30a](2025-09-27_1700-1800_g9b30a-summary.md)** - 13 local decisions
+- **[2025-09-27_1800-1900_g9b30a](2025-09-27_1800-1900_g9b30a-summary.md)** - 12 local decisions
+- **[2025-09-27_2000-2100_g9b30a](2025-09-27_2000-2100_g9b30a-summary.md)** - 6 local decisions
+- **[2025-09-27_2100-2200_g9b30a](2025-09-27_2100-2200_g9b30a-summary.md)** - 21 local decisions
+- **[2025-09-27_2200-2300_g9b30a](2025-09-27_2200-2300_g9b30a-summary.md)** - 3 local decisions
+- **[2025-09-28_0600-0700_g9b30a](2025-09-28_0600-0700_g9b30a-summary.md)** - 12 local decisions
+- **[2025-09-28_0900-1000_g9b30a](2025-09-28_0900-1000_g9b30a-summary.md)** - 1 local decisions
+- **[2025-09-28_1000-1100_g9b30a](2025-09-28_1000-1100_g9b30a-summary.md)** - 6 local decisions
+- **[2025-09-28_1100-1200_g9b30a](2025-09-28_1100-1200_g9b30a-summary.md)** - 6 local decisions
+- **[2025-09-28_1200-1300_g9b30a](2025-09-28_1200-1300_g9b30a-summary.md)** - 9 local decisions
+- **[2025-09-28_1400-1500_g9b30a](2025-09-28_1400-1500_g9b30a-summary.md)** - 25 local decisions
+- **[2025-09-28_1500-1600_g9b30a](2025-09-28_1500-1600_g9b30a-summary.md)** - 4 local decisions
+- **[2025-09-28_1600-1700_g9b30a](2025-09-28_1600-1700_g9b30a-summary.md)** - 12 local decisions
+- **[2025-09-28_1700-1800_g9b30a](2025-09-28_1700-1800_g9b30a-summary.md)** - 21 local decisions
+- **[2025-09-28_1800-1900_g9b30a](2025-09-28_1800-1900_g9b30a-summary.md)** - 12 local decisions
+- **[2025-09-28_1900-2000_g9b30a](2025-09-28_1900-2000_g9b30a-summary.md)** - 6 local decisions
+- **[2025-09-28_2100-2200_g9b30a](2025-09-28_2100-2200_g9b30a-summary.md)** - 33 local decisions
+- **[2025-09-28_2200-2300_g9b30a](2025-09-28_2200-2300_g9b30a-summary.md)** - 23 local decisions
+- **[2025-09-29_0600-0700_g9b30a](2025-09-29_0600-0700_g9b30a-summary.md)** - 12 local decisions
+- **[2025-09-29_0700-0800_g9b30a](2025-09-29_0700-0800_g9b30a-summary.md)** - 6 local decisions
+- **[2025-09-29_0800-0900_g9b30a](2025-09-29_0800-0900_g9b30a-summary.md)** - 18 local decisions
+- **[2025-09-29_1000-1100_g9b30a](2025-09-29_1000-1100_g9b30a-summary.md)** - 4 local decisions
+- **[2025-09-29_1100-1200_g9b30a](2025-09-29_1100-1200_g9b30a-summary.md)** - 6 local decisions
+- **[2025-09-29_1200-1300_g9b30a](2025-09-29_1200-1300_g9b30a-summary.md)** - 1 local decisions
+- **[2025-09-29_1300-1400_g9b30a](2025-09-29_1300-1400_g9b30a-summary.md)** - 11 local decisions
+- **[2025-09-29_1400-1500_g9b30a](2025-09-29_1400-1500_g9b30a-summary.md)** - 19 local decisions
+- **[2025-09-29_1500-1600_g9b30a](2025-09-29_1500-1600_g9b30a-summary.md)** - 7 local decisions
+- **[2025-09-29_1600-1700_g9b30a](2025-09-29_1600-1700_g9b30a-summary.md)** - 25 local decisions
+- **[2025-09-29_1700-1800_g9b30a](2025-09-29_1700-1800_g9b30a-summary.md)** - 18 local decisions
+- **[2025-10-01_0800-0900_g9b30a](2025-10-01_0800-0900_g9b30a-summary.md)** - 1 local decisions
+- **[2025-10-01_0900-1000_g9b30a](2025-10-01_0900-1000_g9b30a-summary.md)** - 2 local decisions
+- **[2025-10-01_1300-1400_g9b30a](2025-10-01_1300-1400_g9b30a-summary.md)** - 23 local decisions
+- **[2025-10-01_1600-1700_g9b30a](2025-10-01_1600-1700_g9b30a-summary.md)** - 15 local decisions
+- **[2025-10-01_1700-1800_g9b30a](2025-10-01_1700-1800_g9b30a-summary.md)** - 7 local decisions
+- **[2025-10-01_1800-1900_g9b30a](2025-10-01_1800-1900_g9b30a-summary.md)** - 2 local decisions
+- **[2025-10-02_0900-1000_g9b30a](2025-10-02_0900-1000_g9b30a-summary.md)** - 1 local decisions
+- **[2025-10-02_1500-1600_g9b30a](2025-10-02_1500-1600_g9b30a-summary.md)** - 1 local decisions
+- **[2025-10-02_1600-1700_g9b30a](2025-10-02_1600-1700_g9b30a-summary.md)** - 1 local decisions
+- **[2025-10-02_1800-1900_g9b30a](2025-10-02_1800-1900_g9b30a-summary.md)** - 1 local decisions
+- **[2025-10-03_0800-0900_g9b30a](2025-10-03_0800-0900_g9b30a-summary.md)** - 1 local decisions
+- **[2025-10-03_1000-1100_g9b30a](2025-10-03_1000-1100_g9b30a-summary.md)** - 2 local decisions
+- **[2025-10-03_1300-1400_g9b30a](2025-10-03_1300-1400_g9b30a-summary.md)** - 5 local decisions
+- **[2025-10-03_1800-1900_g9b30a](2025-10-03_1800-1900_g9b30a-summary.md)** - 2 local decisions
+- **[2025-10-03_1900-2000_g9b30a](2025-10-03_1900-2000_g9b30a-summary.md)** - 1 local decisions
+- **[2025-10-04_1500-1600_g9b30a](2025-10-04_1500-1600_g9b30a-summary.md)** - 1 local decisions
+- **[2025-10-04_1600-1700_g9b30a](2025-10-04_1600-1700_g9b30a-summary.md)** - 1 local decisions
+- **[2025-10-04_1700-1800_g9b30a](2025-10-04_1700-1800_g9b30a-summary.md)** - 1 local decisions
+- **[2025-10-05_0900-1000_g9b30a](2025-10-05_0900-1000_g9b30a-summary.md)** - 8 local decisions
+- **[2025-10-05_1600-1700_g9b30a](2025-10-05_1600-1700_g9b30a-summary.md)** - 7 local decisions
+- **[2025-10-05_1700-1800_g9b30a](2025-10-05_1700-1800_g9b30a-summary.md)** - 13 local decisions
+- **[2025-10-05_1800-1900_g9b30a](2025-10-05_1800-1900_g9b30a-summary.md)** - 1 local decisions
+- **[2025-10-05_1900-2000_g9b30a](2025-10-05_1900-2000_g9b30a-summary.md)** - 1 local decisions
+
+### Layer 4: Semantic Analysis
+
+#### Redirected (CODING)
+
+- **[2025-09-19_1300-1400_g9b30a](2025-09-19_1300-1400_g9b30a-summary.md)** - 1 coding decisions
+- **[2025-09-20_1000-1100_g9b30a](2025-09-20_1000-1100_g9b30a-summary.md)** - 1 coding decisions
+- **[2025-09-21_0900-1000_g9b30a](2025-09-21_0900-1000_g9b30a-summary.md)** - 1 coding decisions
+- **[2025-09-22_1800-1900_g9b30a](2025-09-22_1800-1900_g9b30a-summary.md)** - 1 coding decisions
+
+#### Local (LOCAL)
+
+- **[2025-09-19_0600-0700_g9b30a](2025-09-19_0600-0700_g9b30a-summary.md)** - 1 local decisions
+- **[2025-09-19_0700-0800_g9b30a](2025-09-19_0700-0800_g9b30a-summary.md)** - 3 local decisions
+- **[2025-09-19_0800-0900_g9b30a](2025-09-19_0800-0900_g9b30a-summary.md)** - 1 local decisions
+- **[2025-09-19_1200-1300_g9b30a](2025-09-19_1200-1300_g9b30a-summary.md)** - 2 local decisions
+- **[2025-09-19_1300-1400_g9b30a](2025-09-19_1300-1400_g9b30a-summary.md)** - 10 local decisions
+- **[2025-09-19_1400-1500_g9b30a](2025-09-19_1400-1500_g9b30a-summary.md)** - 3 local decisions
+- **[2025-09-19_1900-2000_g9b30a](2025-09-19_1900-2000_g9b30a-summary.md)** - 1 local decisions
+- **[2025-09-20_0900-1000_g9b30a](2025-09-20_0900-1000_g9b30a-summary.md)** - 7 local decisions
+- **[2025-09-20_1100-1200_g9b30a](2025-09-20_1100-1200_g9b30a-summary.md)** - 4 local decisions
+- **[2025-09-20_1200-1300_g9b30a](2025-09-20_1200-1300_g9b30a-summary.md)** - 3 local decisions
+- **[2025-09-20_1500-1600_g9b30a](2025-09-20_1500-1600_g9b30a-summary.md)** - 1 local decisions
+- **[2025-09-20_1600-1700_g9b30a](2025-09-20_1600-1700_g9b30a-summary.md)** - 1 local decisions
+- **[2025-09-20_1700-1800_g9b30a](2025-09-20_1700-1800_g9b30a-summary.md)** - 2 local decisions
+- **[2025-09-20_1800-1900_g9b30a](2025-09-20_1800-1900_g9b30a-summary.md)** - 5 local decisions
+- **[2025-09-20_2100-2200_g9b30a](2025-09-20_2100-2200_g9b30a-summary.md)** - 5 local decisions
+- **[2025-09-20_2200-2300_g9b30a](2025-09-20_2200-2300_g9b30a-summary.md)** - 4 local decisions
+- **[2025-09-21_0600-0700_g9b30a](2025-09-21_0600-0700_g9b30a-summary.md)** - 4 local decisions
+- **[2025-09-21_0700-0800_g9b30a](2025-09-21_0700-0800_g9b30a-summary.md)** - 8 local decisions
+- **[2025-09-21_0800-0900_g9b30a](2025-09-21_0800-0900_g9b30a-summary.md)** - 4 local decisions
+- **[2025-09-21_1000-1100_g9b30a](2025-09-21_1000-1100_g9b30a-summary.md)** - 3 local decisions
+- **[2025-09-21_1200-1300_g9b30a](2025-09-21_1200-1300_g9b30a-summary.md)** - 1 local decisions
+- **[2025-09-21_1300-1400_g9b30a](2025-09-21_1300-1400_g9b30a-summary.md)** - 1 local decisions
+- **[2025-09-21_1400-1500_g9b30a](2025-09-21_1400-1500_g9b30a-summary.md)** - 2 local decisions
+- **[2025-09-21_2100-2200_g9b30a](2025-09-21_2100-2200_g9b30a-summary.md)** - 4 local decisions
+- **[2025-09-21_2200-2300_g9b30a](2025-09-21_2200-2300_g9b30a-summary.md)** - 1 local decisions
+- **[2025-09-22_0700-0800_g9b30a](2025-09-22_0700-0800_g9b30a-summary.md)** - 7 local decisions
+- **[2025-09-22_0800-0900_g9b30a](2025-09-22_0800-0900_g9b30a-summary.md)** - 24 local decisions
+- **[2025-09-22_1000-1100_g9b30a](2025-09-22_1000-1100_g9b30a-summary.md)** - 12 local decisions
+- **[2025-09-22_1100-1200_g9b30a](2025-09-22_1100-1200_g9b30a-summary.md)** - 3 local decisions
+- **[2025-09-22_1400-1500_g9b30a](2025-09-22_1400-1500_g9b30a-summary.md)** - 1 local decisions
+- **[2025-09-22_1600-1700_g9b30a](2025-09-22_1600-1700_g9b30a-summary.md)** - 4 local decisions
+- **[2025-09-22_1900-2000_g9b30a](2025-09-22_1900-2000_g9b30a-summary.md)** - 2 local decisions
+- **[2025-09-22_2000-2100_g9b30a](2025-09-22_2000-2100_g9b30a-summary.md)** - 3 local decisions
+- **[2025-09-22_2100-2200_g9b30a](2025-09-22_2100-2200_g9b30a-summary.md)** - 4 local decisions
+- **[2025-09-23_0700-0800_g9b30a](2025-09-23_0700-0800_g9b30a-summary.md)** - 1 local decisions
+- **[2025-09-23_0800-0900_g9b30a](2025-09-23_0800-0900_g9b30a-summary.md)** - 3 local decisions
+- **[2025-09-23_0900-1000_g9b30a](2025-09-23_0900-1000_g9b30a-summary.md)** - 1 local decisions
+- **[2025-09-23_1000-1100_g9b30a](2025-09-23_1000-1100_g9b30a-summary.md)** - 9 local decisions
+- **[2025-09-23_2100-2200_g9b30a](2025-09-23_2100-2200_g9b30a-summary.md)** - 6 local decisions
+- **[2025-09-24_0600-0700_g9b30a](2025-09-24_0600-0700_g9b30a-summary.md)** - 3 local decisions
+- **[2025-09-24_0900-1000_g9b30a](2025-09-24_0900-1000_g9b30a-summary.md)** - 3 local decisions
+- **[2025-09-24_1000-1100_g9b30a](2025-09-24_1000-1100_g9b30a-summary.md)** - 15 local decisions
+- **[2025-09-24_1300-1400_g9b30a](2025-09-24_1300-1400_g9b30a-summary.md)** - 1 local decisions
+- **[2025-09-24_1600-1700_g9b30a](2025-09-24_1600-1700_g9b30a-summary.md)** - 9 local decisions
+- **[2025-09-24_1700-1800_g9b30a](2025-09-24_1700-1800_g9b30a-summary.md)** - 2 local decisions
+- **[2025-09-24_1800-1900_g9b30a](2025-09-24_1800-1900_g9b30a-summary.md)** - 1 local decisions
+- **[2025-09-24_1900-2000_g9b30a](2025-09-24_1900-2000_g9b30a-summary.md)** - 6 local decisions
+- **[2025-09-24_2300-0000_g9b30a](2025-09-24_2300-0000_g9b30a-summary.md)** - 1 local decisions
+- **[2025-09-25_0600-0700_g9b30a](2025-09-25_0600-0700_g9b30a-summary.md)** - 7 local decisions
+- **[2025-09-25_0700-0800_g9b30a](2025-09-25_0700-0800_g9b30a-summary.md)** - 14 local decisions
+- **[2025-09-25_1700-1800_g9b30a](2025-09-25_1700-1800_g9b30a-summary.md)** - 1 local decisions
+- **[2025-09-25_1800-1900_g9b30a](2025-09-25_1800-1900_g9b30a-summary.md)** - 5 local decisions
+- **[2025-09-25_1900-2000_g9b30a](2025-09-25_1900-2000_g9b30a-summary.md)** - 1 local decisions
+- **[2025-09-25_2100-2200_g9b30a](2025-09-25_2100-2200_g9b30a-summary.md)** - 4 local decisions
+- **[2025-09-25_2200-2300_g9b30a](2025-09-25_2200-2300_g9b30a-summary.md)** - 2 local decisions
+- **[2025-09-26_0600-0700_g9b30a](2025-09-26_0600-0700_g9b30a-summary.md)** - 3 local decisions
+- **[2025-09-26_0700-0800_g9b30a](2025-09-26_0700-0800_g9b30a-summary.md)** - 3 local decisions
+- **[2025-09-26_0800-0900_g9b30a](2025-09-26_0800-0900_g9b30a-summary.md)** - 10 local decisions
+- **[2025-09-26_0900-1000_g9b30a](2025-09-26_0900-1000_g9b30a-summary.md)** - 5 local decisions
+- **[2025-09-26_1000-1100_g9b30a](2025-09-26_1000-1100_g9b30a-summary.md)** - 1 local decisions
+- **[2025-09-26_1100-1200_g9b30a](2025-09-26_1100-1200_g9b30a-summary.md)** - 6 local decisions
+- **[2025-09-26_1200-1300_g9b30a](2025-09-26_1200-1300_g9b30a-summary.md)** - 3 local decisions
+- **[2025-09-26_1300-1400_g9b30a](2025-09-26_1300-1400_g9b30a-summary.md)** - 12 local decisions
+- **[2025-09-26_1600-1700_g9b30a](2025-09-26_1600-1700_g9b30a-summary.md)** - 9 local decisions
+- **[2025-09-26_1700-1800_g9b30a](2025-09-26_1700-1800_g9b30a-summary.md)** - 11 local decisions
+- **[2025-09-26_1800-1900_g9b30a](2025-09-26_1800-1900_g9b30a-summary.md)** - 3 local decisions
+- **[2025-09-27_0900-1000_g9b30a](2025-09-27_0900-1000_g9b30a-summary.md)** - 9 local decisions
+- **[2025-09-27_1000-1100_g9b30a](2025-09-27_1000-1100_g9b30a-summary.md)** - 4 local decisions
+- **[2025-09-27_1100-1200_g9b30a](2025-09-27_1100-1200_g9b30a-summary.md)** - 1 local decisions
+- **[2025-09-27_1200-1300_g9b30a](2025-09-27_1200-1300_g9b30a-summary.md)** - 5 local decisions
+- **[2025-09-27_1400-1500_g9b30a](2025-09-27_1400-1500_g9b30a-summary.md)** - 6 local decisions
+- **[2025-09-27_1500-1600_g9b30a](2025-09-27_1500-1600_g9b30a-summary.md)** - 1 local decisions
+- **[2025-09-27_1700-1800_g9b30a](2025-09-27_1700-1800_g9b30a-summary.md)** - 8 local decisions
+- **[2025-09-27_1800-1900_g9b30a](2025-09-27_1800-1900_g9b30a-summary.md)** - 3 local decisions
+- **[2025-09-27_2100-2200_g9b30a](2025-09-27_2100-2200_g9b30a-summary.md)** - 7 local decisions
+- **[2025-09-28_0600-0700_g9b30a](2025-09-28_0600-0700_g9b30a-summary.md)** - 10 local decisions
+- **[2025-09-28_0700-0800_g9b30a](2025-09-28_0700-0800_g9b30a-summary.md)** - 5 local decisions
+- **[2025-09-28_0800-0900_g9b30a](2025-09-28_0800-0900_g9b30a-summary.md)** - 5 local decisions
+- **[2025-09-28_0900-1000_g9b30a](2025-09-28_0900-1000_g9b30a-summary.md)** - 2 local decisions
+- **[2025-09-28_1000-1100_g9b30a](2025-09-28_1000-1100_g9b30a-summary.md)** - 6 local decisions
+- **[2025-09-28_1100-1200_g9b30a](2025-09-28_1100-1200_g9b30a-summary.md)** - 3 local decisions
+- **[2025-09-28_1200-1300_g9b30a](2025-09-28_1200-1300_g9b30a-summary.md)** - 12 local decisions
+- **[2025-09-28_1300-1400_g9b30a](2025-09-28_1300-1400_g9b30a-summary.md)** - 7 local decisions
+- **[2025-09-28_1400-1500_g9b30a](2025-09-28_1400-1500_g9b30a-summary.md)** - 26 local decisions
+- **[2025-09-28_1500-1600_g9b30a](2025-09-28_1500-1600_g9b30a-summary.md)** - 8 local decisions
+- **[2025-09-28_1600-1700_g9b30a](2025-09-28_1600-1700_g9b30a-summary.md)** - 4 local decisions
+- **[2025-09-28_1700-1800_g9b30a](2025-09-28_1700-1800_g9b30a-summary.md)** - 2 local decisions
+- **[2025-09-28_2100-2200_g9b30a](2025-09-28_2100-2200_g9b30a-summary.md)** - 11 local decisions
+- **[2025-09-28_2200-2300_g9b30a](2025-09-28_2200-2300_g9b30a-summary.md)** - 4 local decisions
+- **[2025-09-29_0700-0800_g9b30a](2025-09-29_0700-0800_g9b30a-summary.md)** - 3 local decisions
+- **[2025-09-29_0800-0900_g9b30a](2025-09-29_0800-0900_g9b30a-summary.md)** - 7 local decisions
+- **[2025-09-29_1000-1100_g9b30a](2025-09-29_1000-1100_g9b30a-summary.md)** - 4 local decisions
+- **[2025-09-29_1100-1200_g9b30a](2025-09-29_1100-1200_g9b30a-summary.md)** - 1 local decisions
+- **[2025-09-29_1300-1400_g9b30a](2025-09-29_1300-1400_g9b30a-summary.md)** - 11 local decisions
+- **[2025-09-29_1400-1500_g9b30a](2025-09-29_1400-1500_g9b30a-summary.md)** - 18 local decisions
+- **[2025-09-29_1500-1600_g9b30a](2025-09-29_1500-1600_g9b30a-summary.md)** - 6 local decisions
+- **[2025-09-29_1600-1700_g9b30a](2025-09-29_1600-1700_g9b30a-summary.md)** - 12 local decisions
+- **[2025-09-29_1700-1800_g9b30a](2025-09-29_1700-1800_g9b30a-summary.md)** - 17 local decisions
+- **[2025-09-29_1800-1900_g9b30a](2025-09-29_1800-1900_g9b30a-summary.md)** - 5 local decisions
+- **[2025-09-29_1900-2000_g9b30a](2025-09-29_1900-2000_g9b30a-summary.md)** - 2 local decisions
+- **[2025-10-01_0800-0900_g9b30a](2025-10-01_0800-0900_g9b30a-summary.md)** - 2 local decisions
+- **[2025-10-01_1300-1400_g9b30a](2025-10-01_1300-1400_g9b30a-summary.md)** - 13 local decisions
+- **[2025-10-01_1600-1700_g9b30a](2025-10-01_1600-1700_g9b30a-summary.md)** - 9 local decisions
+- **[2025-10-01_1700-1800_g9b30a](2025-10-01_1700-1800_g9b30a-summary.md)** - 14 local decisions
+- **[2025-10-01_1800-1900_g9b30a](2025-10-01_1800-1900_g9b30a-summary.md)** - 2 local decisions
+- **[2025-10-02_0900-1000_g9b30a](2025-10-02_0900-1000_g9b30a-summary.md)** - 2 local decisions
+- **[2025-10-02_1600-1700_g9b30a](2025-10-02_1600-1700_g9b30a-summary.md)** - 2 local decisions
+- **[2025-10-02_1800-1900_g9b30a](2025-10-02_1800-1900_g9b30a-summary.md)** - 2 local decisions
+- **[2025-10-03_0700-0800_g9b30a](2025-10-03_0700-0800_g9b30a-summary.md)** - 5 local decisions
+- **[2025-10-03_0800-0900_g9b30a](2025-10-03_0800-0900_g9b30a-summary.md)** - 5 local decisions
+- **[2025-10-03_1000-1100_g9b30a](2025-10-03_1000-1100_g9b30a-summary.md)** - 6 local decisions
+- **[2025-10-03_1300-1400_g9b30a](2025-10-03_1300-1400_g9b30a-summary.md)** - 3 local decisions
+- **[2025-10-03_1400-1500_g9b30a](2025-10-03_1400-1500_g9b30a-summary.md)** - 2 local decisions
+- **[2025-10-03_1600-1700_g9b30a](2025-10-03_1600-1700_g9b30a-summary.md)** - 1 local decisions
+- **[2025-10-04_0800-0900_g9b30a](2025-10-04_0800-0900_g9b30a-summary.md)** - 6 local decisions
+- **[2025-10-04_0900-1000_g9b30a](2025-10-04_0900-1000_g9b30a-summary.md)** - 8 local decisions
+- **[2025-10-04_1100-1200_g9b30a](2025-10-04_1100-1200_g9b30a-summary.md)** - 1 local decisions
+- **[2025-10-04_1600-1700_g9b30a](2025-10-04_1600-1700_g9b30a-summary.md)** - 3 local decisions
+- **[2025-10-04_1700-1800_g9b30a](2025-10-04_1700-1800_g9b30a-summary.md)** - 1 local decisions
+- **[2025-10-04_1800-1900_g9b30a](2025-10-04_1800-1900_g9b30a-summary.md)** - 2 local decisions
+- **[2025-10-05_0900-1000_g9b30a](2025-10-05_0900-1000_g9b30a-summary.md)** - 6 local decisions
+- **[2025-10-05_1000-1100_g9b30a](2025-10-05_1000-1100_g9b30a-summary.md)** - 8 local decisions
+- **[2025-10-05_1100-1200_g9b30a](2025-10-05_1100-1200_g9b30a-summary.md)** - 2 local decisions
+- **[2025-10-05_1200-1300_g9b30a](2025-10-05_1200-1300_g9b30a-summary.md)** - 8 local decisions
+- **[2025-10-05_1400-1500_g9b30a](2025-10-05_1400-1500_g9b30a-summary.md)** - 4 local decisions
+
+---
+
+## All Session Windows
+
+Complete chronological list of all classification sessions.
+
+- **[2025-09-19_0600-0700_g9b30a](2025-09-19_0600-0700_g9b30a-summary.md)** - 7 decisions (3 coding, 4 local)
+- **[2025-09-19_0700-0800_g9b30a](2025-09-19_0700-0800_g9b30a-summary.md)** - 9 decisions (1 coding, 8 local)
+- **[2025-09-19_0800-0900_g9b30a](2025-09-19_0800-0900_g9b30a-summary.md)** - 3 decisions (1 coding, 2 local)
+- **[2025-09-19_1000-1100_g9b30a](2025-09-19_1000-1100_g9b30a-summary.md)** - 1 decisions (0 coding, 1 local)
+- **[2025-09-19_1200-1300_g9b30a](2025-09-19_1200-1300_g9b30a-summary.md)** - 4 decisions (0 coding, 4 local)
+- **[2025-09-19_1300-1400_g9b30a](2025-09-19_1300-1400_g9b30a-summary.md)** - 21 decisions (7 coding, 14 local)
+- **[2025-09-19_1400-1500_g9b30a](2025-09-19_1400-1500_g9b30a-summary.md)** - 10 decisions (0 coding, 10 local)
+- **[2025-09-19_1800-1900_g9b30a](2025-09-19_1800-1900_g9b30a-summary.md)** - 3 decisions (0 coding, 3 local)
+- **[2025-09-19_1900-2000_g9b30a](2025-09-19_1900-2000_g9b30a-summary.md)** - 7 decisions (0 coding, 7 local)
+- **[2025-09-19_2000-2100_g9b30a](2025-09-19_2000-2100_g9b30a-summary.md)** - 4 decisions (0 coding, 4 local)
+- **[2025-09-20_0800-0900_g9b30a](2025-09-20_0800-0900_g9b30a-summary.md)** - 3 decisions (0 coding, 3 local)
+- **[2025-09-20_0900-1000_g9b30a](2025-09-20_0900-1000_g9b30a-summary.md)** - 11 decisions (0 coding, 11 local)
+- **[2025-09-20_1000-1100_g9b30a](2025-09-20_1000-1100_g9b30a-summary.md)** - 1 decisions (1 coding, 0 local)
+- **[2025-09-20_1100-1200_g9b30a](2025-09-20_1100-1200_g9b30a-summary.md)** - 7 decisions (0 coding, 7 local)
+- **[2025-09-20_1200-1300_g9b30a](2025-09-20_1200-1300_g9b30a-summary.md)** - 7 decisions (2 coding, 5 local)
+- **[2025-09-20_1500-1600_g9b30a](2025-09-20_1500-1600_g9b30a-summary.md)** - 1 decisions (0 coding, 1 local)
+- **[2025-09-20_1600-1700_g9b30a](2025-09-20_1600-1700_g9b30a-summary.md)** - 4 decisions (0 coding, 4 local)
+- **[2025-09-20_1700-1800_g9b30a](2025-09-20_1700-1800_g9b30a-summary.md)** - 4 decisions (0 coding, 4 local)
+- **[2025-09-20_1800-1900_g9b30a](2025-09-20_1800-1900_g9b30a-summary.md)** - 5 decisions (0 coding, 5 local)
+- **[2025-09-20_1900-2000_g9b30a](2025-09-20_1900-2000_g9b30a-summary.md)** - 1 decisions (0 coding, 1 local)
+- **[2025-09-20_2000-2100_g9b30a](2025-09-20_2000-2100_g9b30a-summary.md)** - 1 decisions (1 coding, 0 local)
+- **[2025-09-20_2100-2200_g9b30a](2025-09-20_2100-2200_g9b30a-summary.md)** - 6 decisions (0 coding, 6 local)
+- **[2025-09-20_2200-2300_g9b30a](2025-09-20_2200-2300_g9b30a-summary.md)** - 7 decisions (1 coding, 6 local)
+- **[2025-09-21_0600-0700_g9b30a](2025-09-21_0600-0700_g9b30a-summary.md)** - 9 decisions (2 coding, 7 local)
+- **[2025-09-21_0700-0800_g9b30a](2025-09-21_0700-0800_g9b30a-summary.md)** - 14 decisions (3 coding, 11 local)
+- **[2025-09-21_0800-0900_g9b30a](2025-09-21_0800-0900_g9b30a-summary.md)** - 7 decisions (1 coding, 6 local)
+- **[2025-09-21_0900-1000_g9b30a](2025-09-21_0900-1000_g9b30a-summary.md)** - 1 decisions (1 coding, 0 local)
+- **[2025-09-21_1000-1100_g9b30a](2025-09-21_1000-1100_g9b30a-summary.md)** - 5 decisions (0 coding, 5 local)
+- **[2025-09-21_1100-1200_g9b30a](2025-09-21_1100-1200_g9b30a-summary.md)** - 3 decisions (0 coding, 3 local)
+- **[2025-09-21_1200-1300_g9b30a](2025-09-21_1200-1300_g9b30a-summary.md)** - 2 decisions (0 coding, 2 local)
+- **[2025-09-21_1300-1400_g9b30a](2025-09-21_1300-1400_g9b30a-summary.md)** - 5 decisions (0 coding, 5 local)
+- **[2025-09-21_1400-1500_g9b30a](2025-09-21_1400-1500_g9b30a-summary.md)** - 6 decisions (0 coding, 6 local)
+- **[2025-09-21_1500-1600_g9b30a](2025-09-21_1500-1600_g9b30a-summary.md)** - 1 decisions (0 coding, 1 local)
+- **[2025-09-21_1700-1800_g9b30a](2025-09-21_1700-1800_g9b30a-summary.md)** - 1 decisions (0 coding, 1 local)
+- **[2025-09-21_1800-1900_g9b30a](2025-09-21_1800-1900_g9b30a-summary.md)** - 1 decisions (0 coding, 1 local)
+- **[2025-09-21_1900-2000_g9b30a](2025-09-21_1900-2000_g9b30a-summary.md)** - 2 decisions (0 coding, 2 local)
+- **[2025-09-21_2100-2200_g9b30a](2025-09-21_2100-2200_g9b30a-summary.md)** - 12 decisions (0 coding, 12 local)
+- **[2025-09-21_2200-2300_g9b30a](2025-09-21_2200-2300_g9b30a-summary.md)** - 9 decisions (8 coding, 1 local)
+- **[2025-09-22_0600-0700_g9b30a](2025-09-22_0600-0700_g9b30a-summary.md)** - 22 decisions (9 coding, 13 local)
+- **[2025-09-22_0700-0800_g9b30a](2025-09-22_0700-0800_g9b30a-summary.md)** - 39 decisions (13 coding, 26 local)
+- **[2025-09-22_0800-0900_g9b30a](2025-09-22_0800-0900_g9b30a-summary.md)** - 39 decisions (9 coding, 30 local)
+- **[2025-09-22_1000-1100_g9b30a](2025-09-22_1000-1100_g9b30a-summary.md)** - 64 decisions (6 coding, 58 local)
+- **[2025-09-22_1100-1200_g9b30a](2025-09-22_1100-1200_g9b30a-summary.md)** - 16 decisions (4 coding, 12 local)
+- **[2025-09-22_1300-1400_g9b30a](2025-09-22_1300-1400_g9b30a-summary.md)** - 5 decisions (3 coding, 2 local)
+- **[2025-09-22_1400-1500_g9b30a](2025-09-22_1400-1500_g9b30a-summary.md)** - 10 decisions (1 coding, 9 local)
+- **[2025-09-22_1600-1700_g9b30a](2025-09-22_1600-1700_g9b30a-summary.md)** - 31 decisions (8 coding, 23 local)
+- **[2025-09-22_1800-1900_g9b30a](2025-09-22_1800-1900_g9b30a-summary.md)** - 4 decisions (2 coding, 2 local)
+- **[2025-09-22_1900-2000_g9b30a](2025-09-22_1900-2000_g9b30a-summary.md)** - 6 decisions (1 coding, 5 local)
+- **[2025-09-22_2000-2100_g9b30a](2025-09-22_2000-2100_g9b30a-summary.md)** - 5 decisions (2 coding, 3 local)
+- **[2025-09-22_2100-2200_g9b30a](2025-09-22_2100-2200_g9b30a-summary.md)** - 42 decisions (0 coding, 42 local)
+- **[2025-09-23_0600-0700_g9b30a](2025-09-23_0600-0700_g9b30a-summary.md)** - 21 decisions (0 coding, 21 local)
+- **[2025-09-23_0700-0800_g9b30a](2025-09-23_0700-0800_g9b30a-summary.md)** - 45 decisions (7 coding, 38 local)
+- **[2025-09-23_0800-0900_g9b30a](2025-09-23_0800-0900_g9b30a-summary.md)** - 34 decisions (3 coding, 31 local)
+- **[2025-09-23_0900-1000_g9b30a](2025-09-23_0900-1000_g9b30a-summary.md)** - 7 decisions (1 coding, 6 local)
+- **[2025-09-23_1000-1100_g9b30a](2025-09-23_1000-1100_g9b30a-summary.md)** - 26 decisions (0 coding, 26 local)
+- **[2025-09-23_1900-2000_g9b30a](2025-09-23_1900-2000_g9b30a-summary.md)** - 8 decisions (0 coding, 8 local)
+- **[2025-09-23_2100-2200_g9b30a](2025-09-23_2100-2200_g9b30a-summary.md)** - 33 decisions (0 coding, 33 local)
+- **[2025-09-23_2200-2300_g9b30a](2025-09-23_2200-2300_g9b30a-summary.md)** - 9 decisions (0 coding, 9 local)
+- **[2025-09-24_0600-0700_g9b30a](2025-09-24_0600-0700_g9b30a-summary.md)** - 4 decisions (0 coding, 4 local)
+- **[2025-09-24_0900-1000_g9b30a](2025-09-24_0900-1000_g9b30a-summary.md)** - 4 decisions (0 coding, 4 local)
+- **[2025-09-24_1000-1100_g9b30a](2025-09-24_1000-1100_g9b30a-summary.md)** - 35 decisions (4 coding, 31 local)
+- **[2025-09-24_1100-1200_g9b30a](2025-09-24_1100-1200_g9b30a-summary.md)** - 6 decisions (3 coding, 3 local)
+- **[2025-09-24_1200-1300_g9b30a](2025-09-24_1200-1300_g9b30a-summary.md)** - 22 decisions (7 coding, 15 local)
+- **[2025-09-24_1300-1400_g9b30a](2025-09-24_1300-1400_g9b30a-summary.md)** - 2 decisions (1 coding, 1 local)
+- **[2025-09-24_1400-1500_g9b30a](2025-09-24_1400-1500_g9b30a-summary.md)** - 12 decisions (3 coding, 9 local)
+- **[2025-09-24_1500-1600_g9b30a](2025-09-24_1500-1600_g9b30a-summary.md)** - 20 decisions (4 coding, 16 local)
+- **[2025-09-24_1600-1700_g9b30a](2025-09-24_1600-1700_g9b30a-summary.md)** - 24 decisions (4 coding, 20 local)
+- **[2025-09-24_1700-1800_g9b30a](2025-09-24_1700-1800_g9b30a-summary.md)** - 27 decisions (5 coding, 22 local)
+- **[2025-09-24_1800-1900_g9b30a](2025-09-24_1800-1900_g9b30a-summary.md)** - 8 decisions (1 coding, 7 local)
+- **[2025-09-24_1900-2000_g9b30a](2025-09-24_1900-2000_g9b30a-summary.md)** - 49 decisions (5 coding, 44 local)
+- **[2025-09-24_2200-2300_g9b30a](2025-09-24_2200-2300_g9b30a-summary.md)** - 13 decisions (7 coding, 6 local)
+- **[2025-09-24_2300-0000_g9b30a](2025-09-24_2300-0000_g9b30a-summary.md)** - 17 decisions (2 coding, 15 local)
+- **[2025-09-25_0600-0700_g9b30a](2025-09-25_0600-0700_g9b30a-summary.md)** - 35 decisions (5 coding, 30 local)
+- **[2025-09-25_0700-0800_g9b30a](2025-09-25_0700-0800_g9b30a-summary.md)** - 41 decisions (8 coding, 33 local)
+- **[2025-09-25_0800-0900_g9b30a](2025-09-25_0800-0900_g9b30a-summary.md)** - 1 decisions (1 coding, 0 local)
+- **[2025-09-25_1700-1800_g9b30a](2025-09-25_1700-1800_g9b30a-summary.md)** - 14 decisions (2 coding, 12 local)
+- **[2025-09-25_1800-1900_g9b30a](2025-09-25_1800-1900_g9b30a-summary.md)** - 32 decisions (8 coding, 24 local)
+- **[2025-09-25_1900-2000_g9b30a](2025-09-25_1900-2000_g9b30a-summary.md)** - 6 decisions (1 coding, 5 local)
+- **[2025-09-25_2100-2200_g9b30a](2025-09-25_2100-2200_g9b30a-summary.md)** - 8 decisions (1 coding, 7 local)
+- **[2025-09-25_2200-2300_g9b30a](2025-09-25_2200-2300_g9b30a-summary.md)** - 12 decisions (9 coding, 3 local)
+- **[2025-09-26_0600-0700_g9b30a](2025-09-26_0600-0700_g9b30a-summary.md)** - 9 decisions (0 coding, 9 local)
+- **[2025-09-26_0700-0800_g9b30a](2025-09-26_0700-0800_g9b30a-summary.md)** - 19 decisions (10 coding, 9 local)
+- **[2025-09-26_0800-0900_g9b30a](2025-09-26_0800-0900_g9b30a-summary.md)** - 34 decisions (9 coding, 25 local)
+- **[2025-09-26_0900-1000_g9b30a](2025-09-26_0900-1000_g9b30a-summary.md)** - 23 decisions (6 coding, 17 local)
+- **[2025-09-26_1000-1100_g9b30a](2025-09-26_1000-1100_g9b30a-summary.md)** - 4 decisions (3 coding, 1 local)
+- **[2025-09-26_1100-1200_g9b30a](2025-09-26_1100-1200_g9b30a-summary.md)** - 42 decisions (5 coding, 37 local)
+- **[2025-09-26_1200-1300_g9b30a](2025-09-26_1200-1300_g9b30a-summary.md)** - 20 decisions (3 coding, 17 local)
+- **[2025-09-26_1300-1400_g9b30a](2025-09-26_1300-1400_g9b30a-summary.md)** - 59 decisions (5 coding, 54 local)
+- **[2025-09-26_1400-1500_g9b30a](2025-09-26_1400-1500_g9b30a-summary.md)** - 19 decisions (1 coding, 18 local)
+- **[2025-09-26_1600-1700_g9b30a](2025-09-26_1600-1700_g9b30a-summary.md)** - 54 decisions (20 coding, 34 local)
+- **[2025-09-26_1700-1800_g9b30a](2025-09-26_1700-1800_g9b30a-summary.md)** - 53 decisions (22 coding, 31 local)
+- **[2025-09-26_1800-1900_g9b30a](2025-09-26_1800-1900_g9b30a-summary.md)** - 49 decisions (21 coding, 28 local)
+- **[2025-09-26_1900-2000_g9b30a](2025-09-26_1900-2000_g9b30a-summary.md)** - 6 decisions (3 coding, 3 local)
+- **[2025-09-27_0900-1000_g9b30a](2025-09-27_0900-1000_g9b30a-summary.md)** - 49 decisions (1 coding, 48 local)
+- **[2025-09-27_1000-1100_g9b30a](2025-09-27_1000-1100_g9b30a-summary.md)** - 65 decisions (8 coding, 57 local)
+- **[2025-09-27_1100-1200_g9b30a](2025-09-27_1100-1200_g9b30a-summary.md)** - 21 decisions (5 coding, 16 local)
+- **[2025-09-27_1200-1300_g9b30a](2025-09-27_1200-1300_g9b30a-summary.md)** - 47 decisions (5 coding, 42 local)
+- **[2025-09-27_1400-1500_g9b30a](2025-09-27_1400-1500_g9b30a-summary.md)** - 19 decisions (1 coding, 18 local)
+- **[2025-09-27_1500-1600_g9b30a](2025-09-27_1500-1600_g9b30a-summary.md)** - 9 decisions (1 coding, 8 local)
+- **[2025-09-27_1700-1800_g9b30a](2025-09-27_1700-1800_g9b30a-summary.md)** - 32 decisions (5 coding, 27 local)
+- **[2025-09-27_1800-1900_g9b30a](2025-09-27_1800-1900_g9b30a-summary.md)** - 21 decisions (2 coding, 19 local)
+- **[2025-09-27_1900-2000_g9b30a](2025-09-27_1900-2000_g9b30a-summary.md)** - 1 decisions (0 coding, 1 local)
+- **[2025-09-27_2000-2100_g9b30a](2025-09-27_2000-2100_g9b30a-summary.md)** - 7 decisions (0 coding, 7 local)
+- **[2025-09-27_2100-2200_g9b30a](2025-09-27_2100-2200_g9b30a-summary.md)** - 34 decisions (2 coding, 32 local)
+- **[2025-09-27_2200-2300_g9b30a](2025-09-27_2200-2300_g9b30a-summary.md)** - 6 decisions (0 coding, 6 local)
+- **[2025-09-28_0600-0700_g9b30a](2025-09-28_0600-0700_g9b30a-summary.md)** - 51 decisions (26 coding, 25 local)
+- **[2025-09-28_0700-0800_g9b30a](2025-09-28_0700-0800_g9b30a-summary.md)** - 13 decisions (6 coding, 7 local)
+- **[2025-09-28_0800-0900_g9b30a](2025-09-28_0800-0900_g9b30a-summary.md)** - 20 decisions (9 coding, 11 local)
+- **[2025-09-28_0900-1000_g9b30a](2025-09-28_0900-1000_g9b30a-summary.md)** - 21 decisions (12 coding, 9 local)
+- **[2025-09-28_1000-1100_g9b30a](2025-09-28_1000-1100_g9b30a-summary.md)** - 18 decisions (2 coding, 16 local)
+- **[2025-09-28_1100-1200_g9b30a](2025-09-28_1100-1200_g9b30a-summary.md)** - 19 decisions (4 coding, 15 local)
+- **[2025-09-28_1200-1300_g9b30a](2025-09-28_1200-1300_g9b30a-summary.md)** - 29 decisions (7 coding, 22 local)
+- **[2025-09-28_1300-1400_g9b30a](2025-09-28_1300-1400_g9b30a-summary.md)** - 14 decisions (5 coding, 9 local)
+- **[2025-09-28_1400-1500_g9b30a](2025-09-28_1400-1500_g9b30a-summary.md)** - 64 decisions (12 coding, 52 local)
+- **[2025-09-28_1500-1600_g9b30a](2025-09-28_1500-1600_g9b30a-summary.md)** - 22 decisions (10 coding, 12 local)
+- **[2025-09-28_1600-1700_g9b30a](2025-09-28_1600-1700_g9b30a-summary.md)** - 42 decisions (18 coding, 24 local)
+- **[2025-09-28_1700-1800_g9b30a](2025-09-28_1700-1800_g9b30a-summary.md)** - 29 decisions (5 coding, 24 local)
+- **[2025-09-28_1800-1900_g9b30a](2025-09-28_1800-1900_g9b30a-summary.md)** - 22 decisions (5 coding, 17 local)
+- **[2025-09-28_1900-2000_g9b30a](2025-09-28_1900-2000_g9b30a-summary.md)** - 16 decisions (6 coding, 10 local)
+- **[2025-09-28_2000-2100_g9b30a](2025-09-28_2000-2100_g9b30a-summary.md)** - 1 decisions (0 coding, 1 local)
+- **[2025-09-28_2100-2200_g9b30a](2025-09-28_2100-2200_g9b30a-summary.md)** - 60 decisions (10 coding, 50 local)
+- **[2025-09-28_2200-2300_g9b30a](2025-09-28_2200-2300_g9b30a-summary.md)** - 41 decisions (8 coding, 33 local)
+- **[2025-09-29_0600-0700_g9b30a](2025-09-29_0600-0700_g9b30a-summary.md)** - 14 decisions (1 coding, 13 local)
+- **[2025-09-29_0700-0800_g9b30a](2025-09-29_0700-0800_g9b30a-summary.md)** - 21 decisions (7 coding, 14 local)
+- **[2025-09-29_0800-0900_g9b30a](2025-09-29_0800-0900_g9b30a-summary.md)** - 40 decisions (8 coding, 32 local)
+- **[2025-09-29_1000-1100_g9b30a](2025-09-29_1000-1100_g9b30a-summary.md)** - 15 decisions (6 coding, 9 local)
+- **[2025-09-29_1100-1200_g9b30a](2025-09-29_1100-1200_g9b30a-summary.md)** - 16 decisions (2 coding, 14 local)
+- **[2025-09-29_1200-1300_g9b30a](2025-09-29_1200-1300_g9b30a-summary.md)** - 2 decisions (1 coding, 1 local)
+- **[2025-09-29_1300-1400_g9b30a](2025-09-29_1300-1400_g9b30a-summary.md)** - 36 decisions (5 coding, 31 local)
+- **[2025-09-29_1400-1500_g9b30a](2025-09-29_1400-1500_g9b30a-summary.md)** - 55 decisions (12 coding, 43 local)
+- **[2025-09-29_1500-1600_g9b30a](2025-09-29_1500-1600_g9b30a-summary.md)** - 19 decisions (2 coding, 17 local)
+- **[2025-09-29_1600-1700_g9b30a](2025-09-29_1600-1700_g9b30a-summary.md)** - 45 decisions (7 coding, 38 local)
+- **[2025-09-29_1700-1800_g9b30a](2025-09-29_1700-1800_g9b30a-summary.md)** - 50 decisions (14 coding, 36 local)
+- **[2025-09-29_1800-1900_g9b30a](2025-09-29_1800-1900_g9b30a-summary.md)** - 11 decisions (6 coding, 5 local)
+- **[2025-09-29_1900-2000_g9b30a](2025-09-29_1900-2000_g9b30a-summary.md)** - 4 decisions (2 coding, 2 local)
+- **[2025-10-01_0700-0800_g9b30a](2025-10-01_0700-0800_g9b30a-summary.md)** - 1 decisions (1 coding, 0 local)
+- **[2025-10-01_0800-0900_g9b30a](2025-10-01_0800-0900_g9b30a-summary.md)** - 4 decisions (1 coding, 3 local)
+- **[2025-10-01_0900-1000_g9b30a](2025-10-01_0900-1000_g9b30a-summary.md)** - 7 decisions (4 coding, 3 local)
+- **[2025-10-01_1300-1400_g9b30a](2025-10-01_1300-1400_g9b30a-summary.md)** - 46 decisions (7 coding, 39 local)
+- **[2025-10-01_1600-1700_g9b30a](2025-10-01_1600-1700_g9b30a-summary.md)** - 28 decisions (1 coding, 27 local)
+- **[2025-10-01_1700-1800_g9b30a](2025-10-01_1700-1800_g9b30a-summary.md)** - 30 decisions (9 coding, 21 local)
+- **[2025-10-01_1800-1900_g9b30a](2025-10-01_1800-1900_g9b30a-summary.md)** - 6 decisions (1 coding, 5 local)
+- **[2025-10-02_0700-0800_g9b30a](2025-10-02_0700-0800_g9b30a-summary.md)** - 3 decisions (3 coding, 0 local)
+- **[2025-10-02_0800-0900_g9b30a](2025-10-02_0800-0900_g9b30a-summary.md)** - 5 decisions (4 coding, 1 local)
+- **[2025-10-02_0900-1000_g9b30a](2025-10-02_0900-1000_g9b30a-summary.md)** - 6 decisions (2 coding, 4 local)
+- **[2025-10-02_1500-1600_g9b30a](2025-10-02_1500-1600_g9b30a-summary.md)** - 3 decisions (2 coding, 1 local)
+- **[2025-10-02_1600-1700_g9b30a](2025-10-02_1600-1700_g9b30a-summary.md)** - 12 decisions (6 coding, 6 local)
+- **[2025-10-02_1700-1800_g9b30a](2025-10-02_1700-1800_g9b30a-summary.md)** - 4 decisions (1 coding, 3 local)
+- **[2025-10-02_1800-1900_g9b30a](2025-10-02_1800-1900_g9b30a-summary.md)** - 10 decisions (5 coding, 5 local)
+- **[2025-10-02_2000-2100_g9b30a](2025-10-02_2000-2100_g9b30a-summary.md)** - 1 decisions (0 coding, 1 local)
+- **[2025-10-03_0700-0800_g9b30a](2025-10-03_0700-0800_g9b30a-summary.md)** - 15 decisions (7 coding, 8 local)
+- **[2025-10-03_0800-0900_g9b30a](2025-10-03_0800-0900_g9b30a-summary.md)** - 20 decisions (11 coding, 9 local)
+- **[2025-10-03_0900-1000_g9b30a](2025-10-03_0900-1000_g9b30a-summary.md)** - 2 decisions (1 coding, 1 local)
+- **[2025-10-03_1000-1100_g9b30a](2025-10-03_1000-1100_g9b30a-summary.md)** - 19 decisions (7 coding, 12 local)
+- **[2025-10-03_1100-1200_g9b30a](2025-10-03_1100-1200_g9b30a-summary.md)** - 4 decisions (3 coding, 1 local)
+- **[2025-10-03_1200-1300_g9b30a](2025-10-03_1200-1300_g9b30a-summary.md)** - 1 decisions (1 coding, 0 local)
+- **[2025-10-03_1300-1400_g9b30a](2025-10-03_1300-1400_g9b30a-summary.md)** - 17 decisions (6 coding, 11 local)
+- **[2025-10-03_1400-1500_g9b30a](2025-10-03_1400-1500_g9b30a-summary.md)** - 12 decisions (8 coding, 4 local)
+- **[2025-10-03_1500-1600_g9b30a](2025-10-03_1500-1600_g9b30a-summary.md)** - 7 decisions (6 coding, 1 local)
+- **[2025-10-03_1600-1700_g9b30a](2025-10-03_1600-1700_g9b30a-summary.md)** - 7 decisions (3 coding, 4 local)
+- **[2025-10-03_1700-1800_g9b30a](2025-10-03_1700-1800_g9b30a-summary.md)** - 4 decisions (4 coding, 0 local)
+- **[2025-10-03_1800-1900_g9b30a](2025-10-03_1800-1900_g9b30a-summary.md)** - 12 decisions (8 coding, 4 local)
+- **[2025-10-03_1900-2000_g9b30a](2025-10-03_1900-2000_g9b30a-summary.md)** - 5 decisions (2 coding, 3 local)
+- **[2025-10-04_0800-0900_g9b30a](2025-10-04_0800-0900_g9b30a-summary.md)** - 18 decisions (7 coding, 11 local)
+- **[2025-10-04_0900-1000_g9b30a](2025-10-04_0900-1000_g9b30a-summary.md)** - 18 decisions (8 coding, 10 local)
+- **[2025-10-04_1000-1100_g9b30a](2025-10-04_1000-1100_g9b30a-summary.md)** - 5 decisions (2 coding, 3 local)
+- **[2025-10-04_1100-1200_g9b30a](2025-10-04_1100-1200_g9b30a-summary.md)** - 5 decisions (3 coding, 2 local)
+- **[2025-10-04_1300-1400_g9b30a](2025-10-04_1300-1400_g9b30a-summary.md)** - 1 decisions (0 coding, 1 local)
+- **[2025-10-04_1400-1500_g9b30a](2025-10-04_1400-1500_g9b30a-summary.md)** - 3 decisions (2 coding, 1 local)
+- **[2025-10-04_1500-1600_g9b30a](2025-10-04_1500-1600_g9b30a-summary.md)** - 10 decisions (7 coding, 3 local)
+- **[2025-10-04_1600-1700_g9b30a](2025-10-04_1600-1700_g9b30a-summary.md)** - 8 decisions (3 coding, 5 local)
+- **[2025-10-04_1700-1800_g9b30a](2025-10-04_1700-1800_g9b30a-summary.md)** - 8 decisions (4 coding, 4 local)
+- **[2025-10-04_1800-1900_g9b30a](2025-10-04_1800-1900_g9b30a-summary.md)** - 7 decisions (4 coding, 3 local)
+- **[2025-10-05_0800-0900_g9b30a](2025-10-05_0800-0900_g9b30a-summary.md)** - 2 decisions (2 coding, 0 local)
+- **[2025-10-05_0900-1000_g9b30a](2025-10-05_0900-1000_g9b30a-summary.md)** - 31 decisions (15 coding, 16 local)
+- **[2025-10-05_1000-1100_g9b30a](2025-10-05_1000-1100_g9b30a-summary.md)** - 26 decisions (14 coding, 12 local)
+- **[2025-10-05_1100-1200_g9b30a](2025-10-05_1100-1200_g9b30a-summary.md)** - 12 decisions (6 coding, 6 local)
+- **[2025-10-05_1200-1300_g9b30a](2025-10-05_1200-1300_g9b30a-summary.md)** - 16 decisions (8 coding, 8 local)
+- **[2025-10-05_1400-1500_g9b30a](2025-10-05_1400-1500_g9b30a-summary.md)** - 20 decisions (14 coding, 6 local)
+- **[2025-10-05_1500-1600_g9b30a](2025-10-05_1500-1600_g9b30a-summary.md)** - 1 decisions (1 coding, 0 local)
+- **[2025-10-05_1600-1700_g9b30a](2025-10-05_1600-1700_g9b30a-summary.md)** - 17 decisions (10 coding, 7 local)
+- **[2025-10-05_1700-1800_g9b30a](2025-10-05_1700-1800_g9b30a-summary.md)** - 23 decisions (9 coding, 14 local)
+- **[2025-10-05_1800-1900_g9b30a](2025-10-05_1800-1900_g9b30a-summary.md)** - 4 decisions (3 coding, 1 local)
+- **[2025-10-05_1900-2000_g9b30a](2025-10-05_1900-2000_g9b30a-summary.md)** - 1 decisions (0 coding, 1 local)
+
+---
+
+*Generated by Classification Logger v1.0*

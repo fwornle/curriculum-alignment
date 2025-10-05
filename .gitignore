@@ -163,10 +163,16 @@ dev.db
 .dockerignore
 Dockerfile.local
 
-# Logs
+# Logs (but allow .specstory/logs/classification/)
 logs/
 *.log
 transcript-monitor.log
+
+# CRITICAL: Allow classification logs to be tracked
+!.specstory/
+!.specstory/logs/
+!.specstory/logs/classification/
+!.specstory/logs/classification/**
 
 # Database
 database.db
