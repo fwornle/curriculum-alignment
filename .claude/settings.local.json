@@ -74,7 +74,10 @@
       "mcp__shadcn__get_project_registries",
       "mcp__shadcn__search_items_in_registries",
       "mcp__shadcn__list_items_in_registries",
-      "Bash(curl:*)"
+      "Bash(curl:*)",
+      "Bash(python3:*)",
+      "Bash(java:*)",
+      "Bash(plantuml:*)"
     ],
     "additionalDirectories": []
   },
