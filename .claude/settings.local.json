@@ -78,7 +78,8 @@
       "Bash(python3:*)",
       "Bash(java:*)",
       "Bash(plantuml:*)",
-      "Bash(cat:*)"
+      "Bash(cat:*)",
+      "Bash(PROJECT_PATH=/Users/q284340/Agentic/curriculum-alignment CODING_REPO=/Users/q284340/Agentic/coding node /Users/q284340/Agentic/coding/scripts/batch-lsl-processor.js regenerate-markdown)"
     ],
     "additionalDirectories": []
   },
