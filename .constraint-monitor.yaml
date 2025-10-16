@@ -63,15 +63,21 @@ constraints:
     pattern: \b\d{2,}\b(?!\s*(px|%|em|rem|vh|vw))
     message: Magic numbers detected - consider using named constants
     severity: info
-    enabled: false
+    enabled: true
     suggestion: "Define meaningful constants: const MAX_RETRIES = 3"
   - id: no-hardcoded-secrets
     group: security
-    pattern: (api[_-]?key|password|secret|token)\s*[=:]\s*['"][^'"]{8,}['"]
+    pattern: (?i)(api[\w]?key|password|secret|token)\s*[=:]\s*['"][^'"]{8,}['"]
     message: Potential hardcoded secret detected
     severity: critical
     enabled: true
     suggestion: Use environment variables or secure key management
+    semantic_validation: true
+    exceptions:
+      - path: test/**
+      - path: docs/**
+      - path: "**/*.test.js"
+      - path: "**/*.spec.js"
   - id: no-eval-usage
     group: security
     pattern: \beval\s*\(
@@ -81,7 +87,7 @@ constraints:
     suggestion: Avoid eval() - use safer alternatives for dynamic code execution
   - id: no-parallel-files
     group: architecture
-    pattern: (v[2-9]|enhanced|improved|better|new|advanced|pro|simplified|simple|basic|lite|fixed|patched|updated|revised|modified|temp|temporary|backup|copy|duplicate|clone|alt|alternative|variant|final|draft|test|experimental)[._-]
+    pattern: "[._-](v[2-9]|enhanced|improved|better|new|advanced|pro|simplified|simple|basic|lite|fixed|patched|updated|revised|modified|temp|temporary|backup|copy|duplicate|clone|alt|alternative|variant|final|draft|experimental)(?:[._-]|$)"
     message: "CRITICAL: No parallel versions allowed - edit the original file directly"
     severity: critical
     enabled: true
@@ -93,13 +99,15 @@ constraints:
     severity: error
     enabled: true
     suggestion: Use debugging tools and verification commands to identify root causes
+    semantic_validation: true
   - id: no-evolutionary-names
     group: architecture
-    pattern: (?:class|function|const|let|var)\s+\w*(?:V[2-9]|Enhanced|Improved|Better|New|Advanced|Pro|Simplified|Simple|Basic|Lite|Fixed|Patched|Updated|Revised|Modified|Temp|Temporary|Backup|Copy|Duplicate|Clone|Alt|Alternative|Variant|Final|Draft|Test|Experimental)\w*
+    pattern: (?:class|function|const|let|var)\s+\w*(?:V[2-9]|Enhanced|Improved|Better|New|Advanced|Pro|Simplified|Simple|Basic|Lite|Fixed|Patched|Updated|Revised|Modified|Temp|Temporary|Backup|Copy|Duplicate|Clone|Alt|Alternative|Variant|Final|Draft|Experimental)\w*
     message: Evolutionary naming detected - refactor original instead
     severity: error
     enabled: true
     suggestion: Rename to descriptive functional name and refactor the original
+    semantic_validation: true
   - id: plantuml-standard-styling
     group: plantuml
     pattern: "@startuml.*\\n(?!.*!include _standard-style\\.puml)"
