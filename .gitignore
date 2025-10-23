@@ -181,6 +181,9 @@ transcript-monitor.log
 database.db
 *.db
 
+# MCP Memory LevelDB (volatile runtime data)
+.data/
+
 # Secrets and credentials
 secrets.json
 credentials.json
