@@ -84,7 +84,8 @@
       "mcp__serena__think_about_collected_information",
       "Read(//private/tmp/**)",
       "Bash(node:*)",
-      "Bash(launchctl load:*)"
+      "Bash(launchctl load:*)",
+      "Bash(docker exec:*)"
     ],
     "additionalDirectories": []
   },
