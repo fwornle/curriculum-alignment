@@ -1,15 +1,15 @@
 # Classification Status - curriculum-alignment
 
-**Generated**: 2025-10-27T19:29:30.750Z
+**Generated**: 2025-10-27T19:33:30.854Z
 **Total Sessions**: 185
-**Total Decisions**: 1694
+**Total Decisions**: 1695
 
 ---
 
 ## Overall Statistics
 
-- **Total Prompt Sets Classified**: 1694
-- **Classified as CODING**: 1439 (85%)
+- **Total Prompt Sets Classified**: 1695
+- **Classified as CODING**: 1440 (85%)
 - **Classified as LOCAL**: 255 (15%)
 
 ### Classification Method Distribution
@@ -20,7 +20,7 @@ Click on a classification method to view all sessions decided by that layer.
 |-------|--------|-----------|------------|
 | 0 | [Session Filter](#layer-0-session-filter) | 0 | 0% |
 | 1 | [Path Analysis](#layer-1-path-analysis) | 445 | 26% |
-| 2 | [Keyword Matching](#layer-2-keyword-matching) | 683 | 40% |
+| 2 | [Keyword Matching](#layer-2-keyword-matching) | 684 | 40% |
 | 3 | [Embedding Search](#layer-3-embedding-search) | 566 | 33% |
 | 4 | [Semantic Analysis](#layer-4-semantic-analysis) | 0 | 0% |
 
@@ -264,7 +264,7 @@ Sessions grouped by the classification layer that made the final decision.
 - **[2025-10-27_1300-1400_g9b30a](../../../../coding/.specstory/logs/classification/2025-10-27_1300-1400_g9b30a_from-curriculum-alignment.md)** - 2 coding decisions
 - **[2025-10-27_1600-1700_g9b30a](../../../../coding/.specstory/logs/classification/2025-10-27_1600-1700_g9b30a_from-curriculum-alignment.md)** - 2 coding decisions
 - **[2025-10-27_1700-1800_g9b30a](../../../../coding/.specstory/logs/classification/2025-10-27_1700-1800_g9b30a_from-curriculum-alignment.md)** - 3 coding decisions
-- **[2025-10-27_2000-2100_g9b30a](../../../../coding/.specstory/logs/classification/2025-10-27_2000-2100_g9b30a_from-curriculum-alignment.md)** - 3 coding decisions
+- **[2025-10-27_2000-2100_g9b30a](../../../../coding/.specstory/logs/classification/2025-10-27_2000-2100_g9b30a_from-curriculum-alignment.md)** - 4 coding decisions
 
 ### Layer 3: Embedding Search
 
@@ -616,7 +616,7 @@ Complete chronological list of all classification sessions.
 - **2025-10-27_1600-1700_g9b30a** - 6 decisions ([CODING: 5](../../../../coding/.specstory/logs/classification/2025-10-27_1600-1700_g9b30a_from-curriculum-alignment.md), [LOCAL: 1](2025-10-27_1600-1700_g9b30a.md))
 - **2025-10-27_1700-1800_g9b30a** - 3 decisions ([CODING: 3](../../../../coding/.specstory/logs/classification/2025-10-27_1700-1800_g9b30a_from-curriculum-alignment.md))
 - **2025-10-27_1900-2000_g9b30a** - 2 decisions ([CODING: 1](../../../../coding/.specstory/logs/classification/2025-10-27_1900-2000_g9b30a_from-curriculum-alignment.md), [LOCAL: 1](2025-10-27_1900-2000_g9b30a.md))
-- **2025-10-27_2000-2100_g9b30a** - 8 decisions ([CODING: 6](../../../../coding/.specstory/logs/classification/2025-10-27_2000-2100_g9b30a_from-curriculum-alignment.md), [LOCAL: 2](2025-10-27_2000-2100_g9b30a.md))
+- **2025-10-27_2000-2100_g9b30a** - 9 decisions ([CODING: 7](../../../../coding/.specstory/logs/classification/2025-10-27_2000-2100_g9b30a_from-curriculum-alignment.md), [LOCAL: 2](2025-10-27_2000-2100_g9b30a.md))
 
 ---
 
